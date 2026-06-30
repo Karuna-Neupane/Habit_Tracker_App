@@ -3,6 +3,7 @@ import HabitList from './components/HabitList.jsx'
 import HabitFormModal from './components/AddHabitForm.jsx'
 import ConfirmDialog from './components/ConfirmDialog.jsx'
 import { loadHabits, saveHabits, makeId } from './utils/storage.js'
+import { computeStreak, todayKey } from './utils/streak.js'
 
 export default function App() {
   // Starts empty on first-ever visit. After that, whatever is in
@@ -17,6 +18,31 @@ export default function App() {
   useEffect(() => {
     saveHabits(habits)
   }, [habits])
+
+  // --- Week 2: streak integrity check on load -----------------------------
+  // A habit's `streak` is never the source of truth — `completions` is.
+  // If the app was closed for a few days, the cached streak number could
+  // be stale (e.g. it still says "5" even though the user missed two
+  // days). On every app load, recompute every habit's streak fresh from
+  // its completion history so broken streaks reset to the correct value
+  // immediately, before the user sees anything.
+  useEffect(() => {
+    setHabits((prev) => {
+      let changed = false
+      const next = prev.map((habit) => {
+        const correctStreak = computeStreak(habit.completions, habit.frequency)
+        if (correctStreak !== habit.streak) {
+          changed = true
+          return { ...habit, streak: correctStreak }
+        }
+        return habit
+      })
+      return changed ? next : prev
+    })
+    // Runs once on mount, deliberately — this is a load-time integrity
+    // check, not something that should re-run on every habits change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function openAddForm() {
     setEditingHabitId(null)
@@ -39,7 +65,16 @@ export default function App() {
     if (editingHabitId) {
       setHabits((prev) =>
         prev.map((habit) =>
-          habit.id === editingHabitId ? { ...habit, name, frequency } : habit
+          habit.id === editingHabitId
+            ? {
+                ...habit,
+                name,
+                frequency,
+                // Frequency change can change what counts as a streak
+                // (daily vs weekly), so recompute it from history.
+                streak: computeStreak(habit.completions, frequency),
+              }
+            : habit
         )
       )
     } else {
@@ -47,8 +82,8 @@ export default function App() {
         id: makeId(),
         name,
         frequency,
+        completions: [],
         streak: 0,
-        ticks: [false, false, false, false, false, false, false],
       }
       setHabits((prev) => [...prev, newHabit])
     }
@@ -69,16 +104,23 @@ export default function App() {
     setHabitPendingDeleteId(null)
   }
 
+  // --- Week 2: toggle today + live streak recompute ------------------------
   function handleToggleToday(habitId) {
+    const today = todayKey()
     setHabits((prev) =>
       prev.map((habit) => {
         if (habit.id !== habitId) return habit
-        const ticks = [...habit.ticks]
-        const last = ticks.length - 1
-        const wasDone = ticks[last]
-        ticks[last] = !wasDone
-        const streak = wasDone ? Math.max(habit.streak - 1, 0) : habit.streak + 1
-        return { ...habit, ticks, streak }
+
+        const alreadyDone = habit.completions.includes(today)
+        const completions = alreadyDone
+          ? habit.completions.filter((date) => date !== today)
+          : [...habit.completions, today].sort()
+
+        return {
+          ...habit,
+          completions,
+          streak: computeStreak(completions, habit.frequency),
+        }
       })
     )
   }
@@ -97,6 +139,9 @@ export default function App() {
       <div className="mx-auto max-w-5xl px-4 py-10">
         <header className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
+            <p className="font-mono text-xs uppercase tracking-widest text-pine">
+              Your log
+            </p>
             <h1 className="font-display text-3xl font-bold text-ink">
               Habit Tracker
             </h1>

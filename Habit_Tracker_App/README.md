@@ -1,7 +1,8 @@
-# Habit Tracker — Week 1
+# Habit Tracker — Week 1 + Week 2
 
-React + Vite + Tailwind UI for the Habit Tracker app. This covers every Week 1
-checklist item:
+React + Vite + Tailwind UI for the Habit Tracker app.
+
+## Week 1 — React Setup + Habit UI
 
 1. React + Vite project, Tailwind installed
 2. `HabitCard` — habit name, streak count, today's tick button, edit + delete buttons
@@ -9,7 +10,16 @@ checklist item:
 4. `AddHabitForm` (`HabitFormModal`) — one modal used for both adding and editing: name + frequency (daily/weekly)
 5. `WeekCalendarStrip` — 7-day strip showing ticks for the last 7 days
 6. Habits persist in the browser (`localStorage`) so they survive a refresh
-7. Ready to push to GitHub (steps below)
+7. Pushed to GitHub (steps below)
+
+## Week 2 — State + Streak Logic
+
+1. **`completions` date array** — each habit stores `completions: ["YYYY-MM-DD", ...]`, the actual calendar dates it was completed, instead of a fixed-size boolean window. See `src/utils/streak.js`.
+2. **Toggle today's completion** — clicking the tick button on `HabitCard` adds/removes *today's* date from that habit's `completions` array (`handleToggleToday` in `App.jsx`).
+3. **Streak computed from real dates** — `computeStreak()` walks backward day-by-day (or week-by-week for weekly habits) from today counting consecutive completions, rather than incrementing/decrementing a stored counter by hand. A streak is "alive" if today or yesterday is done, so it doesn't visually vanish before you've had a chance to tick today — but any real gap breaks it.
+4. **`useEffect`: reset broken streaks on load** — on mount, `App.jsx` recomputes every habit's streak fresh from its `completions` history and corrects the stored number if it's stale (e.g. you skipped a few days while the tab was closed).
+5. **Add and delete habits from state** — unchanged from Week 1, still backed by `useState` + `localStorage`.
+6. **Tick button turns green when today is done** — `HabitCard`'s button is `bg-pine` (green) and reads "Done for today ✓" once today's date is in `completions`; otherwise it's dark and reads "Mark today done".
 
 ## Folder structure
 
@@ -24,17 +34,20 @@ habit-tracker/
 ├── README.md
 └── src/
     ├── main.jsx              # React root render
-    ├── App.jsx               # Top-level state (habits, modal open/close, persistence)
+    ├── App.jsx               # Top-level state, streak recompute, persistence
     ├── index.css             # Tailwind directives + global styles
     ├── data/
     │   └── sampleHabits.js   # Unused by default; kept as example data shape
     ├── utils/
-    │   └── storage.js        # localStorage load/save helpers
+    │   ├── streak.js         # Week 2: date keys + computeStreak() (daily/weekly)
+    │   ├── storage.js        # localStorage load/save + sanitization
+    │   └── validation.js     # Name/frequency validation rules
     └── components/
         ├── HabitCard.jsx         # One habit: name, streak, tick/edit/delete buttons, week strip
         ├── HabitList.jsx         # Grid of HabitCards + empty state
         ├── AddHabitForm.jsx      # Modal used for both adding AND editing a habit
-        └── WeekCalendarStrip.jsx # Punch-card style 7-day strip
+        ├── ConfirmDialog.jsx     # Reusable in-app confirmation popup (replaces window.confirm)
+        └── WeekCalendarStrip.jsx # Punch-card style 7-day strip, derived from completions
 ```
 
 ## Design notes
@@ -50,11 +63,30 @@ change, then reloaded on page load — so the app starts with **no habits**
 on a brand-new browser, and whatever you add sticks around after a refresh.
 There's no backend/database yet; that's a later week.
 
-- `onToggleToday` flips today's tick and bumps the streak up/down
-- `onAddHabit` (via the modal) appends a new habit with an empty 7-day history
-- `onEdit` opens the same modal pre-filled, and saves changes to name/frequency
-  without touching its streak or tick history
-- `onDelete` asks for confirmation, then removes the habit for good
+Each habit looks like:
+
+```js
+{
+  id: 'a1b2c3...',
+  name: 'Read 20 minutes',
+  frequency: 'daily',          // 'daily' | 'weekly'
+  completions: ['2026-06-28', '2026-06-29', '2026-06-30'],
+  streak: 3,                   // always DERIVED from completions, never hand-edited
+}
+```
+
+- `onToggleToday` adds/removes *today's* date in `completions`, then
+  recomputes `streak` from the updated history — so the streak number
+  updates live as soon as you tap the tick button
+- `onAddHabit` (via the modal) appends a new habit with empty `completions`
+- `onEdit` opens the same modal pre-filled, and saves changes to
+  name/frequency (changing frequency recomputes the streak, since daily vs
+  weekly streaks are counted differently)
+- `onDelete` opens a confirmation popup, then removes the habit for good
+- On every app load, a `useEffect` recomputes every habit's streak fresh
+  from `completions` and corrects it if it's stale — so a streak that
+  "broke" while the tab was closed (you missed a day) shows the right
+  number immediately instead of a leftover cached value
 
 ## Run it locally
 
@@ -86,9 +118,9 @@ git push -u origin main
 (Create an empty repo on GitHub first — no README/license selected there — so
 there's no conflicting history to merge.)
 
-## What's next (Week 2+, not in this scope)
+## What's next (Week 3+, not in this scope)
 
-- Backend API + database for habits/completions
+- Backend API + database for habits/completions (so the same data shows on any device)
 - Authentication (login/signup, protected routes)
 - AI coaching/motivation endpoint
 - Full month calendar + progress dashboard charts
@@ -122,9 +154,12 @@ injection holes. Specifically:
   (or a browser extension) can edit by hand. Every habit read back from
   storage is re-validated and coerced into the correct shape
   (`sanitizeHabit` in `src/utils/storage.js`) — wrong types, missing
-  fields, a tampered `frequency`, more than 7 ticks, a negative streak,
-  etc. are all corrected or dropped rather than crashing the app or being
-  trusted as-is.
+  fields, a tampered `frequency`, malformed dates in `completions`, a
+  hand-edited `streak` number, etc. are all corrected or dropped rather
+  than crashing the app or being trusted as-is. `streak` specifically is
+  never read from storage at all — it's always recomputed from
+  `completions` (see `computeStreak` in `src/utils/streak.js`), so there's
+  no way to fake a streak by editing localStorage directly.
 - **Bounded storage** — at most 200 habits and 60 characters per name are
   ever persisted, to avoid unbounded `localStorage` growth.
 - **No native `alert`/`confirm`/`prompt`.** Destructive actions (delete)

@@ -5,9 +5,11 @@
 // app must not trust it blindly.
 
 import { ALLOWED_FREQUENCIES, NAME_MAX_LENGTH, sanitizeName } from './validation.js'
+import { computeStreak, isValidDateKey } from './streak.js'
 
 const STORAGE_KEY = 'habit-tracker:habits'
 const MAX_HABITS = 200 // sane upper bound, avoids unbounded storage growth
+const MAX_COMPLETIONS_PER_HABIT = 3660 // ~10 years of daily ticks, plenty
 
 function makeId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -20,6 +22,8 @@ function makeId() {
 // Coerces an unknown value from storage into a well-formed habit object,
 // or returns null if it can't be salvaged. This is the single choke point
 // that guarantees every habit in app state has the right shape and types.
+// Streak is never trusted from storage — it's always recomputed from
+// `completions`, so a hand-edited or stale streak number can't survive.
 function sanitizeHabit(raw) {
   if (!raw || typeof raw !== 'object') return null
 
@@ -32,14 +36,15 @@ function sanitizeHabit(raw) {
 
   const id = typeof raw.id === 'string' && raw.id.length > 0 ? raw.id : makeId()
 
-  const streak = Number.isInteger(raw.streak) && raw.streak >= 0 ? raw.streak : 0
-
-  const ticks = Array.isArray(raw.ticks)
-    ? raw.ticks.slice(-7).map(Boolean)
+  const completions = Array.isArray(raw.completions)
+    ? Array.from(new Set(raw.completions.filter(isValidDateKey)))
+        .sort()
+        .slice(-MAX_COMPLETIONS_PER_HABIT)
     : []
-  while (ticks.length < 7) ticks.unshift(false)
 
-  return { id, name, frequency, streak, ticks }
+  const streak = computeStreak(completions, frequency)
+
+  return { id, name, frequency, completions, streak }
 }
 
 export function loadHabits() {

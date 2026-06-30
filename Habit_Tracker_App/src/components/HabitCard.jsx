@@ -1,7 +1,8 @@
 import WeekCalendarStrip from './WeekCalendarStrip.jsx'
+import { isCompletedToday } from '../utils/streak.js'
 
 export default function HabitCard({ habit, onToggleToday, onEdit, onDelete }) {
-  const todayDone = habit.ticks[habit.ticks.length - 1]
+  const todayDone = isCompletedToday(habit.completions)
 
   return (
     <div className="rounded-xl border border-paperLine bg-white/60 p-4 shadow-sm">
@@ -43,7 +44,7 @@ export default function HabitCard({ habit, onToggleToday, onEdit, onDelete }) {
       </div>
 
       <div className="mt-4">
-        <WeekCalendarStrip ticks={habit.ticks} />
+        <WeekCalendarStrip completions={habit.completions} />
       </div>
 
       <button

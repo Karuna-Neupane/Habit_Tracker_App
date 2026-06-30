@@ -6,13 +6,6 @@ import {
   validateHabitName,
 } from '../utils/validation.js'
 
-// Same modal handles both "add" and "edit": if `editingHabit` is passed in,
-// the fields are pre-filled and submitting saves changes instead of
-// creating a new habit.
-//
-// `existingNames` is the list of every other habit's name, used to block
-// duplicates. When editing, the habit's own current name is excluded by
-// the caller so renaming to the same name doesn't false-positive.
 export default function HabitFormModal({
   open,
   onClose,
