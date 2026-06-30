@@ -1,2 +1,29 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+html,
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+.bg-dotgrid-paper {
+  background-color: #f3f1ea;
+  background-image: radial-gradient(circle, #dad3c0 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* Visible keyboard focus ring across the app */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #2f6f62;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
