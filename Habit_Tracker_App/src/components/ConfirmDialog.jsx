@@ -1,38 +1,26 @@
 import { useEffect, useRef } from 'react'
 
-/**
- * Reusable confirmation popup. Used anywhere the app needs a yes/no
- * confirmation instead of the browser's native window.confirm/alert
- * (which block the tab, can't be styled, and are easy to misuse).
- *
- * Closes on Escape or backdrop click (treated as Cancel), and focuses
- * the primary action when it opens.
- */
 export default function ConfirmDialog({
   open,
   title,
   message,
   confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
-  danger = false,
+  cancelLabel  = 'Cancel',
+  danger       = false,
   onConfirm,
   onCancel,
 }) {
-  const confirmButtonRef = useRef(null)
+  const primaryRef = useRef(null)
 
   useEffect(() => {
     if (!open) return
+    primaryRef.current?.focus()
 
-    confirmButtonRef.current?.focus()
-
-    function handleKeyDown(e) {
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        onCancel()
-      }
+    function onKey(e) {
+      if (e.key === 'Escape') { e.preventDefault(); onCancel() }
     }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
   }, [open, onCancel])
 
   if (!open) return null
@@ -45,18 +33,15 @@ export default function ConfirmDialog({
       <div
         role="alertdialog"
         aria-modal="true"
-        aria-labelledby="confirm-dialog-title"
-        aria-describedby="confirm-dialog-message"
-        className="w-full max-w-sm rounded-xl bg-paper p-6 shadow-lg"
+        aria-labelledby="cdlg-title"
+        aria-describedby="cdlg-msg"
+        className="w-full max-w-sm rounded-2xl bg-paper p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2
-          id="confirm-dialog-title"
-          className="font-display text-lg font-semibold text-ink"
-        >
+        <h2 id="cdlg-title" className="font-display text-lg font-semibold text-ink">
           {title}
         </h2>
-        <p id="confirm-dialog-message" className="mt-1 text-sm text-inkSoft">
+        <p id="cdlg-msg" className="mt-1 text-sm text-inkSoft leading-relaxed">
           {message}
         </p>
 
@@ -64,16 +49,16 @@ export default function ConfirmDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 rounded-lg border border-paperLine py-2 text-sm font-semibold text-inkSoft hover:bg-white"
+            className="flex-1 rounded-lg border border-paperLine py-2.5 text-sm font-semibold text-inkSoft hover:bg-white transition-colors"
           >
             {cancelLabel}
           </button>
           <button
-            ref={confirmButtonRef}
+            ref={primaryRef}
             type="button"
             onClick={onConfirm}
             className={[
-              'flex-1 rounded-lg py-2 text-sm font-semibold text-white',
+              'flex-1 rounded-lg py-2.5 text-sm font-semibold text-white transition-colors',
               danger ? 'bg-ember hover:bg-ember/90' : 'bg-pine hover:bg-pine/90',
             ].join(' ')}
           >

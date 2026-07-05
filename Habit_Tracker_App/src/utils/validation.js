@@ -1,16 +1,15 @@
-// Centralised validation rules so the same constraints are enforced
-// both in the form (UX) and in storage (defense in depth — never trust
-// only the UI layer, in case data is added programmatically or the
-// localStorage value is edited by hand).
+// Centralised validation so the same rules apply in the form (UX feedback)
+// AND in the storage layer (defense in depth — never trust only the UI).
 
 export const ALLOWED_FREQUENCIES = ['daily', 'weekly']
-
 export const NAME_MIN_LENGTH = 2
 export const NAME_MAX_LENGTH = 60
 
-// Strips control characters and collapses excess whitespace. Does not
-// attempt to strip HTML — React already escapes all text it renders, so
-// there is no injection risk from storing "<script>" as a plain string.
+/**
+ * Strips control characters and collapses excess whitespace.
+ * React auto-escapes all rendered text so there is no XSS risk from storing
+ * a name like "<script>" — it will always display as a literal string.
+ */
 export function sanitizeName(rawName) {
   return String(rawName ?? '')
     // eslint-disable-next-line no-control-regex
@@ -20,38 +19,29 @@ export function sanitizeName(rawName) {
 }
 
 /**
- * Validates a habit name against length rules and (optionally) against
- * a list of names already in use, so two habits can't collide.
- *
- * @param {string} rawName
- * @param {string[]} existingNames - other habit names already saved (lowercased comparison)
- * @returns {string} an error message, or '' if the name is valid
+ * Returns a non-empty error string if the name is invalid, otherwise ''.
+ * @param {string}   rawName
+ * @param {string[]} existingNames  Other habits' names (for duplicate check)
  */
 export function validateHabitName(rawName, existingNames = []) {
   const name = sanitizeName(rawName)
 
-  if (!name) {
+  if (!name)
     return 'Habit name is required.'
-  }
-  if (name.length < NAME_MIN_LENGTH) {
-    return `Habit name must be at least ${NAME_MIN_LENGTH} characters.`
-  }
-  if (name.length > NAME_MAX_LENGTH) {
-    return `Habit name must be ${NAME_MAX_LENGTH} characters or fewer.`
-  }
+  if (name.length < NAME_MIN_LENGTH)
+    return `Name must be at least ${NAME_MIN_LENGTH} characters.`
+  if (name.length > NAME_MAX_LENGTH)
+    return `Name must be ${NAME_MAX_LENGTH} characters or fewer.`
 
-  const isDuplicate = existingNames.some(
-    (existing) => existing.trim().toLowerCase() === name.toLowerCase()
+  const duplicate = existingNames.some(
+    (n) => n.trim().toLowerCase() === name.toLowerCase()
   )
-  if (isDuplicate) {
+  if (duplicate)
     return 'You already have a habit with this name.'
-  }
 
   return ''
 }
 
 export function validateFrequency(frequency) {
-  return ALLOWED_FREQUENCIES.includes(frequency)
-    ? ''
-    : 'Choose a valid frequency.'
+  return ALLOWED_FREQUENCIES.includes(frequency) ? '' : 'Choose a valid frequency.'
 }

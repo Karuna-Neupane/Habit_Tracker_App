@@ -1,27 +1,37 @@
-# Habit Tracker — Week 1 + Week 2
+# Habit Tracker
 
-React + Vite + Tailwind UI for the Habit Tracker app.
+A React-based single-page application for building and maintaining positive daily routines. Track habits, monitor streaks, and visualize your consistency through a 7-day calendar strip — all with data that persists locally in your browser.
 
-## Week 1 — React Setup + Habit UI
+---
 
-1. React + Vite project, Tailwind installed
-2. `HabitCard` — habit name, streak count, today's tick button, edit + delete buttons
-3. `HabitList` — renders habits, with an empty state ("No habits added yet")
-4. `AddHabitForm` (`HabitFormModal`) — one modal used for both adding and editing: name + frequency (daily/weekly)
-5. `WeekCalendarStrip` — 7-day strip showing ticks for the last 7 days
-6. Habits persist in the browser (`localStorage`) so they survive a refresh
-7. Pushed to GitHub (steps below)
+## Features
 
-## Week 2 — State + Streak Logic
+- **Habit management** — Add, edit, and delete habits with a name and frequency (daily or weekly)
+- **Daily check-ins** — Mark any habit as done for the day; the tick button turns green on completion
+- **Live streak counter** — Streak is computed in real time from your actual completion history, not a manually stored number
+- **Auto-recovery** — Broken streaks are detected and corrected automatically the moment you open the app
+- **7-day calendar strip** — A punch-card style strip shows your completion history for the last 7 days
+- **Stats page** — 30-day completion rate per habit with a visual progress bar, plus overall totals
+- **Persistent storage** — All habits survive a page refresh via localStorage; first-time users see 3 seeded habits to get started
+- **No native alerts** — Destructive actions (delete) use a styled in-app confirmation dialog, not `window.confirm`
+- **Full form validation** — Name required, 2–60 characters, no duplicates allowed, frequency whitelisted
 
-1. **`completions` date array** — each habit stores `completions: ["YYYY-MM-DD", ...]`, the actual calendar dates it was completed, instead of a fixed-size boolean window. See `src/utils/streak.js`.
-2. **Toggle today's completion** — clicking the tick button on `HabitCard` adds/removes *today's* date from that habit's `completions` array (`handleToggleToday` in `App.jsx`).
-3. **Streak computed from real dates** — `computeStreak()` walks backward day-by-day (or week-by-week for weekly habits) from today counting consecutive completions, rather than incrementing/decrementing a stored counter by hand. A streak is "alive" if today or yesterday is done, so it doesn't visually vanish before you've had a chance to tick today — but any real gap breaks it.
-4. **`useEffect`: reset broken streaks on load** — on mount, `App.jsx` recomputes every habit's streak fresh from its `completions` history and corrects the stored number if it's stale (e.g. you skipped a few days while the tab was closed).
-5. **Add and delete habits from state** — unchanged from Week 1, still backed by `useState` + `localStorage`.
-6. **Tick button turns green when today is done** — `HabitCard`'s button is `bg-pine` (green) and reads "Done for today ✓" once today's date is in `completions`; otherwise it's dark and reads "Mark today done".
+---
 
-## Folder structure
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| UI framework | React 18 + Vite |
+| Styling | Tailwind CSS |
+| Routing | react-router-dom v6 |
+| State management | React Context API + useState |
+| Persistence | localStorage (browser) |
+| Language | JavaScript (ES Modules) |
+
+---
+
+## Project structure
 
 ```
 habit-tracker/
@@ -31,141 +41,175 @@ habit-tracker/
 ├── tailwind.config.js
 ├── postcss.config.js
 ├── .gitignore
-├── README.md
 └── src/
-    ├── main.jsx              # React root render
-    ├── App.jsx               # Top-level state, streak recompute, persistence
-    ├── index.css             # Tailwind directives + global styles
-    ├── data/
-    │   └── sampleHabits.js   # Unused by default; kept as example data shape
+    ├── main.jsx                      # React root — mounts <App />
+    ├── App.jsx                       # BrowserRouter + Routes + HabitsProvider wrapper
+    ├── index.css                     # Tailwind directives, dot-grid texture, focus styles
+    │
+    ├── context/
+    │   └── HabitsContext.jsx         # Global state: habits array + all actions
+    │                                 # (createContext → Provider → useHabits hook)
+    │
+    ├── pages/
+    │   ├── Dashboard.jsx             # Route "/" — main habit tracker view
+    │   └── Stats.jsx                 # Route "/stats" — 30-day progress overview
+    │
+    ├── components/
+    │   ├── Navbar.jsx                # Top navigation with Link (SPA, no page reload)
+    │   ├── HabitCard.jsx             # Single habit tile: name, streak, tick, edit, delete
+    │   ├── HabitList.jsx             # Responsive grid of HabitCards + empty state
+    │   ├── AddHabitForm.jsx          # Controlled modal form for adding and editing
+    │   ├── ConfirmDialog.jsx         # Accessible in-app confirmation popup
+    │   └── WeekCalendarStrip.jsx     # 7-day punch-card strip from real date keys
+    │
     ├── utils/
-    │   ├── streak.js         # Week 2: date keys + computeStreak() (daily/weekly)
-    │   ├── storage.js        # localStorage load/save + sanitization
-    │   └── validation.js     # Name/frequency validation rules
-    └── components/
-        ├── HabitCard.jsx         # One habit: name, streak, tick/edit/delete buttons, week strip
-        ├── HabitList.jsx         # Grid of HabitCards + empty state
-        ├── AddHabitForm.jsx      # Modal used for both adding AND editing a habit
-        ├── ConfirmDialog.jsx     # Reusable in-app confirmation popup (replaces window.confirm)
-        └── WeekCalendarStrip.jsx # Punch-card style 7-day strip, derived from completions
+    │   ├── streak.js                 # Date helpers, computeStreak(), isCompletedToday()
+    │   ├── storage.js                # localStorage read/write + sanitizeHabit()
+    │   └── validation.js             # validateHabitName(), validateFrequency(), sanitizeName()
+    │
+    └── data/
+        └── sampleHabits.js           # 3 seeded habits shown on first visit
 ```
 
-## Design notes
+---
 
-Visual language is a "habit log" theme: warm paper background with a dot-grid
-texture, deep pine green for completed days, and an ember-orange streak badge
-(🔥 count) so progress reads at a glance. The week strip is a punch-card: a
-solid pine dot for a day done, an empty ring for a day missed, an ember ring
-on today if it isn't done yet.
+## Getting started
 
-State lives in `App.jsx` (`useState`) and is saved to `localStorage` on every
-change, then reloaded on page load — so the app starts with **no habits**
-on a brand-new browser, and whatever you add sticks around after a refresh.
-There's no backend/database yet; that's a later week.
+### Prerequisites
 
-Each habit looks like:
+- Node.js 18 or higher
+- npm 9 or higher
 
-```js
-{
-  id: 'a1b2c3...',
-  name: 'Read 20 minutes',
-  frequency: 'daily',          // 'daily' | 'weekly'
-  completions: ['2026-06-28', '2026-06-29', '2026-06-30'],
-  streak: 3,                   // always DERIVED from completions, never hand-edited
-}
-```
-
-- `onToggleToday` adds/removes *today's* date in `completions`, then
-  recomputes `streak` from the updated history — so the streak number
-  updates live as soon as you tap the tick button
-- `onAddHabit` (via the modal) appends a new habit with empty `completions`
-- `onEdit` opens the same modal pre-filled, and saves changes to
-  name/frequency (changing frequency recomputes the streak, since daily vs
-  weekly streaks are counted differently)
-- `onDelete` opens a confirmation popup, then removes the habit for good
-- On every app load, a `useEffect` recomputes every habit's streak fresh
-  from `completions` and corrects it if it's stale — so a streak that
-  "broke" while the tab was closed (you missed a day) shows the right
-  number immediately instead of a leftover cached value
-
-## Run it locally
+### Install and run
 
 ```bash
+# 1. Install dependencies
 npm install
+
+# 2. Start the development server
 npm run dev
 ```
 
-Open the printed local URL (defaults to `http://localhost:5173`).
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-To build for production:
+### Build for production
 
 ```bash
 npm run build
-npm run preview
+npm run preview    # preview the production build locally
 ```
 
-## Push to GitHub
+### Push to GitHub
 
 ```bash
 git init
 git add .
-git commit -m "Week 1: React + Tailwind habit tracker UI"
+git commit -m "feat: habit tracker with streak logic, routing, and context API"
 git branch -M main
-git remote add origin <your-empty-github-repo-url>
+git remote add origin https://github.com/YOUR_USERNAME/habit-tracker.git
 git push -u origin main
 ```
 
-(Create an empty repo on GitHub first — no README/license selected there — so
-there's no conflicting history to merge.)
+---
 
-## What's next (Week 3+, not in this scope)
+## How it works
 
-- Backend API + database for habits/completions (so the same data shows on any device)
-- Authentication (login/signup, protected routes)
-- AI coaching/motivation endpoint
-- Full month calendar + progress dashboard charts
+### Habit data model
 
-## Validation
+Each habit is stored as a plain object:
 
-- **Required, trimmed name** — blank or whitespace-only names are rejected.
-- **Length limits** — 2–60 characters, enforced both by the input's
-  `maxLength` and by `validateHabitName` (a live "characters left" counter
-  is shown).
-- **No duplicate names** — case-insensitive check against your other
-  habits; renaming a habit to its own current name is allowed.
-- **Whitelisted frequency** — only `daily` or `weekly` can ever be saved;
-  there's no free-text field for it.
-- All rules live in `src/utils/validation.js` so the form and the storage
-  layer use the exact same logic.
+```js
+{
+  id:          "3f2a1b...",                         // crypto.randomUUID()
+  name:        "Read 20 minutes",
+  frequency:   "daily",                             // "daily" | "weekly"
+  completions: ["2026-06-28", "2026-06-29", "2026-06-30"],  // YYYY-MM-DD strings
+  streak:      3,                                   // always derived, never stored manually
+}
+```
 
-## Security notes
+`completions` is the source of truth. The `streak` field is always computed from it via `computeStreak()` and never incremented or decremented by hand — so it can never drift out of sync with the actual history.
 
-This is a client-only app right now (no backend/auth yet), so "security"
-here means: don't trust input, don't trust storage, and don't open any
-injection holes. Specifically:
+### Streak calculation
 
-- **No `dangerouslySetInnerHTML` anywhere.** Habit names are rendered as
-  plain React text, which auto-escapes — so a habit named `<script>...`
-  is just displayed as that literal text, never executed.
-- **Input is validated AND sanitized**, not just validated: control
-  characters are stripped and whitespace is collapsed (`sanitizeName`)
-  before anything is stored or displayed.
-- **`localStorage` is treated as untrusted input.** It's plain text a user
-  (or a browser extension) can edit by hand. Every habit read back from
-  storage is re-validated and coerced into the correct shape
-  (`sanitizeHabit` in `src/utils/storage.js`) — wrong types, missing
-  fields, a tampered `frequency`, malformed dates in `completions`, a
-  hand-edited `streak` number, etc. are all corrected or dropped rather
-  than crashing the app or being trusted as-is. `streak` specifically is
-  never read from storage at all — it's always recomputed from
-  `completions` (see `computeStreak` in `src/utils/streak.js`), so there's
-  no way to fake a streak by editing localStorage directly.
-- **Bounded storage** — at most 200 habits and 60 characters per name are
-  ever persisted, to avoid unbounded `localStorage` growth.
-- **No native `alert`/`confirm`/`prompt`.** Destructive actions (delete)
-  use an in-app `ConfirmDialog` instead — it's keyboard accessible
-  (focus moves to it, `Escape` cancels), can't be skinned to look like a
-  real browser dialog by a malicious page, and doesn't block the whole
-  tab the way native dialogs do.
-- **IDs use `crypto.randomUUID()`** (with a fallback) instead of a
-  timestamp, so two habits added in the same millisecond can't collide.
+`computeStreak()` in `src/utils/streak.js` walks backwards from today:
+
+- **Daily habits** — counts consecutive calendar days. The streak is kept "alive" if either today or yesterday is completed, so it doesn't visually drop to zero the moment midnight passes before you've had a chance to tick today.
+- **Weekly habits** — counts consecutive ISO weeks. One completion anywhere in a given week counts for that week.
+- Any gap beyond one day (or one week) resets the count to zero.
+
+On every app load, a `useEffect` recomputes every habit's streak fresh from its `completions` array and corrects any cached number that is now stale (e.g. you skipped two days while the tab was closed).
+
+### State management — Context API
+
+Habits state and all actions live in `HabitsContext.jsx`. Any component that needs them calls `useHabits()` directly — no prop drilling through intermediate components.
+
+```js
+// In any component, anywhere in the tree:
+const { habits, toggleToday, addHabit, editHabit, deleteHabit } = useHabits()
+```
+
+Local UI state (which modal is open, which habit is pending deletion) stays local to the page that needs it via `useState`.
+
+### Routing
+
+`App.jsx` sets up two routes with `react-router-dom`:
+
+| Path | Page | Purpose |
+|---|---|---|
+| `/` | Dashboard | Daily habit list — tick, add, edit, delete |
+| `/stats` | Stats | 30-day completion rates and streak summary |
+
+The `<Navbar>` uses `<Link>` so navigating between pages never triggers a full browser reload.
+
+### Form validation
+
+`AddHabitForm` is a controlled component — React state drives every input value. On submission:
+
+| Rule | Detail |
+|---|---|
+| Name required | Blank or whitespace-only names are rejected |
+| Minimum length | 2 characters after trimming |
+| Maximum length | 60 characters (enforced by `maxLength` attribute and validator) |
+| No duplicates | Case-insensitive check against all other habits; editing your own name is allowed |
+| Frequency | Must be `daily` or `weekly` — no free-text accepted |
+
+Errors appear inline beneath the field as `role="alert"` paragraphs, accessible to screen readers.
+
+---
+
+## Security
+
+| Concern | How it's handled |
+|---|---|
+| XSS | No `dangerouslySetInnerHTML` anywhere. React auto-escapes all rendered text, so a habit named `<script>` displays as literal text. |
+| Untrusted storage | Every habit loaded from localStorage passes through `sanitizeHabit()`, which coerces wrong types, strips invalid date strings, and recomputes the streak — a hand-edited JSON value cannot crash the app or fake a streak. |
+| Input sanitization | Control characters are stripped and whitespace collapsed before anything is stored or displayed. |
+| Fake streaks | `streak` is never trusted from storage. It is always recomputed from `completions` on load. |
+| Bounded storage | Max 200 habits, 60 chars per name, 3 660 completions per habit. |
+| Unique IDs | `crypto.randomUUID()` with a time-based fallback for older browsers. |
+| Confirmations | No `window.confirm` or `window.alert`. All destructive actions use the in-app `<ConfirmDialog>` which is keyboard-accessible (focus on open, Escape to cancel). |
+
+---
+
+## Keyboard accessibility
+
+- Every interactive element is reachable by Tab
+- Focus ring visible on all buttons, inputs, and links
+- Modals trap focus on open and close on Escape
+- `role="dialog"` and `role="alertdialog"` with `aria-modal`, `aria-labelledby`, and `aria-describedby` on all overlays
+- Streak and calendar cells have `aria-label` text for screen readers
+- `prefers-reduced-motion` media query disables all transitions for users who request it
+
+---
+
+## Roadmap
+
+The following features are planned for upcoming iterations:
+
+- **Backend API** — REST endpoints (Node/Express or FastAPI) to replace localStorage
+- **Database** — PostgreSQL or MongoDB for multi-device persistence
+- **Authentication** — Sign up, log in, protected routes
+- **AI coaching** — Personalised motivation and tips via the Anthropic API
+- **Monthly calendar** — Full calendar view with historical completion data
+- **Charts** — Recharts-based progress graphs on the Stats page

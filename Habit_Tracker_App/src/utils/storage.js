@@ -1,29 +1,28 @@
-// Small wrapper around localStorage so habits survive a page refresh.
-// Every value coming OUT of storage is re-validated (`sanitizeHabit`)
-// before it ever reaches React state. This matters because localStorage
-// is plain text a user (or a browser extension) can edit by hand — the
-// app must not trust it blindly.
+// localStorage wrapper.
+//
+// SECURITY: localStorage is plain text that any user or browser extension can
+// edit by hand. Everything read back from storage is coerced into the correct
+// shape by sanitizeHabit(). Streak is NEVER trusted from storage — it is
+// always recomputed from `completions` so it can't be faked by editing JSON.
 
 import { ALLOWED_FREQUENCIES, NAME_MAX_LENGTH, sanitizeName } from './validation.js'
 import { computeStreak, isValidDateKey } from './streak.js'
 
-const STORAGE_KEY = 'habit-tracker:habits'
-const MAX_HABITS = 200 // sane upper bound, avoids unbounded storage growth
-const MAX_COMPLETIONS_PER_HABIT = 3660 // ~10 years of daily ticks, plenty
+const STORAGE_KEY         = 'habit-tracker:habits'
+const MAX_HABITS          = 200
+const MAX_COMPLETIONS     = 3_660   // ~10 years of daily ticks
 
-function makeId() {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID()
-  }
-  // Fallback for older browsers without crypto.randomUUID
+/** Cryptographically random ID. Falls back for very old browsers. */
+export function makeId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
   return `h${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
-// Coerces an unknown value from storage into a well-formed habit object,
-// or returns null if it can't be salvaged. This is the single choke point
-// that guarantees every habit in app state has the right shape and types.
-// Streak is never trusted from storage — it's always recomputed from
-// `completions`, so a hand-edited or stale streak number can't survive.
+/**
+ * Sanitize one unknown value from storage into a valid habit, or null.
+ * This is the single choke-point: every habit flowing into React state
+ * has been through here.
+ */
 function sanitizeHabit(raw) {
   if (!raw || typeof raw !== 'object') return null
 
@@ -34,14 +33,17 @@ function sanitizeHabit(raw) {
     ? raw.frequency
     : 'daily'
 
-  const id = typeof raw.id === 'string' && raw.id.length > 0 ? raw.id : makeId()
+  const id =
+    typeof raw.id === 'string' && raw.id.length > 0 ? raw.id : makeId()
 
+  // Deduplicate + sort + cap completions; reject invalid date strings
   const completions = Array.isArray(raw.completions)
     ? Array.from(new Set(raw.completions.filter(isValidDateKey)))
         .sort()
-        .slice(-MAX_COMPLETIONS_PER_HABIT)
+        .slice(-MAX_COMPLETIONS)
     : []
 
+  // Always derive streak — never trust the stored number
   const streak = computeStreak(completions, frequency)
 
   return { id, name, frequency, completions, streak }
@@ -51,6 +53,7 @@ export function loadHabits() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return []
+
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
 
@@ -58,14 +61,14 @@ export function loadHabits() {
     return parsed
       .map(sanitizeHabit)
       .filter(Boolean)
-      .filter((habit) => {
-        if (seenIds.has(habit.id)) return false
-        seenIds.add(habit.id)
+      .filter(({ id }) => {
+        if (seenIds.has(id)) return false
+        seenIds.add(id)
         return true
       })
       .slice(0, MAX_HABITS)
   } catch (err) {
-    console.warn('Could not read habits from localStorage:', err)
+    console.warn('[HabitTracker] Could not load habits:', err)
     return []
   }
 }
@@ -75,10 +78,7 @@ export function saveHabits(habits) {
     const safe = Array.isArray(habits) ? habits.slice(0, MAX_HABITS) : []
     localStorage.setItem(STORAGE_KEY, JSON.stringify(safe))
   } catch (err) {
-    // Quota exceeded, storage disabled, etc. — fail quietly, app still
-    // works in-memory for the rest of the session.
-    console.warn('Could not save habits to localStorage:', err)
+    // Quota exceeded, private browsing, etc. — keep working in-memory
+    console.warn('[HabitTracker] Could not save habits:', err)
   }
 }
-
-export { makeId }

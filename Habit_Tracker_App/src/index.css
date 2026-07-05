@@ -2,27 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body {
+/* Fonts */
+html, body {
   font-family: 'Inter', sans-serif;
+  background-color: #F3F1EA;
 }
 
-.bg-dotgrid-paper {
-  background-color: #f3f1ea;
-  background-image: radial-gradient(circle, #dad3c0 1px, transparent 1px);
-  background-size: 18px 18px;
+/* Dot-grid paper texture */
+.bg-dotgrid {
+  background-color: #F3F1EA;
+  background-image: radial-gradient(circle, #C8BFA8 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
-/* Visible keyboard focus ring across the app */
+/* Focus ring (accessibility) */
 button:focus-visible,
 input:focus-visible,
-select:focus-visible {
-  outline: 2px solid #2f6f62;
+select:focus-visible,
+a:focus-visible {
+  outline: 2px solid #2F6F62;
   outline-offset: 2px;
+  border-radius: 4px;
 }
 
+/* Respect reduced-motion preference */
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *, *::before, *::after {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }
