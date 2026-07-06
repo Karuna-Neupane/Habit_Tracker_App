@@ -1,0 +1,179 @@
+{
+  "info": {
+    "name": "Habit Tracker API",
+    "description": "All endpoints for the Habit Tracker REST API. Import this file into Postman, then set the 'dev' environment with base_url = http://localhost:3000.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000" }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/health",
+        "description": "Verify the server is running."
+      }
+    },
+    {
+      "name": "Habits",
+      "item": [
+        {
+          "name": "GET all habits",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/habits",
+            "description": "Returns all habits with live streak counts."
+          }
+        },
+        {
+          "name": "GET one habit",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/habits/{{habit_id}}",
+            "description": "Returns a single habit by its ID."
+          }
+        },
+        {
+          "name": "POST create habit",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/habits",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Meditate 10 minutes\",\n  \"frequency\": \"daily\"\n}"
+            },
+            "description": "Creates a new habit. Returns 201 on success. Returns 409 if the name already exists."
+          }
+        },
+        {
+          "name": "POST create habit (validation fail - empty name)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/habits",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"frequency\": \"daily\"\n}"
+            },
+            "description": "Expected: 400 Bad Request with validation error."
+          }
+        },
+        {
+          "name": "POST create habit (validation fail - bad frequency)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/habits",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Habit\",\n  \"frequency\": \"hourly\"\n}"
+            },
+            "description": "Expected: 400 Bad Request — frequency must be daily or weekly."
+          }
+        },
+        {
+          "name": "PUT update habit",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/api/habits/{{habit_id}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated habit name\",\n  \"frequency\": \"weekly\"\n}"
+            },
+            "description": "Updates name and/or frequency. Returns 404 if not found, 409 if name is taken."
+          }
+        },
+        {
+          "name": "DELETE habit",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/habits/{{habit_id}}",
+            "description": "Deletes a habit. Returns 204 No Content on success, 404 if not found."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Completions",
+      "item": [
+        {
+          "name": "POST complete — today (no body needed)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/habits/{{habit_id}}/complete",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "description": "Marks the habit as done for today. The server uses its own date so the client cannot fake a future date."
+          }
+        },
+        {
+          "name": "POST complete — specific date",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/habits/{{habit_id}}/complete",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-07-01\"\n}"
+            },
+            "description": "Marks the habit as done for a specific past date."
+          }
+        },
+        {
+          "name": "POST complete — DUPLICATE (same date again) ← 409 expected",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/habits/{{habit_id}}/complete",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-07-01\"\n}"
+            },
+            "description": "Expected: 409 Conflict — 'Habit already completed on 2026-07-01. Each day can only be marked once.'"
+          }
+        },
+        {
+          "name": "POST complete — invalid date format ← 400 expected",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/habits/{{habit_id}}/complete",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"July 1 2026\"\n}"
+            },
+            "description": "Expected: 400 Bad Request — date must be YYYY-MM-DD format."
+          }
+        },
+        {
+          "name": "DELETE un-complete (untick today)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/habits/{{habit_id}}/complete",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "description": "Removes today's completion from the habit."
+          }
+        },
+        {
+          "name": "GET history",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/habits/{{habit_id}}/history",
+            "description": "Returns the full completions array, streak, and total completion count for one habit."
+          }
+        }
+      ]
+    }
+  ]
+}

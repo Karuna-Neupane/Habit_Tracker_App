@@ -12,6 +12,7 @@ export default function AddHabitForm({
   onSubmit,
   editingHabit = null,
   existingNames = [],
+  serverError = '',   // error message returned from the backend (e.g. duplicate name)
 }) {
   // Controlled component state 
   const [name, setName] = useState('')
@@ -46,7 +47,7 @@ export default function AddHabitForm({
 
   if (!open) return null
 
-  // Form submission (Tutorial PDF pattern) 
+  // Form submission
   function handleSubmit(e) {
     e.preventDefault()   // stop browser page reload
 
@@ -107,8 +108,8 @@ export default function AddHabitForm({
               ref={nameInputRef}
               id="hf-name"
               type="text"
-              value={name} // binds state to input value
-              onChange={(e) => { // updates state on keystroke
+              value={name}                                      // binds state to input value
+              onChange={(e) => {                                // updates state on keystroke
                 setName(e.target.value)
                 if (nameError) setNameError('')
               }}
@@ -132,7 +133,7 @@ export default function AddHabitForm({
             )}
           </div>
 
-          {/* Frequency toggle (radiogroup pattern) */}
+          {/* Frequency toggle (radiogroup pattern)*/}
           <div>
             <span className="block text-sm font-medium text-ink">Frequency</span>
             <div
@@ -162,6 +163,13 @@ export default function AddHabitForm({
               <p role="alert" className="mt-1 text-xs text-ember">{freqError}</p>
             )}
           </div>
+
+          {/* Server-side error (e.g. duplicate name from API) */}
+          {serverError && (
+            <p role="alert" className="rounded-lg bg-emberSoft px-3 py-2 text-xs text-ember">
+              {serverError}
+            </p>
+          )}
 
           {/* Action buttons */}
           <div className="flex gap-2 pt-1">
