@@ -7,10 +7,10 @@ export default function Stats() {
   const { habits } = useHabits()
 
   // Derived stats (computed each render, no extra state needed)
-  const totalHabits    = habits.length
-  const doneToday      = habits.filter((h) => isCompletedToday(h.completions)).length
-  const longestStreak  = habits.reduce((max, h) => Math.max(max, h.streak), 0)
-  const avgRate30      = totalHabits
+  const totalHabits = habits.length
+  const doneToday = habits.filter((h) => isCompletedToday(h.completions)).length
+  const longestStreak = habits.reduce((max, h) => Math.max(max, h.streak), 0)
+  const avgRate30 = totalHabits
     ? Math.round(habits.reduce((sum, h) => sum + completionRate30(h.completions), 0) / totalHabits)
     : 0
 
@@ -57,10 +57,10 @@ export default function Stats() {
       {/* Top-line summary cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-8">
         {[
-          { label: 'Habits',         value: totalHabits,           unit: ''  },
-          { label: 'Done today',     value: `${doneToday}/${totalHabits}`, unit: '' },
-          { label: 'Best streak',    value: longestStreak,         unit: '🔥' },
-          { label: '30-day avg',     value: `${avgRate30}%`,       unit: ''  },
+          { label: 'Habits', value: totalHabits, unit: '' },
+          { label: 'Done today', value: `${doneToday}/${totalHabits}`, unit: '' },
+          { label: 'Best streak', value: longestStreak, unit: '🔥' },
+          { label: '30-day avg', value: `${avgRate30}%`, unit: '' },
         ].map(({ label, value, unit }) => (
           <div key={label} className="rounded-2xl border border-paperLine bg-white/70 p-4">
             <p className="font-mono text-xs uppercase tracking-wide text-inkSoft">{label}</p>

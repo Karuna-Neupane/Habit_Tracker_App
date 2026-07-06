@@ -10,11 +10,11 @@ export default function AddHabitForm({
   open,
   onClose,
   onSubmit,
-  editingHabit  = null,
+  editingHabit = null,
   existingNames = [],
 }) {
   // Controlled component state 
-  const [name,      setName]      = useState('')
+  const [name, setName] = useState('')
   const [frequency, setFrequency] = useState('daily')
   const [nameError, setNameError] = useState('')
   const [freqError, setFreqError] = useState('')

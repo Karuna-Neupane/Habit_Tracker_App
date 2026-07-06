@@ -96,11 +96,11 @@ export function HabitsProvider({ children }) {
         habit.id !== habitId
           ? habit
           : {
-              ...habit,
-              name,
-              frequency,
-              streak: computeStreak(habit.completions, frequency),
-            }
+            ...habit,
+            name,
+            frequency,
+            streak: computeStreak(habit.completions, frequency),
+          }
       )
     )
   }

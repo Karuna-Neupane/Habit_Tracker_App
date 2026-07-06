@@ -5,8 +5,8 @@ export default function ConfirmDialog({
   title,
   message,
   confirmLabel = 'Confirm',
-  cancelLabel  = 'Cancel',
-  danger       = false,
+  cancelLabel = 'Cancel',
+  danger = false,
   onConfirm,
   onCancel,
 }) {

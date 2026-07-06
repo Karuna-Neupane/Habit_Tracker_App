@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 /* Fonts */
-html, body {
+html,
+body {
   font-family: 'Inter', sans-serif;
   background-color: #F3F1EA;
 }
@@ -27,7 +28,10 @@ a:focus-visible {
 
 /* Respect reduced-motion preference */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }

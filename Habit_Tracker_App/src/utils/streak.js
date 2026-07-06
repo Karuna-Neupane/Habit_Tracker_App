@@ -1,5 +1,4 @@
-// ─── Date + Streak Logic (Week 2) ────────────────────────────────────────────
-//
+// Date + Streak Logic 
 // Habits store `completions`: an array of "YYYY-MM-DD" strings (local calendar
 // dates, NOT UTC timestamps) — one entry per completed day.
 //

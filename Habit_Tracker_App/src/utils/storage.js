@@ -8,9 +8,9 @@
 import { ALLOWED_FREQUENCIES, NAME_MAX_LENGTH, sanitizeName } from './validation.js'
 import { computeStreak, isValidDateKey } from './streak.js'
 
-const STORAGE_KEY         = 'habit-tracker:habits'
-const MAX_HABITS          = 200
-const MAX_COMPLETIONS     = 3_660   // ~10 years of daily ticks
+const STORAGE_KEY = 'habit-tracker:habits'
+const MAX_HABITS = 200
+const MAX_COMPLETIONS = 3_660   // ~10 years of daily ticks
 
 /** Cryptographically random ID. Falls back for very old browsers. */
 export function makeId() {
@@ -39,8 +39,8 @@ function sanitizeHabit(raw) {
   // Deduplicate + sort + cap completions; reject invalid date strings
   const completions = Array.isArray(raw.completions)
     ? Array.from(new Set(raw.completions.filter(isValidDateKey)))
-        .sort()
-        .slice(-MAX_COMPLETIONS)
+      .sort()
+      .slice(-MAX_COMPLETIONS)
     : []
 
   // Always derive streak — never trust the stored number

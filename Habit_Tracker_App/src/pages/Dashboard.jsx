@@ -1,22 +1,22 @@
 import { useState } from 'react'
-import HabitList    from '../components/HabitList.jsx'
+import HabitList from '../components/HabitList.jsx'
 import AddHabitForm from '../components/AddHabitForm.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
-import { useHabits }  from '../context/HabitsContext.jsx'
+import { useHabits } from '../context/HabitsContext.jsx'
 
 export default function Dashboard() {
   // Context: habits data + actions (no prop drilling)
   const { habits, toggleToday, addHabit, editHabit, deleteHabit } = useHabits()
 
   // Local UI state (useState) 
-  const [formOpen,      setFormOpen]      = useState(false)
-  const [editingHabit,  setEditingHabit]  = useState(null) // habit object | null
+  const [formOpen, setFormOpen] = useState(false)
+  const [editingHabit, setEditingHabit] = useState(null) // habit object | null
   const [deletingHabit, setDeletingHabit] = useState(null) // habit object | null
 
   // Handlers
-  function openAddForm()       { setEditingHabit(null); setFormOpen(true) }
+  function openAddForm() { setEditingHabit(null); setFormOpen(true) }
   function openEditForm(habit) { setEditingHabit(habit); setFormOpen(true) }
-  function closeForm()         { setFormOpen(false); setEditingHabit(null) }
+  function closeForm() { setFormOpen(false); setEditingHabit(null) }
 
   function handleSubmit({ name, frequency }) {
     if (editingHabit) {
@@ -27,8 +27,8 @@ export default function Dashboard() {
   }
 
   function requestDelete(habit) { setDeletingHabit(habit) }
-  function cancelDelete()       { setDeletingHabit(null)  }
-  function confirmDelete()      { deleteHabit(deletingHabit.id); setDeletingHabit(null) }
+  function cancelDelete() { setDeletingHabit(null) }
+  function confirmDelete() { deleteHabit(deletingHabit.id); setDeletingHabit(null) }
 
   // Existing names for duplicate validation (exclude the habit being edited)
   const existingNames = habits

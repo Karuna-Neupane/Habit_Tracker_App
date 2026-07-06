@@ -8,9 +8,9 @@ function d(offsetDays) {
   return toDateKey(addDays(new Date(), -Math.abs(offsetDays)))
 }
 
-const waterCompletions  = [d(6), d(5), d(4), d(3), d(1), d(0)]
-const readCompletions   = [d(6), d(5), d(4), d(3), d(2), d(1), d(0)]
-const mealCompletions   = [d(5), d(0)]
+const waterCompletions = [d(6), d(5), d(4), d(3), d(1), d(0)]
+const readCompletions = [d(6), d(5), d(4), d(3), d(2), d(1), d(0)]
+const mealCompletions = [d(5), d(0)]
 
 export const sampleHabits = [
   {
