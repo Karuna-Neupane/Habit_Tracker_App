@@ -3,7 +3,7 @@
     "name": "Habit Tracker API",
     "description": "All endpoints for the Habit Tracker REST API. Import this file into Postman, then set the 'dev' environment with base_url = http://localhost:3000.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
+  }, 
   "variable": [
     { "key": "base_url", "value": "http://localhost:3000" }
   ],

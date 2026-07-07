@@ -1,8 +1,3 @@
-// Streak and date utilities — mirrors src/utils/streak.js on the frontend.
-// Keeping the logic in one place on the backend means the source of truth
-// for "what counts as a streak" lives on the server and can't be spoofed
-// by a client sending a hand-crafted completion array.
-
 const DATE_KEY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Local calendar date → "YYYY-MM-DD" */

@@ -1,10 +1,3 @@
-// ─── Model (MVC) ─────────────────────────────────────────────────────────────
-// Manages all data logic. Nothing in this file knows about HTTP requests or
-// responses — that separation is the whole point of MVC.
-//
-// Storage is in-memory for Week 3. When the database is added (Week 4+),
-// only this file changes; controllers and routes stay exactly the same.
-
 const { v4: uuidv4 } = require('crypto').webcrypto
   ? { v4: () => require('crypto').randomUUID() }
   : { v4: () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}` };
@@ -14,7 +7,7 @@ const { computeStreak, todayKey, isValidDateKey } = require('../utils/streak');
 const ALLOWED_FREQUENCIES = ['daily', 'weekly'];
 const MAX_COMPLETIONS = 3_660;
 
-// ── Seed data (3 sample habits shown on first run) ────────────────────────────
+// Seed data (3 sample habits shown on first run) 
 function daysAgo(n) {
   const d = new Date();
   d.setDate(d.getDate() - n);
@@ -48,7 +41,7 @@ let habits = [
   },
 ];
 
-// ── Helper: attach the derived streak field before sending to client ──────────
+// Helper: attach the derived streak field before sending to client 
 function withStreak(habit) {
   return {
     ...habit,
@@ -56,7 +49,7 @@ function withStreak(habit) {
   };
 }
 
-// ── Model methods (exported for use by controllers) ───────────────────────────
+// Model methods (exported for use by controllers)
 module.exports = {
   /** Return all habits with live streak counts. */
   getAll() {
@@ -117,7 +110,7 @@ module.exports = {
     const habit = habits.find((h) => h.id === id);
     if (!habit) return { success: false, code: 'NOT_FOUND', message: 'Habit not found.' };
 
-    // ── Week 3, item 6: reject duplicate completion for same date ──────────
+    // Reject duplicate completion for same date
     if (habit.completions.includes(today)) {
       return {
         success: false,
