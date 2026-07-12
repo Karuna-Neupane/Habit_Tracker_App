@@ -1,4 +1,4 @@
-// Server Entry Point 
+// ─── Server Entry Point ───────────────────────────────────────────────────────
 // Imports the configured Express app and binds it to a port.
 // Keeping this separate from app.js means the app can be tested without
 // starting a real server. (Tutorial PDF pattern)

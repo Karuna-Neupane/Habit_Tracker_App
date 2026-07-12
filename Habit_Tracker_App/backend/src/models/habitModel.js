@@ -1,47 +1,51 @@
-const { v4: uuidv4 } = require('crypto').webcrypto
-  ? { v4: () => require('crypto').randomUUID() }
-  : { v4: () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}` };
+// ─── Model (MVC) ─────────────────────────────────────────────────────────────
+// Manages all data logic. Nothing in this file knows about HTTP requests or
+// responses — that separation is the whole point of MVC.
+//
+// Storage is a JSON file on disk (data/habits.json). This is still not a
+// real database, but unlike a plain in-memory array it survives server
+// restarts, so habits you add/edit/delete stick around on the next run.
+// When a real database is added (Week 4+), only this file changes;
+// controllers and routes stay exactly the same.
+
+const fs = require('fs');
+const path = require('path');
 
 const { computeStreak, todayKey, isValidDateKey } = require('../utils/streak');
 
 const ALLOWED_FREQUENCIES = ['daily', 'weekly'];
 const MAX_COMPLETIONS = 3_660;
 
-// Seed data (3 sample habits shown on first run) 
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
+const DATA_DIR = path.join(__dirname, '..', '..', 'data');
+const DATA_FILE = path.join(DATA_DIR, 'habits.json');
+
+// ── Load habits from disk on startup. No seed data — starts empty. ───────────
+function loadHabits() {
+  try {
+    const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (err) {
+    // File doesn't exist yet (first run) or is unreadable/corrupt — start empty.
+    return [];
+  }
 }
 
-let habits = [
-  {
-    id: require('crypto').randomUUID(),
-    name: 'Drink 2L of water',
-    frequency: 'daily',
-    completions: [daysAgo(6), daysAgo(5), daysAgo(4), daysAgo(3), daysAgo(1), daysAgo(0)],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: require('crypto').randomUUID(),
-    name: 'Read 20 minutes',
-    frequency: 'daily',
-    completions: [daysAgo(6), daysAgo(5), daysAgo(4), daysAgo(3), daysAgo(2), daysAgo(1), daysAgo(0)],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: require('crypto').randomUUID(),
-    name: 'Weekly meal prep',
-    frequency: 'weekly',
-    completions: [daysAgo(6), daysAgo(0)],
-    createdAt: new Date().toISOString(),
-  },
-];
+// ── Persist the current habits array to disk. ────────────────────────────────
+function saveHabits() {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(DATA_FILE, JSON.stringify(habits, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('Failed to save habits to disk:', err.message);
+  }
+}
 
-// Helper: attach the derived streak field before sending to client 
+let habits = loadHabits();
+
+// ── Helper: attach the derived streak field before sending to client ──────────
 function withStreak(habit) {
   return {
     ...habit,
@@ -49,7 +53,7 @@ function withStreak(habit) {
   };
 }
 
-// Model methods (exported for use by controllers)
+// ── Model methods (exported for use by controllers) ───────────────────────────
 module.exports = {
   /** Return all habits with live streak counts. */
   getAll() {
@@ -72,6 +76,7 @@ module.exports = {
       createdAt: new Date().toISOString(),
     };
     habits.push(newHabit);
+    saveHabits();
     return withStreak(newHabit);
   },
 
@@ -83,6 +88,7 @@ module.exports = {
     if (frequency !== undefined && ALLOWED_FREQUENCIES.includes(frequency)) {
       habit.frequency = frequency;
     }
+    saveHabits();
     return withStreak(habit);
   },
 
@@ -91,6 +97,7 @@ module.exports = {
     const index = habits.findIndex((h) => h.id === id);
     if (index === -1) return false;
     habits.splice(index, 1);
+    saveHabits();
     return true;
   },
 
@@ -110,7 +117,7 @@ module.exports = {
     const habit = habits.find((h) => h.id === id);
     if (!habit) return { success: false, code: 'NOT_FOUND', message: 'Habit not found.' };
 
-    // Reject duplicate completion for same date
+    // ── Week 3, item 6: reject duplicate completion for same date ──────────
     if (habit.completions.includes(today)) {
       return {
         success: false,
@@ -124,6 +131,7 @@ module.exports = {
       .sort()
       .slice(-MAX_COMPLETIONS);
 
+    saveHabits();
     return { success: true, habit: withStreak(habit) };
   },
 
@@ -136,6 +144,7 @@ module.exports = {
     if (!habit) return null;
     if (!habit.completions.includes(date)) return null;
     habit.completions = habit.completions.filter((d) => d !== date);
+    saveHabits();
     return withStreak(habit);
   },
 

@@ -1,3 +1,4 @@
+import { Flame, CheckCircle2, Pencil, Trash2 } from 'lucide-react'
 import WeekCalendarStrip from './WeekCalendarStrip.jsx'
 import { isCompletedToday } from '../utils/streak.js'
 
@@ -24,7 +25,7 @@ export default function HabitCard({ habit, onToggleToday, onEdit, onDelete }) {
             className="flex items-center gap-1 rounded-full bg-emberSoft px-2.5 py-1"
             title={`${habit.streak}-day streak`}
           >
-            <span aria-hidden="true" className="text-sm">🔥</span>
+            <Flame aria-hidden="true" className="h-3.5 w-3.5 text-ember" />
             <span className="font-mono text-sm font-bold text-ember">
               {habit.streak}
             </span>
@@ -37,9 +38,7 @@ export default function HabitCard({ habit, onToggleToday, onEdit, onDelete }) {
             title="Edit habit"
             className="rounded-lg p-1.5 text-inkSoft hover:bg-pineSoft hover:text-pine transition-colors"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-            </svg>
+            <Pencil className="h-4 w-4" />
           </button>
 
           {/* Delete */}
@@ -49,9 +48,7 @@ export default function HabitCard({ habit, onToggleToday, onEdit, onDelete }) {
             title="Delete habit"
             className="rounded-lg p-1.5 text-inkSoft hover:bg-emberSoft hover:text-ember transition-colors"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
+            <Trash2 className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -69,7 +66,14 @@ export default function HabitCard({ habit, onToggleToday, onEdit, onDelete }) {
             : 'bg-ink text-paper hover:bg-ink/85',
         ].join(' ')}
       >
-        {todayDone ? '✓  Done for today' : 'Mark today done'}
+        {todayDone ? (
+          <span className="flex items-center justify-center gap-1.5">
+            <CheckCircle2 className="h-4 w-4" />
+            Done for today
+          </span>
+        ) : (
+          'Mark today done'
+        )}
       </button>
     </article>
   )

@@ -1,26 +1,39 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext.jsx'
 import { HabitsProvider } from './context/HabitsContext.jsx'
-import Navbar from './components/Navbar.jsx'
-import Dashboard from './pages/Dashboard.jsx'
+import ProtectedRoute from './components/ProtectedRoute.jsx'
+import AppShell from './components/AppShell.jsx'
+import Home from './pages/Home.jsx'
 import Stats from './pages/Stats.jsx'
+import Login from './pages/Login.jsx'
+import Register from './pages/Register.jsx'
+import ForgotPassword from './pages/ForgotPassword.jsx'
 
 export default function App() {
   return (
-    // BrowserRouter: parent wrapper that enables routing 
+    // BrowserRouter: parent wrapper that enables routing
     <BrowserRouter>
-      <HabitsProvider>
-        <div className="min-h-screen bg-dotgrid">
-          <Navbar />
-
-          <main>
+      <AuthProvider>
+        <HabitsProvider>
+          <AppShell>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/stats" element={<Stats />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route
+                path="/stats"
+                element={
+                  <ProtectedRoute>
+                    <Stats />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </main>
-        </div>
-      </HabitsProvider>
+          </AppShell>
+        </HabitsProvider>
+      </AuthProvider>
     </BrowserRouter>
   )
 }

@@ -1,6 +1,6 @@
-const express = require('express');
-const cors = require('cors');
-const habitRoutes = require('./routes/habitRoutes');
+const express      = require('express');
+const cors         = require('cors');
+const habitRoutes  = require('./routes/habitRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -12,7 +12,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Parse JSON request bodies (app.use(express.json())).  
+// Parse JSON request bodies (app.use(express.json()))
 app.use(express.json());
 
 // Request logger (dev only) — prints METHOD /path STATUS in the terminal

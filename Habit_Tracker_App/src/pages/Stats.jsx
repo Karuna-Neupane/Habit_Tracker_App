@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { BarChart2, Flame } from 'lucide-react'
 import { useHabits } from '../context/HabitsContext.jsx'
 import { completionRate30, getLast7DateKeys, isCompletedToday } from '../utils/streak.js'
 
@@ -22,14 +23,14 @@ export default function Stats() {
 
   // useEffect: document title update 
   useEffect(() => {
-    document.title = `Stats — Habit Tracker`
+    document.title = `Habit Tracker`
     return () => { document.title = 'Habit Tracker' }
   }, [])
 
   if (totalHabits === 0) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-16 text-center">
-        <p className="text-4xl mb-3">📊</p>
+      <div className="py-16 text-center">
+        <BarChart2 className="mx-auto mb-3 h-10 w-10 text-inkSoft" aria-hidden="true" />
         <h1 className="font-display text-2xl font-bold text-ink">No data yet</h1>
         <p className="mt-2 text-sm text-inkSoft">
           Head back to the Dashboard and add some habits first.
@@ -45,7 +46,7 @@ export default function Stats() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div>
 
       {/* Page header */}
       <div className="mb-6">
@@ -57,15 +58,16 @@ export default function Stats() {
       {/* Top-line summary cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-8">
         {[
-          { label: 'Habits', value: totalHabits, unit: '' },
-          { label: 'Done today', value: `${doneToday}/${totalHabits}`, unit: '' },
-          { label: 'Best streak', value: longestStreak, unit: '🔥' },
-          { label: '30-day avg', value: `${avgRate30}%`, unit: '' },
-        ].map(({ label, value, unit }) => (
+          { label: 'Habits', value: totalHabits, Icon: null },
+          { label: 'Done today', value: `${doneToday}/${totalHabits}`, Icon: null },
+          { label: 'Best streak', value: longestStreak, Icon: Flame },
+          { label: '30-day avg', value: `${avgRate30}%`, Icon: null },
+        ].map(({ label, value, Icon }) => (
           <div key={label} className="rounded-2xl border border-paperLine bg-white/70 p-4">
             <p className="font-mono text-xs uppercase tracking-wide text-inkSoft">{label}</p>
-            <p className="mt-1 font-display text-2xl font-bold text-ink">
-              {value}{unit && <span className="ml-1 text-lg">{unit}</span>}
+            <p className="mt-1 flex items-center gap-1 font-display text-2xl font-bold text-ink">
+              {value}
+              {Icon && <Icon className="h-4 w-4 text-ember" aria-hidden="true" />}
             </p>
           </div>
         ))}
@@ -87,8 +89,9 @@ export default function Stats() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="font-mono text-xs text-inkSoft">
-                    🔥 {h.streak}
+                  <span className="flex items-center gap-1 font-mono text-xs text-inkSoft">
+                    <Flame className="h-3 w-3 text-ember" aria-hidden="true" />
+                    {h.streak}
                   </span>
                   <span className="font-mono text-sm font-bold text-ink">{h.rate}%</span>
                 </div>

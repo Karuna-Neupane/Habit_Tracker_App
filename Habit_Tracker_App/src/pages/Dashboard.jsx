@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { AlertTriangle, Plus } from 'lucide-react'
 import HabitList from '../components/HabitList.jsx'
 import AddHabitForm from '../components/AddHabitForm.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
@@ -58,7 +59,7 @@ export default function Dashboard() {
     return (
       <div className="mx-auto max-w-5xl px-4 py-8">
         <div className="rounded-2xl border border-ember/30 bg-emberSoft p-6 text-center">
-          <p className="text-2xl mb-2">⚠️</p>
+          <AlertTriangle className="mx-auto mb-2 h-8 w-8 text-ember" aria-hidden="true" />
           <p className="font-display font-semibold text-ink">Could not reach the server</p>
           <p className="mt-1 text-sm text-inkSoft">{error}</p>
           <p className="mt-2 text-xs text-inkSoft">
@@ -70,7 +71,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div>
 
       <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
@@ -86,9 +87,7 @@ export default function Dashboard() {
           onClick={openAddForm}
           className="mt-3 inline-flex items-center gap-2 self-start rounded-xl bg-ember px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-ember/30 hover:bg-ember/90 transition-colors sm:mt-0 sm:self-auto"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-          </svg>
+          <Plus className="h-4 w-4" />
           Add habit
         </button>
       </div>
