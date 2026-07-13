@@ -15,7 +15,7 @@
         "url": "{{base_url}}/api/health",
         "description": "Verify the server is running."
       }
-    },
+    }, 
     {
       "name": "Habits",
       "item": [

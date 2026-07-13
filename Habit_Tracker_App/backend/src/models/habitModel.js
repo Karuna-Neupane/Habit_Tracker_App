@@ -1,11 +1,11 @@
-// ─── Model (MVC) ─────────────────────────────────────────────────────────────
+// Model (MVC) 
 // Manages all data logic. Nothing in this file knows about HTTP requests or
 // responses — that separation is the whole point of MVC.
-//
+// 
 // Storage is a JSON file on disk (data/habits.json). This is still not a
 // real database, but unlike a plain in-memory array it survives server
 // restarts, so habits you add/edit/delete stick around on the next run.
-// When a real database is added (Week 4+), only this file changes;
+// When a real database is added, only this file changes;
 // controllers and routes stay exactly the same.
 
 const fs = require('fs');
@@ -19,7 +19,7 @@ const MAX_COMPLETIONS = 3_660;
 const DATA_DIR = path.join(__dirname, '..', '..', 'data');
 const DATA_FILE = path.join(DATA_DIR, 'habits.json');
 
-// ── Load habits from disk on startup. No seed data — starts empty. ───────────
+// Load habits from disk on startup. No seed data — starts empty.
 function loadHabits() {
   try {
     const raw = fs.readFileSync(DATA_FILE, 'utf-8');
@@ -31,7 +31,7 @@ function loadHabits() {
   }
 }
 
-// ── Persist the current habits array to disk. ────────────────────────────────
+// Persist the current habits array to disk.
 function saveHabits() {
   try {
     if (!fs.existsSync(DATA_DIR)) {
@@ -45,7 +45,7 @@ function saveHabits() {
 
 let habits = loadHabits();
 
-// ── Helper: attach the derived streak field before sending to client ──────────
+// Helper: attach the derived streak field before sending to client 
 function withStreak(habit) {
   return {
     ...habit,
@@ -53,7 +53,7 @@ function withStreak(habit) {
   };
 }
 
-// ── Model methods (exported for use by controllers) ───────────────────────────
+// Model methods (exported for use by controllers) 
 module.exports = {
   /** Return all habits with live streak counts. */
   getAll() {
@@ -117,7 +117,7 @@ module.exports = {
     const habit = habits.find((h) => h.id === id);
     if (!habit) return { success: false, code: 'NOT_FOUND', message: 'Habit not found.' };
 
-    // ── Week 3, item 6: reject duplicate completion for same date ──────────
+    // Reject duplicate completion for same date ──────────
     if (habit.completions.includes(today)) {
       return {
         success: false,

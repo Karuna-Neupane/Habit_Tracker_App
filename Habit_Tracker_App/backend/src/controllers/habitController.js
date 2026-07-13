@@ -1,16 +1,16 @@
-// ─── Controller (MVC) ────────────────────────────────────────────────────────
+// Controller (MVC) 
 // Handles incoming HTTP requests. Each function:
 //   1. Reads data from req (params, body, query)
 //   2. Calls the Model to do the actual work
 //   3. Sends the HTTP response with the right status code
-//
+// 
 // Controllers never contain data logic — that belongs in the model.
 // Controllers never know about database queries — that also belongs in the model.
 
 const HabitModel = require('../models/habitModel');
 const { todayKey } = require('../utils/streak');
 
-// ── GET /api/habits ───────────────────────────────────────────────────────────
+// GET /api/habits
 exports.getAllHabits = (req, res) => {
   const habits = HabitModel.getAll();
   res.status(200).json({
@@ -19,7 +19,7 @@ exports.getAllHabits = (req, res) => {
   });
 };
 
-// ── GET /api/habits/:id ───────────────────────────────────────────────────────
+// GET /api/habits/:id 
 exports.getHabitById = (req, res) => {
   const habit = HabitModel.getById(req.params.id);
   if (!habit) {
@@ -28,7 +28,7 @@ exports.getHabitById = (req, res) => {
   res.status(200).json(habit);
 };
 
-// ── POST /api/habits ──────────────────────────────────────────────────────────
+// POST /api/habits 
 exports.createHabit = (req, res) => {
   const { name, frequency } = req.body;
 
@@ -43,7 +43,7 @@ exports.createHabit = (req, res) => {
   res.status(201).json(habit);
 };
 
-// ── PUT /api/habits/:id ───────────────────────────────────────────────────────
+// PUT /api/habits/:id
 exports.updateHabit = (req, res) => {
   const { name, frequency } = req.body;
 
@@ -61,7 +61,7 @@ exports.updateHabit = (req, res) => {
   res.status(200).json(updated);
 };
 
-// ── DELETE /api/habits/:id ────────────────────────────────────────────────────
+// DELETE /api/habits/:id 
 exports.deleteHabit = (req, res) => {
   const deleted = HabitModel.delete(req.params.id);
   if (!deleted) {
@@ -71,9 +71,7 @@ exports.deleteHabit = (req, res) => {
   res.status(204).send();
 };
 
-// ── POST /api/habits/:id/complete ─────────────────────────────────────────────
-// Week 3, item 2: log today's date as completed
-// Week 3, item 6: reject duplicate completion for same date
+// POST /api/habits/:id/complete 
 exports.completeHabit = (req, res) => {
   // Use date from body if provided, otherwise default to today on the server.
   // Server-side "today" is authoritative — client can't fake a future date.
@@ -84,7 +82,7 @@ exports.completeHabit = (req, res) => {
   if (!result.success) {
     const statusMap = {
       NOT_FOUND: 404,
-      DUPLICATE:  409,   // 409 Conflict — semantically correct for a duplicate
+      DUPLICATE: 409,
       INVALID_DATE: 400,
     };
     return res.status(statusMap[result.code] || 400).json({
@@ -95,7 +93,7 @@ exports.completeHabit = (req, res) => {
   res.status(200).json(result.habit);
 };
 
-// ── DELETE /api/habits/:id/complete ───────────────────────────────────────────
+// DELETE /api/habits/:id/complete 
 // Un-tick a specific date (or today if no date body provided)
 exports.uncompleteHabit = (req, res) => {
   const date = req.body.date || todayKey();
@@ -108,8 +106,7 @@ exports.uncompleteHabit = (req, res) => {
   res.status(200).json(updated);
 };
 
-// ── GET /api/habits/:id/history ───────────────────────────────────────────────
-// Week 3, item 4: return full completions array with metadata
+// GET /api/habits/:id/history 
 exports.getHabitHistory = (req, res) => {
   const history = HabitModel.getHistory(req.params.id);
   if (!history) {

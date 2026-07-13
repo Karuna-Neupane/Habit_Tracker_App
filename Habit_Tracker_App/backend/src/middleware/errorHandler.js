@@ -1,7 +1,7 @@
-// ─── Global Error Handler Middleware ─────────────────────────────────────────
+// Global Error Handler Middleware 
 // Catches anything thrown or passed to next(err) in routes/controllers.
 // Express recognises a 4-argument middleware as an error handler.
-//
+// 
 // Placed LAST in app.js after all routes.
 
 const errorHandler = (err, req, res, next) => {
