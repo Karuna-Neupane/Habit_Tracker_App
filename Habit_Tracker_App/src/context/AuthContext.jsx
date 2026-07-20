@@ -62,6 +62,38 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
+  // ── Forgot password, step 1: email a 6-digit code ────────────────────────
+  async function requestPasswordReset(email) {
+    try {
+      const { data } = await api.post('/auth/forgot-password', { email })
+      return data.message
+    } catch (err) {
+      throw new Error(err.response?.data?.message || err.message)
+    }
+  }
+
+  // ── Forgot password, step 2: verify the code, get a short-lived reset token ─
+  async function verifyResetCode(email, code) {
+    try {
+      const { data } = await api.post('/auth/verify-reset-code', { email, code })
+      return data.resetToken
+    } catch (err) {
+      throw new Error(err.response?.data?.message || err.message)
+    }
+  }
+
+  // ── Forgot password, step 3: set the new password, auto-login ────────────
+  async function resetPassword(resetToken, password, confirmPassword) {
+    try {
+      const { data } = await api.post('/auth/reset-password', { resetToken, password, confirmPassword })
+      setToken(data.token)
+      setUser(data.user)
+      return data.user
+    } catch (err) {
+      throw new Error(err.response?.data?.message || err.message)
+    }
+  }
+
   const value = {
     user,
     isAuthenticated: Boolean(user),
@@ -69,6 +101,9 @@ export function AuthProvider({ children }) {
     register,
     login,
     logout,
+    requestPasswordReset,
+    verifyResetCode,
+    resetPassword,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

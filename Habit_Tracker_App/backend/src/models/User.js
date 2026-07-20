@@ -32,6 +32,22 @@ const UserSchema = new mongoose.Schema(
       minlength: 6,
       select:   false, // never return the hash unless explicitly requested
     },
+
+    // ── Forgot-password flow ────────────────────────────────────────────
+    // The 6-digit code emailed to the user is never stored in plain text —
+    // only its bcrypt hash, same treatment as the password itself. Both
+    // fields are cleared the moment the code is used (or a fresh one is
+    // requested), so a code is valid exactly once and only until it expires.
+    resetCodeHash: {
+      type:    String,
+      select:  false,
+      default: null,
+    },
+    resetCodeExpires: {
+      type:    Date,
+      select:  false,
+      default: null,
+    },
   },
   {
     timestamps: true,

@@ -11,4 +11,9 @@ router.post('/register', AuthController.registerUser);
 router.post('/login', AuthController.loginUser);
 router.get('/me', verifyToken, AuthController.getCurrentUser);
 
+// Forgot password — 3-step flow, all public (no token yet at this point).
+router.post('/forgot-password', AuthController.forgotPassword);
+router.post('/verify-reset-code', AuthController.verifyResetCode);
+router.post('/reset-password', AuthController.resetPassword);
+
 module.exports = router;

@@ -9,9 +9,13 @@
 
 const jwt    = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const User   = require('../models/User');
+const { sendResetCodeEmail } = require('../utils/mailer');
 
-const TOKEN_EXPIRES_IN = '7d';
+const TOKEN_EXPIRES_IN       = '7d';
+const RESET_CODE_TTL_MINUTES = 10;
+const RESET_TOKEN_EXPIRES_IN = '10m';
 
 function signToken(user) {
   return jwt.sign(
@@ -104,6 +108,132 @@ exports.getCurrentUser = async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found.' });
     res.status(200).json({ user: publicUser(user) });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Forgot password — 3-step flow:
+//   1. POST /forgot-password    { email }               -> emails a 6-digit code
+//   2. POST /verify-reset-code  { email, code }          -> returns a short-lived resetToken
+//   3. POST /reset-password     { resetToken, password } -> sets new password, logs the user in
+//
+// The code itself is never trusted twice: verifying it issues a resetToken
+// (a JWT scoped to purpose: 'password-reset', 10-minute expiry) which is what
+// step 3 actually requires — so even if someone captured the code in transit,
+// it's useless once step 2 has already consumed it into a token.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function signResetToken(user) {
+  return jwt.sign(
+    { id: user._id, purpose: 'password-reset' },
+    process.env.JWT_SECRET,
+    { expiresIn: RESET_TOKEN_EXPIRES_IN }
+  );
+}
+
+// ── POST /api/auth/forgot-password ──────────────────────────────────────────
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required.' });
+    }
+
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
+
+    // Always respond the same way whether or not the account exists, so this
+    // endpoint can't be used to check which emails are registered.
+    const genericResponse = {
+      message: 'If that email is registered, a reset code has been sent.',
+    };
+
+    if (!user) {
+      return res.status(200).json(genericResponse);
+    }
+
+    // 6-digit numeric code, e.g. "042917". Stored only as a bcrypt hash —
+    // same treatment as the account password.
+    const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
+    user.resetCodeHash    = await bcrypt.hash(code, 10);
+    user.resetCodeExpires = new Date(Date.now() + RESET_CODE_TTL_MINUTES * 60 * 1000);
+    await user.save();
+
+    await sendResetCodeEmail(user.email, code);
+
+    res.status(200).json(genericResponse);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ── POST /api/auth/verify-reset-code ────────────────────────────────────────
+exports.verifyResetCode = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) {
+      return res.status(400).json({ message: 'Email and code are required.' });
+    }
+
+    const user = await User
+      .findOne({ email: email.trim().toLowerCase() })
+      .select('+resetCodeHash +resetCodeExpires');
+
+    const invalid = () => res.status(400).json({ message: 'Invalid or expired code.' });
+
+    if (!user || !user.resetCodeHash || !user.resetCodeExpires) return invalid();
+    if (user.resetCodeExpires.getTime() < Date.now())            return invalid();
+
+    const isMatch = await bcrypt.compare(code, user.resetCodeHash);
+    if (!isMatch) return invalid();
+
+    res.status(200).json({ resetToken: signResetToken(user) });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ── POST /api/auth/reset-password ───────────────────────────────────────────
+exports.resetPassword = async (req, res) => {
+  try {
+    const { resetToken, password, confirmPassword } = req.body;
+
+    if (!resetToken || !password) {
+      return res.status(400).json({ message: 'Reset token and new password are required.' });
+    }
+    if (confirmPassword !== undefined && password !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match.' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters.' });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+    } catch {
+      return res.status(400).json({ message: 'Reset link expired. Please request a new code.' });
+    }
+    if (decoded.purpose !== 'password-reset') {
+      return res.status(400).json({ message: 'Invalid reset token.' });
+    }
+
+    const user = await User.findById(decoded.id).select('+resetCodeHash +resetCodeExpires');
+    if (!user || !user.resetCodeHash) {
+      // Code already used (or never requested) — the reset token alone isn't enough.
+      return res.status(400).json({ message: 'This reset link has already been used. Please request a new code.' });
+    }
+
+    user.password         = await bcrypt.hash(password, 10);
+    user.resetCodeHash    = null;
+    user.resetCodeExpires = null;
+    await user.save();
+
+    // Log the user straight in, matching the normal login response shape,
+    // so the frontend can redirect straight to the dashboard.
+    const token = signToken(user);
+    res.status(200).json({ message: 'Password reset successful', token, user: publicUser(user) });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
