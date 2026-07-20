@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { CheckCircle2, Shield, Zap, Star, Sparkles } from 'lucide-react'
+import { CheckCircle2, Shield, Zap, Star, Sparkles, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import SimpleFooter from '../components/SimpleFooter.jsx'
 
@@ -12,6 +12,8 @@ export default function Register() {
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm]   = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm]   = useState(false)
   const [error, setError]       = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -153,30 +155,58 @@ export default function Register() {
                 <label htmlFor="password" className="mb-1 block text-sm font-medium text-ink">
                   Password
                 </label>
-                <input
-                  id="password"
-                  type="password"
-                  autoComplete="new-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-xl border border-paperLine bg-paper px-3 py-2.5 text-sm text-ink outline-none focus:border-pine"
-                  placeholder="At least 6 characters"
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full rounded-xl border border-paperLine bg-paper px-3 py-2.5 pr-10 text-sm text-ink outline-none focus:border-pine"
+                    placeholder="At least 6 characters"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-pressed={showPassword}
+                    tabIndex={-1}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-inkSoft hover:text-ink"
+                  >
+                    {showPassword
+                      ? <EyeOff className="h-4 w-4" aria-hidden="true" />
+                      : <Eye className="h-4 w-4" aria-hidden="true" />}
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label htmlFor="confirm" className="mb-1 block text-sm font-medium text-ink">
                   Confirm password
                 </label>
-                <input
-                  id="confirm"
-                  type="password"
-                  autoComplete="new-password"
-                  value={confirm}
-                  onChange={(e) => setConfirm(e.target.value)}
-                  className="w-full rounded-xl border border-paperLine bg-paper px-3 py-2.5 text-sm text-ink outline-none focus:border-pine"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    id="confirm"
+                    type={showConfirm ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                    className="w-full rounded-xl border border-paperLine bg-paper px-3 py-2.5 pr-10 text-sm text-ink outline-none focus:border-pine"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm((prev) => !prev)}
+                    aria-label={showConfirm ? 'Hide password' : 'Show password'}
+                    aria-pressed={showConfirm}
+                    tabIndex={-1}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-inkSoft hover:text-ink"
+                  >
+                    {showConfirm
+                      ? <EyeOff className="h-4 w-4" aria-hidden="true" />
+                      : <Eye className="h-4 w-4" aria-hidden="true" />}
+                  </button>
+                </div>
               </div>
 
               <button
