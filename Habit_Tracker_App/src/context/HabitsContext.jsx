@@ -1,48 +1,35 @@
+// HabitsContext — Week 4
+// Replaced native fetch() with Axios (Tutorial PDF, "Using Axios for API Integration").
+// All habit data now persists in MongoDB Atlas via the Express backend.
+// Streak computation uses live completions from the database (item 4).
+
+import axios from 'axios'
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { todayKey } from '../utils/streak.js'
 
-// Create the Context
 const HabitsContext = createContext(null)
 
-// API base URL (proxied by Vite in dev, same origin in production) 
-const API = '/api/habits'
+// Axios instance — base URL proxied by Vite to http://localhost:3000
+const api = axios.create({
+  baseURL: '/api/habits',
+  headers: { 'Content-Type': 'application/json' },
+})
 
-async function apiFetch(url, options = {}) {
-  const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options,
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  })
-
-  // For 204 No Content (DELETE success) there's no JSON body
-  if (res.status === 204) return null
-
-  const data = await res.json()
-
-  // Surface server-side errors so callers can show them to the user
-  if (!res.ok) {
-    const message = data?.message || `Request failed with status ${res.status}`
-    throw Object.assign(new Error(message), { status: res.status, data })
-  }
-
-  return data
-}
-
-// Provide the Context 
+// ── Provide the Context ────────────────────────────────────────────────────
 export function HabitsProvider({ children }) {
   const [habits,  setHabits]  = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true)   // drives loading skeleton
   const [error,   setError]   = useState(null)
 
-  // Load all habits from the API on mount
+  // Week 4, item 3: fetch habits from MongoDB via Axios
   const fetchHabits = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      const data = await apiFetch(API)
-      setHabits(data.habits)
+      const { data } = await api.get('/')           // GET /api/habits
+      setHabits(data.habits)                        // completions come from DB
     } catch (err) {
-      setError(err.message)
+      setError(err.response?.data?.message || err.message)
     } finally {
       setLoading(false)
     }
@@ -52,82 +39,69 @@ export function HabitsProvider({ children }) {
     fetchHabits()
   }, [fetchHabits])
 
-  // Toggle today's completion (POST or DELETE /complete)
+  // ── Toggle today — POST or DELETE /complete in MongoDB ──────────────────
+  // Week 4, item 4: streak is recomputed server-side from live DB completions
   async function toggleToday(habitId) {
-    const habit = habits.find(h => h.id === habitId)
-    const today = todayKey()
-    const alreadyDone = habit?.completions.includes(today)
+    const habit    = habits.find((h) => h.id === habitId)
+    const today    = todayKey()
+    const doneTday = habit?.completions.includes(today)
 
     try {
-      const method = alreadyDone ? 'DELETE' : 'POST'
-      const updated = await apiFetch(`${API}/${habitId}/complete`, {
-        method,
-        body: { date: today },
-      })
-      // Replace the one updated habit in local state immediately (no full refetch)
-      setHabits(prev => prev.map(h => h.id === habitId ? updated : h))
+      const { data: updated } = doneTday
+        ? await api.delete(`/${habitId}/complete`, { data: { date: today } })
+        : await api.post(`/${habitId}/complete`, { date: today })
+
+      setHabits((prev) => prev.map((h) => h.id === habitId ? updated : h))
     } catch (err) {
-      setError(err.message)
+      setError(err.response?.data?.message || err.message)
     }
   }
 
-  // Add a new habit
+  // ── Add habit — POST to MongoDB ─────────────────────────────────────────
   async function addHabit({ name, frequency }) {
     try {
-      const newHabit = await apiFetch(API, {
-        method: 'POST',
-        body: { name, frequency },
-      })
-      setHabits(prev => [...prev, newHabit])
+      const { data: newHabit } = await api.post('/', { name, frequency })
+      setHabits((prev) => [...prev, newHabit])
     } catch (err) {
-      setError(err.message)
-      throw err   // re-throw so the form can show the server error message
+      const msg = err.response?.data?.message || err.message
+      setError(msg)
+      throw new Error(msg)
     }
   }
 
-  // Edit an existing habit
+  // ── Edit habit — PUT to MongoDB ─────────────────────────────────────────
   async function editHabit(habitId, { name, frequency }) {
     try {
-      const updated = await apiFetch(`${API}/${habitId}`, {
-        method: 'PUT',
-        body: { name, frequency },
-      })
-      setHabits(prev => prev.map(h => h.id === habitId ? updated : h))
+      const { data: updated } = await api.put(`/${habitId}`, { name, frequency })
+      setHabits((prev) => prev.map((h) => h.id === habitId ? updated : h))
     } catch (err) {
-      setError(err.message)
-      throw err
+      const msg = err.response?.data?.message || err.message
+      setError(msg)
+      throw new Error(msg)
     }
   }
 
-  // Delete a habit 
+  // ── Delete habit — DELETE from MongoDB ──────────────────────────────────
   async function deleteHabit(habitId) {
     try {
-      await apiFetch(`${API}/${habitId}`, { method: 'DELETE' })
-      setHabits(prev => prev.filter(h => h.id !== habitId))
+      await api.delete(`/${habitId}`)
+      setHabits((prev) => prev.filter((h) => h.id !== habitId))
     } catch (err) {
-      setError(err.message)
+      setError(err.response?.data?.message || err.message)
     }
-  }
-
-  const value = {
-    habits,
-    loading,
-    error,
-    toggleToday,
-    addHabit,
-    editHabit,
-    deleteHabit,
-    refetch: fetchHabits,
   }
 
   return (
-    <HabitsContext.Provider value={value}>
+    <HabitsContext.Provider value={{
+      habits, loading, error,
+      toggleToday, addHabit, editHabit, deleteHabit,
+      refetch: fetchHabits,
+    }}>
       {children}
     </HabitsContext.Provider>
   )
 }
 
-// Custom hook to consume the Context 
 export function useHabits() {
   const ctx = useContext(HabitsContext)
   if (!ctx) throw new Error('useHabits must be used inside <HabitsProvider>')

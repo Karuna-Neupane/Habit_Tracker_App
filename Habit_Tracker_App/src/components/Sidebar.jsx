@@ -23,8 +23,8 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="w-full shrink-0 border-b border-paperLine bg-paper sm:min-h-[calc(100vh-57px)] sm:w-56 sm:border-b-0 sm:border-r">
-        <nav className="flex gap-1 overflow-x-auto p-3 sm:sticky sm:top-[57px] sm:flex sm:h-[calc(100vh-57px)] sm:flex-col sm:gap-1 sm:overflow-visible sm:p-4">
+      <aside className="w-full shrink-0 border-b border-paperLine bg-paper sm:min-h-[calc(100vh-73px)] sm:w-56 sm:border-b-0 sm:border-r">
+        <nav className="flex gap-1 overflow-x-auto p-3 sm:sticky sm:top-[73px] sm:flex sm:h-[calc(100vh-73px)] sm:flex-col sm:gap-1 sm:overflow-visible sm:p-4">
           {links.map(({ to, label, Icon }) => {
             const active = pathname === to
             return (

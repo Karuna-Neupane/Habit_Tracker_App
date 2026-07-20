@@ -1,116 +1,174 @@
-// Controller (MVC) 
-// Handles incoming HTTP requests. Each function:
-//   1. Reads data from req (params, body, query)
-//   2. Calls the Model to do the actual work
-//   3. Sends the HTTP response with the right status code
-// 
-// Controllers never contain data logic — that belongs in the model.
-// Controllers never know about database queries — that also belongs in the model.
+// Controller — Week 4: all operations are now async and use Mongoose.
+// The streak is NEVER stored in the database — it is always computed from
+// the live completions array returned from MongoDB, exactly like before.
 
-const HabitModel = require('../models/habitModel');
-const { todayKey } = require('../utils/streak');
+const Habit = require('../models/Habit');
+const { computeStreak, todayKey, isValidDateKey } = require('../utils/streak');
 
-// GET /api/habits
-exports.getAllHabits = (req, res) => {
-  const habits = HabitModel.getAll();
-  res.status(200).json({
-    count: habits.length,
-    habits,
-  });
-};
+// Attach computed streak to a Mongoose document before sending to client.
+// We call .toObject() so the result is a plain JS object (not a Mongoose doc).
+function withStreak(doc) {
+  const obj = doc.toObject ? doc.toObject() : { ...doc };
+  // Rename _id → id so the frontend doesn't need to change
+  obj.id = String(obj._id);
+  delete obj._id;
+  delete obj.__v;
+  obj.streak = computeStreak(obj.completions, obj.frequency);
+  return obj;
+}
 
-// GET /api/habits/:id 
-exports.getHabitById = (req, res) => {
-  const habit = HabitModel.getById(req.params.id);
-  if (!habit) {
-    return res.status(404).json({ message: 'Habit not found.' });
+// ── GET /api/habits ─────────────────────────────────────────────────────────
+exports.getAllHabits = async (req, res) => {
+  try {
+    // Week 4, item 3: fetch live data from MongoDB, not a JSON file
+    const docs = await Habit.find().sort({ createdAt: 1 });
+    const habits = docs.map(withStreak);
+    res.status(200).json({ count: habits.length, habits });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-  res.status(200).json(habit);
 };
 
-// POST /api/habits 
-exports.createHabit = (req, res) => {
-  const { name, frequency } = req.body;
+// ── GET /api/habits/:id ─────────────────────────────────────────────────────
+exports.getHabitById = async (req, res) => {
+  try {
+    const doc = await Habit.findById(req.params.id);
+    if (!doc) return res.status(404).json({ message: 'Habit not found.' });
+    res.status(200).json(withStreak(doc));
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
-  // Duplicate name check (case-insensitive)
-  if (HabitModel.nameExists(name)) {
-    return res.status(409).json({
-      message: `A habit named "${name}" already exists.`,
+// ── POST /api/habits ────────────────────────────────────────────────────────
+exports.createHabit = async (req, res) => {
+  try {
+    const { name, frequency } = req.body;
+
+    // Duplicate name check (case-insensitive)
+    const exists = await Habit.findOne({
+      name: { $regex: new RegExp(`^${name.trim()}$`, 'i') },
     });
-  }
+    if (exists) {
+      return res.status(409).json({ message: `A habit named "${name}" already exists.` });
+    }
 
-  const habit = HabitModel.create({ name, frequency });
-  res.status(201).json(habit);
+    const doc = await Habit.create({ name: name.trim(), frequency });
+    res.status(201).json(withStreak(doc));
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 };
 
-// PUT /api/habits/:id
-exports.updateHabit = (req, res) => {
-  const { name, frequency } = req.body;
+// ── PUT /api/habits/:id ─────────────────────────────────────────────────────
+exports.updateHabit = async (req, res) => {
+  try {
+    const { name, frequency } = req.body;
 
-  // If renaming, check the new name isn't taken by a different habit
-  if (name && HabitModel.nameExists(name, req.params.id)) {
-    return res.status(409).json({
-      message: `A habit named "${name}" already exists.`,
+    // If renaming, check the new name isn't taken by a different habit
+    if (name) {
+      const exists = await Habit.findOne({
+        name: { $regex: new RegExp(`^${name.trim()}$`, 'i') },
+        _id: { $ne: req.params.id },
+      });
+      if (exists) {
+        return res.status(409).json({ message: `A habit named "${name}" already exists.` });
+      }
+    }
+
+    const updates = {};
+    if (name) updates.name = name.trim();
+    if (frequency) updates.frequency = frequency;
+
+    const doc = await Habit.findByIdAndUpdate(
+      req.params.id,
+      updates,
+      { new: true, runValidators: true }
+    );
+    if (!doc) return res.status(404).json({ message: 'Habit not found.' });
+    res.status(200).json(withStreak(doc));
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+// ── DELETE /api/habits/:id ───────────────────────────────────────────────────
+exports.deleteHabit = async (req, res) => {
+  try {
+    const doc = await Habit.findByIdAndDelete(req.params.id);
+    if (!doc) return res.status(404).json({ message: 'Habit not found.' });
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ── POST /api/habits/:id/complete ───────────────────────────────────────────
+// Week 4, item 4: completion saved to MongoDB, streak computed from live DB data
+exports.completeHabit = async (req, res) => {
+  try {
+    const date = req.body.date || todayKey();
+
+    if (!isValidDateKey(date)) {
+      return res.status(400).json({ message: 'Invalid date format. Use YYYY-MM-DD.' });
+    }
+
+    const doc = await Habit.findById(req.params.id);
+    if (!doc) return res.status(404).json({ message: 'Habit not found.' });
+
+    // Week 4, item 6 (also Week 3 item 6): reject duplicate for same date
+    if (doc.completions.includes(date)) {
+      return res.status(409).json({
+        message: `Already completed on ${date}. Each day can only be marked once.`,
+      });
+    }
+
+    doc.completions = [...doc.completions, date].sort();
+    await doc.save();
+
+    res.status(200).json(withStreak(doc));
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ── DELETE /api/habits/:id/complete ─────────────────────────────────────────
+// Un-tick a date — removes it from the completions array in MongoDB
+exports.uncompleteHabit = async (req, res) => {
+  try {
+    const date = req.body.date || todayKey();
+
+    const doc = await Habit.findById(req.params.id);
+    if (!doc) return res.status(404).json({ message: 'Habit not found.' });
+    if (!doc.completions.includes(date)) {
+      return res.status(404).json({ message: 'No completion found for that date.' });
+    }
+
+    doc.completions = doc.completions.filter((d) => d !== date);
+    await doc.save();
+
+    res.status(200).json(withStreak(doc));
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ── GET /api/habits/:id/history ─────────────────────────────────────────────
+// Week 4, item 5: returns real completion dates from MongoDB
+exports.getHabitHistory = async (req, res) => {
+  try {
+    const doc = await Habit.findById(req.params.id);
+    if (!doc) return res.status(404).json({ message: 'Habit not found.' });
+
+    res.status(200).json({
+      id: String(doc._id),
+      name: doc.name,
+      frequency: doc.frequency,
+      completions: doc.completions,          // real dates from MongoDB
+      streak: computeStreak(doc.completions, doc.frequency),
+      totalCompletions: doc.completions.length,
     });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-
-  const updated = HabitModel.update(req.params.id, { name, frequency });
-  if (!updated) {
-    return res.status(404).json({ message: 'Habit not found.' });
-  }
-  res.status(200).json(updated);
-};
-
-// DELETE /api/habits/:id 
-exports.deleteHabit = (req, res) => {
-  const deleted = HabitModel.delete(req.params.id);
-  if (!deleted) {
-    return res.status(404).json({ message: 'Habit not found.' });
-  }
-  // 204 No Content — success with no body (standard for DELETE)
-  res.status(204).send();
-};
-
-// POST /api/habits/:id/complete 
-exports.completeHabit = (req, res) => {
-  // Use date from body if provided, otherwise default to today on the server.
-  // Server-side "today" is authoritative — client can't fake a future date.
-  const date = req.body.date || todayKey();
-
-  const result = HabitModel.addCompletion(req.params.id, date);
-
-  if (!result.success) {
-    const statusMap = {
-      NOT_FOUND: 404,
-      DUPLICATE: 409,
-      INVALID_DATE: 400,
-    };
-    return res.status(statusMap[result.code] || 400).json({
-      message: result.message,
-    });
-  }
-
-  res.status(200).json(result.habit);
-};
-
-// DELETE /api/habits/:id/complete 
-// Un-tick a specific date (or today if no date body provided)
-exports.uncompleteHabit = (req, res) => {
-  const date = req.body.date || todayKey();
-  const updated = HabitModel.removeCompletion(req.params.id, date);
-  if (!updated) {
-    return res.status(404).json({
-      message: 'Habit not found or no completion exists for that date.',
-    });
-  }
-  res.status(200).json(updated);
-};
-
-// GET /api/habits/:id/history 
-exports.getHabitHistory = (req, res) => {
-  const history = HabitModel.getHistory(req.params.id);
-  if (!history) {
-    return res.status(404).json({ message: 'Habit not found.' });
-  }
-  res.status(200).json(history);
 };

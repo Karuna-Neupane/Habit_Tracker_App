@@ -89,7 +89,7 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center px-4 py-12">
+    <div className="flex min-h-[calc(100vh-73px)] items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
           <p className="font-mono text-xs uppercase tracking-widest text-pine">Account recovery</p>

@@ -2,7 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Fonts */
+/* Fonts + smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
 html,
 body {
   font-family: 'Inter', sans-serif;

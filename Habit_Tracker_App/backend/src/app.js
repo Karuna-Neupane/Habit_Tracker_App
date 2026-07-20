@@ -1,47 +1,56 @@
-const express = require('express');
-const cors = require('cors');
+// Express App Configuration — Week 4
+// CORS updated to allow both Vite (5173) and any other local origin.
+// MongoDB is connected in server.js before this app is used.
+
+const express     = require('express');
+const cors        = require('cors');
 const habitRoutes = require('./routes/habitRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-
+// CORS — allow the Vite dev server (port 5173) and production origin
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  origin: [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+  ],
+  methods:      ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Parse JSON request bodies (app.use(express.json()))
+// Parse JSON request bodies
 app.use(express.json());
 
-// Request logger (dev only) — prints METHOD /path STATUS in the terminal
-if (process.env.NODE_ENV !== 'test') {
-  app.use((req, res, next) => {
-    res.on('finish', () => {
-      console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} → ${res.statusCode}`);
-    });
-    next();
+// Request logger
+app.use((req, res, next) => {
+  res.on('finish', () => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} → ${res.statusCode}`);
   });
-}
+  next();
+});
 
-// Health check 
+// Health check
 app.get('/api/health', (req, res) => {
+  const mongoose = require('mongoose');
   res.status(200).json({
-    status: 'ok',
-    message: 'Habit Tracker API is running',
+    status:    'ok',
+    message:   'Habit Tracker API running',
+    db:        mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString(),
   });
 });
 
-// Mount routes at /api/habits 
-// (app.use('/tasks', taskRoutes) pattern)
+// Routes
 app.use('/api/habits', habitRoutes);
 
+// 404
 app.use((req, res) => {
   res.status(404).json({ message: `Route ${req.method} ${req.path} not found.` });
 });
 
+// Global error handler
 app.use(errorHandler);
 
 module.exports = app;

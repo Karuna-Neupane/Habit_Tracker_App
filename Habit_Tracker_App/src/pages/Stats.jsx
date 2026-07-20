@@ -23,8 +23,8 @@ export default function Stats() {
 
   // useEffect: document title update 
   useEffect(() => {
-    document.title = `Habit Tracker`
-    return () => { document.title = 'Habit Tracker' }
+    document.title = `Habitra`
+    return () => { document.title = 'Habitra' }
   }, [])
 
   if (totalHabits === 0) {
