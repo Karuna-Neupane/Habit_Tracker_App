@@ -1,10 +1,13 @@
-// Express App Configuration — Week 4
-// CORS updated to allow both Vite (5173) and any other local origin.
+// Express App Configuration — Week 5
+// CORS allows both Vite (5173) and any other local origin.
 // MongoDB is connected in server.js before this app is used.
+// /api/auth is public; /api/habits requires a valid JWT (verifyToken).
 
 const express     = require('express');
 const cors        = require('cors');
 const habitRoutes = require('./routes/habitRoutes');
+const authRoutes  = require('./routes/authRoutes');
+const verifyToken = require('./middleware/verifyToken');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -43,7 +46,10 @@ app.get('/api/health', (req, res) => {
 });
 
 // Routes
-app.use('/api/habits', habitRoutes);
+// Auth routes are public (register/login issue the token in the first place).
+app.use('/api/auth', authRoutes);
+// Week 5, item 2: every /api/habits route requires a valid JWT.
+app.use('/api/habits', verifyToken, habitRoutes);
 
 // 404
 app.use((req, res) => {

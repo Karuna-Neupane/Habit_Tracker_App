@@ -1,12 +1,13 @@
-// Mongoose Habit Schema — Week 4
-// Replaces the JSON-file model with a real MongoDB document schema.
+// Mongoose Habit Schema — Week 4/5
+// Real MongoDB document schema.
 //
-// Schema shape (Week 4, item 1):
+// Schema shape:
 //   { name, frequency, completions: [String "YYYY-MM-DD"], userId }
 //
 // completions are stored as "YYYY-MM-DD" strings (not Date objects) so they
 // round-trip cleanly to the frontend without timezone conversion issues.
-// userId is stored for future auth integration — optional for now.
+// userId (Week 5) ties every habit to exactly one User — this is what makes
+// habit lists private per account.
 
 const mongoose = require('mongoose');
 
@@ -40,11 +41,14 @@ const HabitSchema = new mongoose.Schema(
       },
     },
 
-    // Reserved for future backend auth (Week 5+).
-    // Optional now — the frontend's localStorage auth doesn't send a userId yet.
+    // Week 5, item 3: every habit belongs to exactly one user. Set from
+    // req.user.id (decoded off the JWT by verifyToken) — never from the
+    // request body, so a user can never create/see a habit under someone
+    // else's id.
     userId: {
-      type:    String,
-      default: null,
+      type:     mongoose.Schema.Types.ObjectId,
+      ref:      'User',
+      required: [true, 'userId is required'],
     },
   },
   {
@@ -53,9 +57,12 @@ const HabitSchema = new mongoose.Schema(
   }
 );
 
-// Ensure a user can't have two habits with the same name (case-insensitive).
-// Since userId is null for now, this is a global uniqueness check.
-HabitSchema.index({ name: 1 }, { unique: false }); // non-unique — controller enforces it
+// Fast lookups of "all habits for this user" — every query in the
+// controller filters by userId, so this index is on the hot path.
+HabitSchema.index({ userId: 1 });
+// A user can't have two habits with the same name (case-insensitive is
+// enforced in the controller) — scoped per-user, not globally.
+HabitSchema.index({ userId: 1, name: 1 }, { unique: false });
 
 // Virtual: streak computed from completions (not stored in DB — always derived).
 // We compute it in the controller using the same streak utility as before.

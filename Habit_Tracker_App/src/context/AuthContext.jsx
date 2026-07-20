@@ -1,191 +1,65 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { sendResetCodeEmail } from '../utils/emailService.js'
+import api, { getToken, setToken } from '../utils/api.js'
 
-// ─── Auth Context ─────────────────────────────────────────────────────────────
-// NOTE: This project's backend only has habit endpoints — there's no user/auth
-// API yet. So this context keeps a small "users table" and the current
-// session in localStorage on the client. It's fine for a demo / learning
-// project, but it is NOT secure: passwords are stored in plain text in the
-// browser. Before shipping this for real, replace this with a real backend
-// (Express + bcrypt + JWT/sessions, or an auth provider like Auth0/Firebase).
-
-const USERS_KEY   = 'habitTracker.users'
-const SESSION_KEY = 'habitTracker.session'
-const RESET_KEY   = 'habitTracker.passwordReset'
-
-const RESET_CODE_TTL_MS = 10 * 60 * 1000 // 10 minutes
+// ─── Auth Context — Week 5 ────────────────────────────────────────────────────
+// Real backend auth: the server hashes passwords with bcrypt and issues a
+// JWT on register/login (see backend/src/controllers/authController.js).
+// The token is kept in localStorage and attached to every API request by
+// the axios interceptor in utils/api.js. On first load we send whatever
+// token we have to GET /api/auth/me to confirm it's still valid and fetch
+// the current user, so a refresh doesn't log anyone out.
 
 const AuthContext = createContext(null)
 
-function loadUsers() {
-  try {
-    return JSON.parse(localStorage.getItem(USERS_KEY)) || []
-  } catch {
-    return []
-  }
-}
-
-function saveUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users))
-}
-
-function loadSession() {
-  try {
-    return JSON.parse(localStorage.getItem(SESSION_KEY))
-  } catch {
-    return null
-  }
-}
-
-function loadResetRequest() {
-  try {
-    return JSON.parse(localStorage.getItem(RESET_KEY))
-  } catch {
-    return null
-  }
-}
-
-function saveResetRequest(req) {
-  if (req) {
-    localStorage.setItem(RESET_KEY, JSON.stringify(req))
-  } else {
-    localStorage.removeItem(RESET_KEY)
-  }
-}
-
-function generateCode() {
-  // 6-digit numeric code, zero-padded
-  return String(Math.floor(Math.random() * 1_000_000)).padStart(6, '0')
-}
-
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null)
+  const [user, setUser] = useState(null)
   const [initializing, setInitializing] = useState(true)
 
-  // Restore session on first load
+  // Restore session on first load by validating the stored token.
   useEffect(() => {
-    setUser(loadSession())
-    setInitializing(false)
+    const token = getToken()
+    if (!token) {
+      setInitializing(false)
+      return
+    }
+    api.get('/auth/me')
+      .then(({ data }) => setUser(data.user))
+      .catch(() => {
+        // Token missing/expired/invalid — clear it and fall back to signed-out.
+        setToken(null)
+        setUser(null)
+      })
+      .finally(() => setInitializing(false))
   }, [])
 
-  function persistSession(sessionUser) {
-    setUser(sessionUser)
-    if (sessionUser) {
-      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser))
-    } else {
-      localStorage.removeItem(SESSION_KEY)
+  // ── Register with name + email + password ────────────────────────────────
+  async function register({ name, email, password, confirmPassword }) {
+    try {
+      const { data } = await api.post('/auth/register', { name, email, password, confirmPassword })
+      setToken(data.token)
+      setUser(data.user)
+      return data.user
+    } catch (err) {
+      throw new Error(err.response?.data?.message || err.message)
     }
   }
 
-  // ── Register with email + password ──────────────────────────────────────
-  function register({ name, email, password }) {
-    const users = loadUsers()
-    const exists = users.some(
-      (u) => u.email.toLowerCase() === email.trim().toLowerCase()
-    )
-    if (exists) {
-      throw new Error('An account with that email already exists.')
+  // ── Login with email + password ───────────────────────────────────────────
+  async function login({ email, password }) {
+    try {
+      const { data } = await api.post('/auth/login', { email, password })
+      setToken(data.token)
+      setUser(data.user)
+      return data.user
+    } catch (err) {
+      throw new Error(err.response?.data?.message || err.message)
     }
-
-    const newUser = {
-      id: crypto.randomUUID(),
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      password, // demo only — never store raw passwords in a real app
-    }
-    users.push(newUser)
-    saveUsers(users)
-
-    const { password: _pw, ...publicUser } = newUser
-    persistSession(publicUser)
-    return publicUser
   }
 
-  // ── Login with email + password ─────────────────────────────────────────
-  function login({ email, password }) {
-    const users = loadUsers()
-    const match = users.find(
-      (u) => u.email.toLowerCase() === email.trim().toLowerCase()
-    )
-    if (!match || match.password !== password) {
-      throw new Error('Incorrect email or password.')
-    }
-    const { password: _pw, ...publicUser } = match
-    persistSession(publicUser)
-    return publicUser
-  }
-
+  // ── Logout: clear the token so every subsequent request is unauthenticated ─
   function logout() {
-    persistSession(null)
-  }
-
-  // ── Forgot password: step 1 — request a code ─────────────────────────────
-  // Finds the account, generates a 6-digit code, and emails it. If no real
-  // email service is configured (see utils/emailService.js), returns the
-  // code directly so the UI can show it in a "demo mode" banner instead.
-  async function requestPasswordReset(email) {
-    const users = loadUsers()
-    const match = users.find(
-      (u) => u.email.toLowerCase() === email.trim().toLowerCase()
-    )
-    if (!match) {
-      throw new Error('No account found with that email.')
-    }
-
-    const code = generateCode()
-    saveResetRequest({
-      email: match.email,
-      code,
-      expiresAt: Date.now() + RESET_CODE_TTL_MS,
-      verified: false,
-    })
-
-    const result = await sendResetCodeEmail({
-      toEmail: match.email,
-      toName: match.name,
-      code,
-    })
-
-    return result // { demo: true, code } or { demo: false }
-  }
-
-  // ── Forgot password: step 2 — verify the code ─────────────────────────────
-  function verifyResetCode(email, code) {
-    const req = loadResetRequest()
-    if (
-      !req ||
-      req.email !== email.trim().toLowerCase() ||
-      req.code !== code.trim()
-    ) {
-      throw new Error('That code is incorrect.')
-    }
-    if (Date.now() > req.expiresAt) {
-      throw new Error('That code has expired. Request a new one.')
-    }
-    saveResetRequest({ ...req, verified: true })
-    return true
-  }
-
-  // ── Forgot password: step 3 — set the new password ───────────────────────
-  function resetPassword(email, newPassword) {
-    const req = loadResetRequest()
-    if (!req || req.email !== email.trim().toLowerCase() || !req.verified) {
-      throw new Error('Please verify your code again.')
-    }
-
-    const users = loadUsers()
-    const match = users.find((u) => u.email === req.email)
-    if (!match) {
-      throw new Error('No account found with that email.')
-    }
-    if (newPassword === match.password) {
-      throw new Error('New password must be different from your old password.')
-    }
-
-    match.password = newPassword
-    saveUsers(users)
-    saveResetRequest(null) // consume the reset request
-    return true
+    setToken(null)
+    setUser(null)
   }
 
   const value = {
@@ -195,9 +69,6 @@ export function AuthProvider({ children }) {
     register,
     login,
     logout,
-    requestPasswordReset,
-    verifyResetCode,
-    resetPassword,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

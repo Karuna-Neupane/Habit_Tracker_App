@@ -5,9 +5,99 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "base_url", "value": "http://localhost:3000" }
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
   ],
   "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('token', data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/register",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ada Lovelace\",\n  \"email\": \"ada@example.com\",\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\"\n}"
+            },
+            "description": "Registers a new user, hashes the password with bcrypt, and returns a JWT. Saves the token to the {{token}} collection variable for the requests below."
+          }
+        },
+        {
+          "name": "POST login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('token', data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ada@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Logs in and returns a JWT. Saves the token to the {{token}} collection variable for the requests below."
+          }
+        },
+        {
+          "name": "GET current user (/me)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/auth/me",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "description": "Requires a valid token. Returns the currently authenticated user."
+          }
+        }
+      ]
+    },
     {
       "name": "Health Check",
       "request": {
@@ -15,7 +105,7 @@
         "url": "{{base_url}}/api/health",
         "description": "Verify the server is running."
       }
-    }, 
+    },
     {
       "name": "Habits",
       "item": [
@@ -24,7 +114,13 @@
           "request": {
             "method": "GET",
             "url": "{{base_url}}/api/habits",
-            "description": "Returns all habits with live streak counts."
+            "description": "Returns all habits with live streak counts.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
           }
         },
         {
@@ -32,7 +128,13 @@
           "request": {
             "method": "GET",
             "url": "{{base_url}}/api/habits/{{habit_id}}",
-            "description": "Returns a single habit by its ID."
+            "description": "Returns a single habit by its ID.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
           }
         },
         {
@@ -40,7 +142,16 @@
           "request": {
             "method": "POST",
             "url": "{{base_url}}/api/habits",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Meditate 10 minutes\",\n  \"frequency\": \"daily\"\n}"
@@ -53,7 +164,16 @@
           "request": {
             "method": "POST",
             "url": "{{base_url}}/api/habits",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"\",\n  \"frequency\": \"daily\"\n}"
@@ -66,12 +186,21 @@
           "request": {
             "method": "POST",
             "url": "{{base_url}}/api/habits",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Test Habit\",\n  \"frequency\": \"hourly\"\n}"
             },
-            "description": "Expected: 400 Bad Request — frequency must be daily or weekly."
+            "description": "Expected: 400 Bad Request \u2014 frequency must be daily or weekly."
           }
         },
         {
@@ -79,7 +208,16 @@
           "request": {
             "method": "PUT",
             "url": "{{base_url}}/api/habits/{{habit_id}}",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Updated habit name\",\n  \"frequency\": \"weekly\"\n}"
@@ -92,7 +230,13 @@
           "request": {
             "method": "DELETE",
             "url": "{{base_url}}/api/habits/{{habit_id}}",
-            "description": "Deletes a habit. Returns 204 No Content on success, 404 if not found."
+            "description": "Deletes a habit. Returns 204 No Content on success, 404 if not found.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
           }
         }
       ]
@@ -101,11 +245,20 @@
       "name": "Completions",
       "item": [
         {
-          "name": "POST complete — today (no body needed)",
+          "name": "POST complete \u2014 today (no body needed)",
           "request": {
             "method": "POST",
             "url": "{{base_url}}/api/habits/{{habit_id}}/complete",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{}"
@@ -114,11 +267,20 @@
           }
         },
         {
-          "name": "POST complete — specific date",
+          "name": "POST complete \u2014 specific date",
           "request": {
             "method": "POST",
             "url": "{{base_url}}/api/habits/{{habit_id}}/complete",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"date\": \"2026-07-01\"\n}"
@@ -127,29 +289,47 @@
           }
         },
         {
-          "name": "POST complete — DUPLICATE (same date again) ← 409 expected",
+          "name": "POST complete \u2014 DUPLICATE (same date again) \u2190 409 expected",
           "request": {
             "method": "POST",
             "url": "{{base_url}}/api/habits/{{habit_id}}/complete",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"date\": \"2026-07-01\"\n}"
             },
-            "description": "Expected: 409 Conflict — 'Habit already completed on 2026-07-01. Each day can only be marked once.'"
+            "description": "Expected: 409 Conflict \u2014 'Habit already completed on 2026-07-01. Each day can only be marked once.'"
           }
         },
         {
-          "name": "POST complete — invalid date format ← 400 expected",
+          "name": "POST complete \u2014 invalid date format \u2190 400 expected",
           "request": {
             "method": "POST",
             "url": "{{base_url}}/api/habits/{{habit_id}}/complete",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"date\": \"July 1 2026\"\n}"
             },
-            "description": "Expected: 400 Bad Request — date must be YYYY-MM-DD format."
+            "description": "Expected: 400 Bad Request \u2014 date must be YYYY-MM-DD format."
           }
         },
         {
@@ -157,7 +337,16 @@
           "request": {
             "method": "DELETE",
             "url": "{{base_url}}/api/habits/{{habit_id}}/complete",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{}"
@@ -170,7 +359,13 @@
           "request": {
             "method": "GET",
             "url": "{{base_url}}/api/habits/{{habit_id}}/history",
-            "description": "Returns the full completions array, streak, and total completion count for one habit."
+            "description": "Returns the full completions array, streak, and total completion count for one habit.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
           }
         }
       ]

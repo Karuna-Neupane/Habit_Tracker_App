@@ -15,7 +15,7 @@ export default function Login() {
   const [error, setError]       = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     setError('')
 
@@ -26,7 +26,7 @@ export default function Login() {
 
     setSubmitting(true)
     try {
-      login({ email, password })
+      await login({ email, password })
       navigate(redirectTo, { replace: true })
     } catch (err) {
       setError(err.message)

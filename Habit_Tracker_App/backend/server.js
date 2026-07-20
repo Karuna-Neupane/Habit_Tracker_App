@@ -17,6 +17,9 @@ connectDB().then(() => {
     console.log(`  http://localhost:${PORT}`);
     console.log('─────────────────────────────────────────────');
     console.log('  Endpoints:');
+    console.log(`  POST   /api/auth/register`);
+    console.log(`  POST   /api/auth/login`);
+    console.log(`  GET    /api/auth/me`);
     console.log(`  GET    /api/habits`);
     console.log(`  POST   /api/habits`);
     console.log(`  PUT    /api/habits/:id`);

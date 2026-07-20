@@ -1,8 +1,16 @@
-// Controller — Week 4: all operations are now async and use Mongoose.
+// Controller — Week 5: every operation is scoped to req.user.id (attached
+// by the verifyToken middleware, applied to all /api/habits routes in
+// app.js). This is the enforcement point for private, per-user habit lists:
+//   - list/read only ever query { userId: req.user.id }
+//   - create always stamps the new habit with userId: req.user.id
+//   - update/delete/complete look the habit up by { _id, userId } together,
+//     so a user can never touch another user's habit even if they guess
+//     its Mongo _id.
+//
 // The streak is NEVER stored in the database — it is always computed from
 // the live completions array returned from MongoDB, exactly like before.
 
-const Habit = require('../models/Habit');
+const Habit      = require('../models/Habit');
 const { computeStreak, todayKey, isValidDateKey } = require('../utils/streak');
 
 // Attach computed streak to a Mongoose document before sending to client.
@@ -10,9 +18,10 @@ const { computeStreak, todayKey, isValidDateKey } = require('../utils/streak');
 function withStreak(doc) {
   const obj = doc.toObject ? doc.toObject() : { ...doc };
   // Rename _id → id so the frontend doesn't need to change
-  obj.id = String(obj._id);
+  obj.id  = String(obj._id);
   delete obj._id;
   delete obj.__v;
+  delete obj.userId; // internal — no need to ship it back to the client
   obj.streak = computeStreak(obj.completions, obj.frequency);
   return obj;
 }
@@ -20,8 +29,7 @@ function withStreak(doc) {
 // ── GET /api/habits ─────────────────────────────────────────────────────────
 exports.getAllHabits = async (req, res) => {
   try {
-    // Week 4, item 3: fetch live data from MongoDB, not a JSON file
-    const docs = await Habit.find().sort({ createdAt: 1 });
+    const docs   = await Habit.find({ userId: req.user.id }).sort({ createdAt: 1 });
     const habits = docs.map(withStreak);
     res.status(200).json({ count: habits.length, habits });
   } catch (err) {
@@ -32,7 +40,7 @@ exports.getAllHabits = async (req, res) => {
 // ── GET /api/habits/:id ─────────────────────────────────────────────────────
 exports.getHabitById = async (req, res) => {
   try {
-    const doc = await Habit.findById(req.params.id);
+    const doc = await Habit.findOne({ _id: req.params.id, userId: req.user.id });
     if (!doc) return res.status(404).json({ message: 'Habit not found.' });
     res.status(200).json(withStreak(doc));
   } catch (err) {
@@ -45,15 +53,17 @@ exports.createHabit = async (req, res) => {
   try {
     const { name, frequency } = req.body;
 
-    // Duplicate name check (case-insensitive)
+    // Duplicate name check (case-insensitive), scoped to this user only —
+    // two different users are free to both have a habit called "Read".
     const exists = await Habit.findOne({
+      userId: req.user.id,
       name: { $regex: new RegExp(`^${name.trim()}$`, 'i') },
     });
     if (exists) {
       return res.status(409).json({ message: `A habit named "${name}" already exists.` });
     }
 
-    const doc = await Habit.create({ name: name.trim(), frequency });
+    const doc = await Habit.create({ name: name.trim(), frequency, userId: req.user.id });
     res.status(201).json(withStreak(doc));
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -66,10 +76,12 @@ exports.updateHabit = async (req, res) => {
     const { name, frequency } = req.body;
 
     // If renaming, check the new name isn't taken by a different habit
+    // belonging to this same user.
     if (name) {
       const exists = await Habit.findOne({
+        userId: req.user.id,
         name: { $regex: new RegExp(`^${name.trim()}$`, 'i') },
-        _id: { $ne: req.params.id },
+        _id:  { $ne: req.params.id },
       });
       if (exists) {
         return res.status(409).json({ message: `A habit named "${name}" already exists.` });
@@ -77,11 +89,11 @@ exports.updateHabit = async (req, res) => {
     }
 
     const updates = {};
-    if (name) updates.name = name.trim();
+    if (name)      updates.name      = name.trim();
     if (frequency) updates.frequency = frequency;
 
-    const doc = await Habit.findByIdAndUpdate(
-      req.params.id,
+    const doc = await Habit.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.id },
       updates,
       { new: true, runValidators: true }
     );
@@ -95,7 +107,7 @@ exports.updateHabit = async (req, res) => {
 // ── DELETE /api/habits/:id ───────────────────────────────────────────────────
 exports.deleteHabit = async (req, res) => {
   try {
-    const doc = await Habit.findByIdAndDelete(req.params.id);
+    const doc = await Habit.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
     if (!doc) return res.status(404).json({ message: 'Habit not found.' });
     res.status(204).send();
   } catch (err) {
@@ -104,7 +116,6 @@ exports.deleteHabit = async (req, res) => {
 };
 
 // ── POST /api/habits/:id/complete ───────────────────────────────────────────
-// Week 4, item 4: completion saved to MongoDB, streak computed from live DB data
 exports.completeHabit = async (req, res) => {
   try {
     const date = req.body.date || todayKey();
@@ -113,10 +124,9 @@ exports.completeHabit = async (req, res) => {
       return res.status(400).json({ message: 'Invalid date format. Use YYYY-MM-DD.' });
     }
 
-    const doc = await Habit.findById(req.params.id);
+    const doc = await Habit.findOne({ _id: req.params.id, userId: req.user.id });
     if (!doc) return res.status(404).json({ message: 'Habit not found.' });
 
-    // Week 4, item 6 (also Week 3 item 6): reject duplicate for same date
     if (doc.completions.includes(date)) {
       return res.status(409).json({
         message: `Already completed on ${date}. Each day can only be marked once.`,
@@ -133,12 +143,11 @@ exports.completeHabit = async (req, res) => {
 };
 
 // ── DELETE /api/habits/:id/complete ─────────────────────────────────────────
-// Un-tick a date — removes it from the completions array in MongoDB
 exports.uncompleteHabit = async (req, res) => {
   try {
     const date = req.body.date || todayKey();
 
-    const doc = await Habit.findById(req.params.id);
+    const doc = await Habit.findOne({ _id: req.params.id, userId: req.user.id });
     if (!doc) return res.status(404).json({ message: 'Habit not found.' });
     if (!doc.completions.includes(date)) {
       return res.status(404).json({ message: 'No completion found for that date.' });
@@ -154,18 +163,17 @@ exports.uncompleteHabit = async (req, res) => {
 };
 
 // ── GET /api/habits/:id/history ─────────────────────────────────────────────
-// Week 4, item 5: returns real completion dates from MongoDB
 exports.getHabitHistory = async (req, res) => {
   try {
-    const doc = await Habit.findById(req.params.id);
+    const doc = await Habit.findOne({ _id: req.params.id, userId: req.user.id });
     if (!doc) return res.status(404).json({ message: 'Habit not found.' });
 
     res.status(200).json({
-      id: String(doc._id),
-      name: doc.name,
-      frequency: doc.frequency,
-      completions: doc.completions,          // real dates from MongoDB
-      streak: computeStreak(doc.completions, doc.frequency),
+      id:               String(doc._id),
+      name:             doc.name,
+      frequency:        doc.frequency,
+      completions:      doc.completions,
+      streak:           computeStreak(doc.completions, doc.frequency),
       totalCompletions: doc.completions.length,
     });
   } catch (err) {
