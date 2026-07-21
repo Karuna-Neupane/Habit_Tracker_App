@@ -222,10 +222,16 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ message: 'Invalid reset token.' });
     }
 
-    const user = await User.findById(decoded.id).select('+resetCodeHash +resetCodeExpires');
+    const user = await User.findById(decoded.id).select('+resetCodeHash +resetCodeExpires +password');
     if (!user || !user.resetCodeHash) {
       // Code already used (or never requested) — the reset token alone isn't enough.
       return res.status(400).json({ message: 'This reset link has already been used. Please request a new code.' });
+    }
+
+    // Don't let the "new" password just be the old one again.
+    const sameAsOld = await bcrypt.compare(password, user.password);
+    if (sameAsOld) {
+      return res.status(400).json({ message: 'New password must be different from your old password.' });
     }
 
     user.password         = await bcrypt.hash(password, 10);
@@ -296,6 +302,12 @@ exports.changePassword = async (req, res) => {
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Current password is incorrect.' });
+    }
+
+    // Don't let the "new" password just be the old one again.
+    const sameAsOld = await bcrypt.compare(newPassword, user.password);
+    if (sameAsOld) {
+      return res.status(400).json({ message: 'New password must be different from your current password.' });
     }
 
     user.password = await bcrypt.hash(newPassword, 10);
