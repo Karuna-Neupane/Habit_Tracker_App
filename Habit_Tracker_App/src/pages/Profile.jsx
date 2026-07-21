@@ -59,28 +59,28 @@ export default function Profile() {
   const fileInputRef = useRef(null)
 
   // ── Profile fields ─────────────────────────────────────────────────────
-  const [name, setName]         = useState(user?.name || '')
+  const [name, setName] = useState(user?.name || '')
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '')
   const [profileSaving, setProfileSaving] = useState(false)
-  const [profileError, setProfileError]   = useState('')
+  const [profileError, setProfileError] = useState('')
   const [profileSuccess, setProfileSuccess] = useState('')
 
   // ── Password fields ─────────────────────────────────────────────────────
   const [currentPassword, setCurrentPassword] = useState('')
-  const [newPassword, setNewPassword]         = useState('')
+  const [newPassword, setNewPassword] = useState('')
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
-  const [passwordSaving, setPasswordSaving]   = useState(false)
-  const [passwordError, setPasswordError]     = useState('')
+  const [passwordSaving, setPasswordSaving] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
   const [passwordSuccess, setPasswordSuccess] = useState('')
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword]         = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false)
 
   // ── Delete account ──────────────────────────────────────────────────────
-  const [deleteOpen, setDeleteOpen]       = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const [deletePassword, setDeletePassword] = useState('')
-  const [deleteError, setDeleteError]     = useState('')
-  const [deleting, setDeleting]           = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+  const [deleting, setDeleting] = useState(false)
 
   async function handleAvatarChange(e) {
     const file = e.target.files?.[0]
@@ -168,7 +168,7 @@ export default function Profile() {
     : '—'
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-5xl">
       <div className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-pine">Account</p>
         <h1 className="font-display text-3xl font-bold text-ink">Profile</h1>
@@ -250,10 +250,10 @@ export default function Profile() {
       <section className="mb-6">
         <h2 className="mb-3 font-display text-lg font-semibold text-ink">Account statistics</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatPill label="Habits"        value={totalHabits}       Icon={ListTodo}   />
-          <StatPill label="Completions"   value={totalCompletions}  Icon={CheckCircle2} />
-          <StatPill label="Best streak"   value={longestOverall}    Icon={Trophy}     />
-          <StatPill label="30-day avg"    value={`${avgRate30}%`}   Icon={Flame}      />
+          <StatPill label="Habits" value={totalHabits} Icon={ListTodo} />
+          <StatPill label="Completions" value={totalCompletions} Icon={CheckCircle2} />
+          <StatPill label="Best streak" value={longestOverall} Icon={Trophy} />
+          <StatPill label="30-day avg" value={`${avgRate30}%`} Icon={Flame} />
         </div>
         <p className="mt-3 flex items-center gap-1.5 text-xs text-inkSoft">
           <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" /> Member since {memberSince}

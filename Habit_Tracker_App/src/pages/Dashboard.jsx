@@ -80,10 +80,10 @@ export default function Dashboard() {
   }
 
   const quickActions = [
-    { to: '/habits',    label: 'My Habits', desc: 'View, edit & complete', Icon: ListChecks,  color: 'bg-pineSoft text-pine'   },
-    { to: '/calendar',  label: 'Calendar',  desc: 'Week & month view',     Icon: CalendarDays, color: 'bg-emberSoft text-ember' },
-    { to: '/analytics', label: 'Analytics', desc: 'Charts & comparisons',  Icon: BarChart2,    color: 'bg-pineSoft text-pine'   },
-    { to: '/ai-coach',  label: 'AI Coach',  desc: 'Get personalised tips', Icon: Bot,          color: 'bg-emberSoft text-ember' },
+    { to: '/habits', label: 'My Habits', desc: 'View, edit & complete', Icon: ListChecks, color: 'bg-pineSoft text-pine' },
+    { to: '/calendar', label: 'Calendar', desc: 'Week & month view', Icon: CalendarDays, color: 'bg-emberSoft text-ember' },
+    { to: '/analytics', label: 'Analytics', desc: 'Charts & comparisons', Icon: BarChart2, color: 'bg-pineSoft text-pine' },
+    { to: '/ai-coach', label: 'AI Coach', desc: 'Get personalised tips', Icon: Bot, color: 'bg-emberSoft text-ember' },
   ]
 
   return (
@@ -103,21 +103,14 @@ export default function Dashboard() {
                 : `${completedToday}/${totalHabits} habits done today.`}
           </p>
         </div>
-        <button
-          onClick={() => { setFormError(''); setFormOpen(true) }}
-          className="mt-3 inline-flex items-center gap-2 self-start rounded-xl bg-ember px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-ember/30 hover:bg-ember/90 transition-colors sm:mt-0 sm:self-auto"
-        >
-          <Plus className="h-4 w-4" />
-          Add habit
-        </button>
       </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-6">
-        <StatCard label="Total habits"     value={totalHabits}                    Icon={ListTodo}     />
-        <StatCard label="Completed today"  value={`${completedToday}/${totalHabits}`} Icon={CheckCircle2} accent="text-pine"  />
-        <StatCard label="Current streak"   value={currentStreak}                  Icon={Flame}        accent="text-ember" />
-        <StatCard label="Longest streak"   value={longestStreak}                  Icon={Trophy}       accent="text-ember" />
+        <StatCard label="Total habits" value={totalHabits} Icon={ListTodo} />
+        <StatCard label="Completed today" value={`${completedToday}/${totalHabits}`} Icon={CheckCircle2} accent="text-pine" />
+        <StatCard label="Current streak" value={currentStreak} Icon={Flame} accent="text-ember" />
+        <StatCard label="Longest streak" value={longestStreak} Icon={Trophy} accent="text-ember" />
       </div>
 
       {/* Weekly / monthly progress */}
