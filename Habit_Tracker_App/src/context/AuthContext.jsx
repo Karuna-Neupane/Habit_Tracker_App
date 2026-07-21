@@ -94,10 +94,10 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // ── Profile: update name / username / avatar ──────────────────────────────
-  async function updateProfile({ name, username, avatarUrl }) {
+  // ── Profile: update name / avatar ──────────────────────────────────────
+  async function updateProfile({ name, avatarUrl }) {
     try {
-      const { data } = await api.put('/auth/profile', { name, username, avatarUrl })
+      const { data } = await api.put('/auth/profile', { name, avatarUrl })
       setUser(data.user)
       return data.user
     } catch (err) {

@@ -25,19 +25,6 @@ const UserSchema = new mongoose.Schema(
       match:     [/^\S+@\S+\.\S+$/, 'Please enter a valid email address'],
     },
 
-    // Auto-generated at registration (slug of name + random suffix), editable
-    // afterwards from the Profile page. Shown alongside the display name.
-    username: {
-      type:      String,
-      required:  true,
-      unique:    true,
-      trim:      true,
-      lowercase: true,
-      minlength: [3,  'Username must be at least 3 characters'],
-      maxlength: [30, 'Username must be 30 characters or fewer'],
-      match:     [/^[a-z0-9_]+$/, 'Username can only contain lowercase letters, numbers, and underscores'],
-    },
-
     // Data URL (small, client-resized image) or a plain image URL. Optional —
     // the frontend falls back to the user's initial when this is empty.
     avatarUrl: {

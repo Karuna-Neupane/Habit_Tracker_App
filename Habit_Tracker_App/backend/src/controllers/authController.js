@@ -30,31 +30,10 @@ function publicUser(user) {
   return {
     id:        String(user._id),
     name:      user.name,
-    username:  user.username,
     email:     user.email,
     avatarUrl: user.avatarUrl || '',
     createdAt: user.createdAt,
   };
-}
-
-// Turns "Ada Lovelace" into a base slug like "ada_lovelace", then appends a
-// random numeric suffix until it finds one that isn't already taken.
-async function generateUniqueUsername(name) {
-  const base = String(name)
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .slice(0, 20) || 'user';
-
-  for (let attempt = 0; attempt < 20; attempt++) {
-    const candidate = attempt === 0 ? base : `${base}_${Math.floor(1000 + Math.random() * 9000)}`;
-    // eslint-disable-next-line no-await-in-loop
-    const taken = await User.findOne({ username: candidate });
-    if (!taken) return candidate;
-  }
-  // Extremely unlikely fallback — fully random suffix.
-  return `${base}_${crypto.randomBytes(4).toString('hex')}`;
 }
 
 // ── POST /api/auth/register ─────────────────────────────────────────────────
@@ -79,12 +58,10 @@ exports.registerUser = async (req, res) => {
 
     // Hash the password before it ever touches the database (item 1).
     const hashedPassword = await bcrypt.hash(password, 10);
-    const username = await generateUniqueUsername(name);
 
     const newUser = await User.create({
       name:  name.trim(),
       email: email.trim().toLowerCase(),
-      username,
       password: hashedPassword,
     });
 
@@ -273,27 +250,13 @@ exports.resetPassword = async (req, res) => {
 // ── PUT /api/auth/profile ───────────────────────────────────────────────────
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, username, avatarUrl } = req.body;
+    const { name, avatarUrl } = req.body;
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found.' });
 
     if (name !== undefined) {
       if (!name.trim()) return res.status(400).json({ message: 'Name cannot be empty.' });
       user.name = name.trim();
-    }
-
-    if (username !== undefined) {
-      const normalized = username.trim().toLowerCase();
-      if (!/^[a-z0-9_]{3,30}$/.test(normalized)) {
-        return res.status(400).json({
-          message: 'Username must be 3-30 characters: lowercase letters, numbers, and underscores only.',
-        });
-      }
-      if (normalized !== user.username) {
-        const taken = await User.findOne({ username: normalized, _id: { $ne: user._id } });
-        if (taken) return res.status(409).json({ message: 'That username is already taken.' });
-        user.username = normalized;
-      }
     }
 
     // Small data-URL image (resized client-side) or a plain image URL.
@@ -308,9 +271,6 @@ exports.updateProfile = async (req, res) => {
     await user.save();
     res.status(200).json({ message: 'Profile updated', user: publicUser(user) });
   } catch (err) {
-    if (err.code === 11000) {
-      return res.status(409).json({ message: 'That username is already taken.' });
-    }
     res.status(400).json({ message: err.message });
   }
 };

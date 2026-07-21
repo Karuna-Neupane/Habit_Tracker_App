@@ -1,13 +1,13 @@
 // Profile — Week 6
 // Avatar (stored as a small client-resized data URL, no cloud storage
-// needed), editable name/username, read-only email, a separate change-
+// needed), an editable name, read-only email, a separate change-
 // password form, computed account statistics, and a danger-zone account
 // deletion flow that requires re-entering the password.
 
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Camera, User, AtSign, Mail, KeyRound, Trash2,
+  Camera, User, Mail, KeyRound, Trash2,
   CheckCircle2, ListTodo, Flame, Trophy, CalendarClock,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -60,7 +60,6 @@ export default function Profile() {
 
   // ── Profile fields ─────────────────────────────────────────────────────
   const [name, setName]         = useState(user?.name || '')
-  const [username, setUsername] = useState(user?.username || '')
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '')
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileError, setProfileError]   = useState('')
@@ -101,7 +100,7 @@ export default function Profile() {
     setProfileSuccess('')
     setProfileSaving(true)
     try {
-      await updateProfile({ name, username, avatarUrl })
+      await updateProfile({ name, avatarUrl })
       setProfileSuccess('Profile updated.')
     } catch (err) {
       setProfileError(err.message)
@@ -191,7 +190,7 @@ export default function Profile() {
           </div>
           <div>
             <p className="font-display text-lg font-semibold text-ink">{user?.name}</p>
-            <p className="text-sm text-inkSoft">@{user?.username}</p>
+            <p className="text-sm text-inkSoft">{user?.email}</p>
           </div>
         </div>
 
@@ -214,20 +213,6 @@ export default function Profile() {
               onChange={(e) => { setName(e.target.value); setProfileSuccess('') }}
               className="w-full rounded-xl border border-paperLine bg-paper px-3 py-2.5 text-sm text-ink outline-none focus:border-pine"
             />
-          </div>
-
-          <div>
-            <label htmlFor="profile-username" className="mb-1 flex items-center gap-1.5 text-sm font-medium text-ink">
-              <AtSign className="h-3.5 w-3.5 text-pine" aria-hidden="true" /> Username
-            </label>
-            <input
-              id="profile-username"
-              type="text"
-              value={username}
-              onChange={(e) => { setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')); setProfileSuccess('') }}
-              className="w-full rounded-xl border border-paperLine bg-paper px-3 py-2.5 text-sm text-ink outline-none focus:border-pine"
-            />
-            <p className="mt-1 text-xs text-inkSoft">Lowercase letters, numbers, and underscores only.</p>
           </div>
 
           <div>
