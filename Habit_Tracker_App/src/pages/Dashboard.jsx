@@ -93,7 +93,7 @@ export default function Dashboard() {
         <div>
           <p className="font-mono text-xs uppercase tracking-widest text-pine">{TODAY_LABEL}</p>
           <h1 className="font-display text-3xl font-bold text-ink">
-            Welcome back, {user?.name?.split(' ')[0] || 'there'}
+            Welcome back, {user?.name || 'there'}
           </h1>
           <p className="mt-1 text-sm text-inkSoft">
             {loading
