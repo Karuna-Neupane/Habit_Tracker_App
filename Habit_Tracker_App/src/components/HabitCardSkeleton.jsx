@@ -13,10 +13,16 @@ export default function HabitCardSkeleton() {
           <div className="h-3 w-1/4 rounded-full bg-paperLine" />
         </div>
         <div className="flex gap-1.5">
-          <div className="h-7 w-14 rounded-full bg-paperLine" />
           <div className="h-7 w-7 rounded-lg bg-paperLine" />
           <div className="h-7 w-7 rounded-lg bg-paperLine" />
         </div>
+      </div>
+
+      {/* Badge row */}
+      <div className="flex gap-1.5">
+        <div className="h-6 w-12 rounded-full bg-paperLine" />
+        <div className="h-6 w-12 rounded-full bg-paperLine" />
+        <div className="h-6 w-12 rounded-full bg-paperLine" />
       </div>
 
       {/* 7-day calendar strip */}

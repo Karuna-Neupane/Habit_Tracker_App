@@ -94,6 +94,38 @@ export function AuthProvider({ children }) {
     }
   }
 
+  // ── Profile: update name / username / avatar ──────────────────────────────
+  async function updateProfile({ name, username, avatarUrl }) {
+    try {
+      const { data } = await api.put('/auth/profile', { name, username, avatarUrl })
+      setUser(data.user)
+      return data.user
+    } catch (err) {
+      throw new Error(err.response?.data?.message || err.message)
+    }
+  }
+
+  // ── Profile: change password (requires current password) ─────────────────
+  async function changePassword({ currentPassword, newPassword, confirmNewPassword }) {
+    try {
+      const { data } = await api.put('/auth/password', { currentPassword, newPassword, confirmNewPassword })
+      return data.message
+    } catch (err) {
+      throw new Error(err.response?.data?.message || err.message)
+    }
+  }
+
+  // ── Profile: delete account (requires password confirmation) ──────────────
+  async function deleteAccount(password) {
+    try {
+      await api.delete('/auth/account', { data: { password } })
+      setToken(null)
+      setUser(null)
+    } catch (err) {
+      throw new Error(err.response?.data?.message || err.message)
+    }
+  }
+
   const value = {
     user,
     isAuthenticated: Boolean(user),
@@ -104,6 +136,9 @@ export function AuthProvider({ children }) {
     requestPasswordReset,
     verifyResetCode,
     resetPassword,
+    updateProfile,
+    changePassword,
+    deleteAccount,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

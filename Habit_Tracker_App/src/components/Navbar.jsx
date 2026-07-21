@@ -89,10 +89,10 @@ export default function Navbar() {
             <span className="rounded-full bg-emberSoft px-2.5 py-1 font-mono text-xs font-semibold text-ember">
               {doneToday}/{habits.length} today
             </span>
-            <div className="flex items-center gap-2">
-              {user?.picture ? (
+            <Link to="/profile" className="flex items-center gap-2">
+              {user?.avatarUrl ? (
                 <img
-                  src={user.picture}
+                  src={user.avatarUrl}
                   alt={user.name}
                   className="h-7 w-7 rounded-full object-cover"
                   referrerPolicy="no-referrer"
@@ -103,7 +103,7 @@ export default function Navbar() {
                 </div>
               )}
               <span className="hidden sm:block text-sm font-medium text-ink">{user?.name}</span>
-            </div>
+            </Link>
           </div>
         ) : (
           <>

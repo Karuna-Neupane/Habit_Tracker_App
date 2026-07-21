@@ -41,9 +41,9 @@ export default function ConfirmDialog({
         <h2 id="cdlg-title" className="font-display text-lg font-semibold text-ink">
           {title}
         </h2>
-        <p id="cdlg-msg" className="mt-1 text-sm text-inkSoft leading-relaxed">
+        <div id="cdlg-msg" className="mt-1 text-sm text-inkSoft leading-relaxed">
           {message}
-        </p>
+        </div>
 
         <div className="mt-5 flex gap-2">
           <button

@@ -11,6 +11,11 @@ router.post('/register', AuthController.registerUser);
 router.post('/login', AuthController.loginUser);
 router.get('/me', verifyToken, AuthController.getCurrentUser);
 
+// Profile management (Week 6) — all require a valid JWT.
+router.put('/profile', verifyToken, AuthController.updateProfile);
+router.put('/password', verifyToken, AuthController.changePassword);
+router.delete('/account', verifyToken, AuthController.deleteAccount);
+
 // Forgot password — 3-step flow, all public (no token yet at this point).
 router.post('/forgot-password', AuthController.forgotPassword);
 router.post('/verify-reset-code', AuthController.verifyResetCode);

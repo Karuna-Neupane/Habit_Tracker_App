@@ -4,7 +4,11 @@ import { HabitsProvider } from './context/HabitsContext.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import AppShell from './components/AppShell.jsx'
 import Home from './pages/Home.jsx'
-import Stats from './pages/Stats.jsx'
+import MyHabits from './pages/MyHabits.jsx'
+import CalendarPage from './pages/CalendarPage.jsx'
+import Analytics from './pages/Analytics.jsx'
+import AICoach from './pages/AICoach.jsx'
+import Profile from './pages/Profile.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import ForgotPassword from './pages/ForgotPassword.jsx'
@@ -22,10 +26,42 @@ export default function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route
-                path="/stats"
+                path="/habits"
                 element={
                   <ProtectedRoute>
-                    <Stats />
+                    <MyHabits />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/calendar"
+                element={
+                  <ProtectedRoute>
+                    <CalendarPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/analytics"
+                element={
+                  <ProtectedRoute>
+                    <Analytics />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/ai-coach"
+                element={
+                  <ProtectedRoute>
+                    <AICoach />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
                   </ProtectedRoute>
                 }
               />

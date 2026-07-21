@@ -11,6 +11,7 @@ const jwt    = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const User   = require('../models/User');
+const Habit  = require('../models/Habit');
 const { sendResetCodeEmail } = require('../utils/mailer');
 
 const TOKEN_EXPIRES_IN       = '7d';
@@ -27,10 +28,33 @@ function signToken(user) {
 
 function publicUser(user) {
   return {
-    id:    String(user._id),
-    name:  user.name,
-    email: user.email,
+    id:        String(user._id),
+    name:      user.name,
+    username:  user.username,
+    email:     user.email,
+    avatarUrl: user.avatarUrl || '',
+    createdAt: user.createdAt,
   };
+}
+
+// Turns "Ada Lovelace" into a base slug like "ada_lovelace", then appends a
+// random numeric suffix until it finds one that isn't already taken.
+async function generateUniqueUsername(name) {
+  const base = String(name)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 20) || 'user';
+
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const candidate = attempt === 0 ? base : `${base}_${Math.floor(1000 + Math.random() * 9000)}`;
+    // eslint-disable-next-line no-await-in-loop
+    const taken = await User.findOne({ username: candidate });
+    if (!taken) return candidate;
+  }
+  // Extremely unlikely fallback — fully random suffix.
+  return `${base}_${crypto.randomBytes(4).toString('hex')}`;
 }
 
 // ── POST /api/auth/register ─────────────────────────────────────────────────
@@ -55,10 +79,12 @@ exports.registerUser = async (req, res) => {
 
     // Hash the password before it ever touches the database (item 1).
     const hashedPassword = await bcrypt.hash(password, 10);
+    const username = await generateUniqueUsername(name);
 
     const newUser = await User.create({
       name:  name.trim(),
       email: email.trim().toLowerCase(),
+      username,
       password: hashedPassword,
     });
 
@@ -234,6 +260,115 @@ exports.resetPassword = async (req, res) => {
     // so the frontend can redirect straight to the dashboard.
     const token = signToken(user);
     res.status(200).json({ message: 'Password reset successful', token, user: publicUser(user) });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Profile — Week 6: update profile, change password, delete account.
+// All three require verifyToken, so req.user.id is always the caller's own id.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── PUT /api/auth/profile ───────────────────────────────────────────────────
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, username, avatarUrl } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found.' });
+
+    if (name !== undefined) {
+      if (!name.trim()) return res.status(400).json({ message: 'Name cannot be empty.' });
+      user.name = name.trim();
+    }
+
+    if (username !== undefined) {
+      const normalized = username.trim().toLowerCase();
+      if (!/^[a-z0-9_]{3,30}$/.test(normalized)) {
+        return res.status(400).json({
+          message: 'Username must be 3-30 characters: lowercase letters, numbers, and underscores only.',
+        });
+      }
+      if (normalized !== user.username) {
+        const taken = await User.findOne({ username: normalized, _id: { $ne: user._id } });
+        if (taken) return res.status(409).json({ message: 'That username is already taken.' });
+        user.username = normalized;
+      }
+    }
+
+    // Small data-URL image (resized client-side) or a plain image URL.
+    // Cap length defensively — avatarUrl is not meant to hold a full-size photo.
+    if (avatarUrl !== undefined) {
+      if (avatarUrl.length > 2_000_000) {
+        return res.status(400).json({ message: 'Image is too large. Please choose a smaller picture.' });
+      }
+      user.avatarUrl = avatarUrl;
+    }
+
+    await user.save();
+    res.status(200).json({ message: 'Profile updated', user: publicUser(user) });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(409).json({ message: 'That username is already taken.' });
+    }
+    res.status(400).json({ message: err.message });
+  }
+};
+
+// ── PUT /api/auth/password ──────────────────────────────────────────────────
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Current and new password are required.' });
+    }
+    if (confirmNewPassword !== undefined && newPassword !== confirmNewPassword) {
+      return res.status(400).json({ message: 'New passwords do not match.' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters.' });
+    }
+
+    const user = await User.findById(req.user.id).select('+password');
+    if (!user) return res.status(404).json({ message: 'User not found.' });
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Current password is incorrect.' });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.status(200).json({ message: 'Password changed successfully.' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ── DELETE /api/auth/account ────────────────────────────────────────────────
+exports.deleteAccount = async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password) {
+      return res.status(400).json({ message: 'Enter your password to confirm account deletion.' });
+    }
+
+    const user = await User.findById(req.user.id).select('+password');
+    if (!user) return res.status(404).json({ message: 'User not found.' });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Incorrect password.' });
+    }
+
+    // Cascade delete — a user's habits are meaningless (and inaccessible)
+    // without the account they're scoped to.
+    await Habit.deleteMany({ userId: user._id });
+    await user.deleteOne();
+
+    res.status(200).json({ message: 'Account deleted.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

@@ -112,15 +112,71 @@ export function getLast7DateKeys() {
 }
 
 /**
+ * Percentage of the trailing `days` days that were completed.
+ * completionRate30 (below) is just this with days=30.
+ */
+export function completionRateN(completions, days) {
+  if (!Array.isArray(completions)) return 0
+  const set = new Set(completions)
+  let count = 0
+  for (let i = 0; i < days; i++) {
+    if (set.has(toDateKey(addDays(new Date(), -i)))) count++
+  }
+  return Math.round((count / days) * 100)
+}
+
+/**
  * Percentage of the last 30 days that were completed.
  * Used on the Stats page.
  */
 export function completionRate30(completions) {
-  if (!Array.isArray(completions)) return 0
-  const set = new Set(completions)
-  let count = 0
-  for (let i = 0; i < 30; i++) {
-    if (set.has(toDateKey(addDays(new Date(), -i)))) count++
+  return completionRateN(completions, 30)
+}
+
+// Longest streak ever achieved (not just the current one) — scans the full
+// completion history for the longest run of consecutive days/weeks.
+function longestConsecutiveDailyRun(dateKeys) {
+  const uniqueSorted = [...new Set(dateKeys)].sort()
+  let longest = 0, run = 0, prevTime = null
+  for (const key of uniqueSorted) {
+    const t = new Date(`${key}T00:00:00`).getTime()
+    run = (prevTime !== null && t - prevTime === 86_400_000) ? run + 1 : 1
+    longest = Math.max(longest, run)
+    prevTime = t
   }
-  return Math.round((count / 30) * 100)
+  return longest
+}
+
+// Weeks aren't a fixed number of days, so we sort by a simple sortable
+// ordinal ("year * 54 + week number") and look for consecutive integers.
+// The 54 multiplier just needs to safely exceed the max ISO week count (53).
+function weekKeyToOrdinal(weekKey) {
+  const [year, week] = weekKey.split('-W').map(Number)
+  return year * 54 + week
+}
+
+function longestConsecutiveWeeklyRun(dateKeys) {
+  const weekKeys = [...new Set(dateKeys.map((k) => toISOWeekKey(new Date(`${k}T00:00:00`))))]
+  const ordinals = weekKeys.map(weekKeyToOrdinal).sort((a, b) => a - b)
+  let longest = 0, run = 0, prev = null
+  for (const o of ordinals) {
+    run = (prev !== null && o === prev + 1) ? run + 1 : 1
+    longest = Math.max(longest, run)
+    prev = o
+  }
+  return longest
+}
+
+/**
+ * The longest streak this habit has EVER had, regardless of whether it's
+ * still active. Unlike computeStreak() (which only looks backwards from
+ * today), this scans the entire completion history.
+ */
+export function longestStreakEver(completions, frequency = 'daily') {
+  if (!Array.isArray(completions) || completions.length === 0) return 0
+  const valid = completions.filter(isValidDateKey)
+  if (valid.length === 0) return 0
+  return frequency === 'weekly'
+    ? longestConsecutiveWeeklyRun(valid)
+    : longestConsecutiveDailyRun(valid)
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Home, BarChart2, LogOut } from 'lucide-react'
+import { Home, ListChecks, CalendarDays, BarChart2, Bot, User, LogOut } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import ConfirmDialog from './ConfirmDialog.jsx'
 
@@ -11,8 +11,12 @@ export default function Sidebar() {
   const [confirmingLogout, setConfirmingLogout] = useState(false)
 
   const links = [
-    { to: '/', label: 'Dashboard', Icon: Home },
-    { to: '/stats', label: 'Stats', Icon: BarChart2 },
+    { to: '/',           label: 'Dashboard', Icon: Home },
+    { to: '/habits',     label: 'My Habits', Icon: ListChecks },
+    { to: '/calendar',   label: 'Calendar',  Icon: CalendarDays },
+    { to: '/analytics',  label: 'Analytics', Icon: BarChart2 },
+    { to: '/ai-coach',   label: 'AI Coach',  Icon: Bot },
+    { to: '/profile',    label: 'Profile',   Icon: User },
   ]
 
   function confirmLogout() {

@@ -1,9 +1,11 @@
-import { Flame, CheckCircle2, Pencil, Trash2 } from 'lucide-react'
+import { Flame, Trophy, CheckCircle2, Pencil, Trash2, Percent } from 'lucide-react'
 import WeekCalendarStrip from './WeekCalendarStrip.jsx'
-import { isCompletedToday } from '../utils/streak.js'
+import { isCompletedToday, longestStreakEver, completionRate30 } from '../utils/streak.js'
 
 export default function HabitCard({ habit, onToggleToday, onEdit, onDelete }) {
   const todayDone = isCompletedToday(habit.completions)
+  const longest   = longestStreakEver(habit.completions, habit.frequency)
+  const rate      = completionRate30(habit.completions)
 
   return (
     <article className="rounded-2xl border border-paperLine bg-white/70 backdrop-blur-sm p-5 shadow-sm flex flex-col gap-4">
@@ -19,18 +21,7 @@ export default function HabitCard({ habit, onToggleToday, onEdit, onDelete }) {
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          {/* Streak badge (Week 2: live-updating) */}
-          <div
-            className="flex items-center gap-1 rounded-full bg-emberSoft px-2.5 py-1"
-            title={`${habit.streak}-day streak`}
-          >
-            <Flame aria-hidden="true" className="h-3.5 w-3.5 text-ember" />
-            <span className="font-mono text-sm font-bold text-ember">
-              {habit.streak}
-            </span>
-          </div>
-
+        <div className="flex items-center gap-1 shrink-0">
           {/* Edit */}
           <button
             onClick={() => onEdit(habit)}
@@ -50,6 +41,22 @@ export default function HabitCard({ habit, onToggleToday, onEdit, onDelete }) {
           >
             <Trash2 className="h-4 w-4" />
           </button>
+        </div>
+      </div>
+
+      {/* Streak / longest / completion% badges */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex items-center gap-1 rounded-full bg-emberSoft px-2.5 py-1" title={`${habit.streak}-day current streak`}>
+          <Flame aria-hidden="true" className="h-3.5 w-3.5 text-ember" />
+          <span className="font-mono text-xs font-bold text-ember">{habit.streak}</span>
+        </div>
+        <div className="flex items-center gap-1 rounded-full bg-pineSoft px-2.5 py-1" title="Longest streak ever">
+          <Trophy aria-hidden="true" className="h-3.5 w-3.5 text-pine" />
+          <span className="font-mono text-xs font-bold text-pine">{longest}</span>
+        </div>
+        <div className="flex items-center gap-1 rounded-full bg-paperLine/70 px-2.5 py-1" title="30-day completion rate">
+          <Percent aria-hidden="true" className="h-3.5 w-3.5 text-inkSoft" />
+          <span className="font-mono text-xs font-bold text-ink">{rate}</span>
         </div>
       </div>
 
