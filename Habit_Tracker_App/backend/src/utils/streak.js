@@ -40,7 +40,11 @@ function toISOWeekKey(date) {
 
 function computeDailyStreak(dateKeys) {
   const set = new Set(dateKeys);
-  let cursor = new Date();
+  const localToday = todayKey();
+  const latestLogged = [...set].sort().at(-1);
+  const anchorKey = latestLogged && latestLogged > localToday ? latestLogged : localToday;
+  let cursor = new Date(`${anchorKey}T00:00:00`);
+
   if (!set.has(toDateKey(cursor))) cursor = addDays(cursor, -1);
   let streak = 0;
   while (set.has(toDateKey(cursor))) {
@@ -51,10 +55,20 @@ function computeDailyStreak(dateKeys) {
 }
 
 function computeWeeklyStreak(dateKeys) {
-  const weekSet = new Set(
-    dateKeys.map((k) => toISOWeekKey(new Date(`${k}T00:00:00`)))
-  );
+  const weekKeys = dateKeys.map((k) => toISOWeekKey(new Date(`${k}T00:00:00`)));
+  const weekSet = new Set(weekKeys);
+  const localWeek = toISOWeekKey(new Date());
+  const latestLoggedWeek = [...weekSet].sort().at(-1);
+  const anchorWeek = latestLoggedWeek && latestLoggedWeek > localWeek ? latestLoggedWeek : localWeek;
+
   let cursor = new Date();
+  while (toISOWeekKey(cursor) !== anchorWeek && toISOWeekKey(cursor) < anchorWeek) {
+    cursor = addDays(cursor, 7);
+  }
+  while (toISOWeekKey(cursor) !== anchorWeek && toISOWeekKey(cursor) > anchorWeek) {
+    cursor = addDays(cursor, -7);
+  }
+
   if (!weekSet.has(toISOWeekKey(cursor))) cursor = addDays(cursor, -7);
   let streak = 0;
   while (weekSet.has(toISOWeekKey(cursor))) {

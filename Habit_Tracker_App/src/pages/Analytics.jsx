@@ -57,7 +57,7 @@ export default function Analytics() {
 
   const doneToday    = habits.filter((h) => h.completions?.includes(toDateKey(new Date()))).length
   const longestOverall = habits.reduce((max, h) => Math.max(max, longestStreakEver(h.completions, h.frequency)), 0)
-  const avgRate30    = Math.round(habits.reduce((sum, h) => sum + completionRate30(h.completions), 0) / totalHabits)
+  const avgRate30    = Math.round(habits.reduce((sum, h) => sum + completionRate30(h.completions, h.createdAt), 0) / totalHabits)
 
   // ── Weekly completion: last 7 days, % of habits completed each day ──────
   const weeklyData = Array.from({ length: 7 }, (_, i) => {
@@ -83,7 +83,7 @@ export default function Analytics() {
 
   // ── Habit comparison: 30-day completion rate per habit ──────────────────
   const comparisonData = habits
-    .map((h) => ({ name: h.name, rate: completionRate30(h.completions) }))
+    .map((h) => ({ name: h.name, rate: completionRate30(h.completions, h.createdAt) }))
     .sort((a, b) => b.rate - a.rate)
 
   // ── Longest streak per habit ─────────────────────────────────────────────

@@ -1,11 +1,13 @@
 import { Flame, Trophy, CheckCircle2, Pencil, Trash2, Percent } from 'lucide-react'
 import WeekCalendarStrip from './WeekCalendarStrip.jsx'
-import { isCompletedToday, longestStreakEver, completionRate30 } from '../utils/streak.js'
+import { isCompletedToday, longestStreakEver, completionRateN } from '../utils/streak.js'
 
 export default function HabitCard({ habit, onToggleToday, onEdit, onDelete }) {
   const todayDone = isCompletedToday(habit.completions)
   const longest   = longestStreakEver(habit.completions, habit.frequency)
-  const rate      = completionRate30(habit.completions)
+  // Matches the 7-day strip shown right below it — no other window would
+  // agree with what the person can visually count on the card.
+  const rate      = completionRateN(habit.completions, 7)
 
   return (
     <article className="rounded-2xl border border-paperLine bg-white/70 backdrop-blur-sm p-5 shadow-sm flex flex-col gap-4">
@@ -54,7 +56,7 @@ export default function HabitCard({ habit, onToggleToday, onEdit, onDelete }) {
           <Trophy aria-hidden="true" className="h-3.5 w-3.5 text-pine" />
           <span className="font-mono text-xs font-bold text-pine">{longest}</span>
         </div>
-        <div className="flex items-center gap-1 rounded-full bg-paperLine/70 px-2.5 py-1" title="30-day completion rate">
+        <div className="flex items-center gap-1 rounded-full bg-paperLine/70 px-2.5 py-1" title="Completion rate over the last 7 days">
           <Percent aria-hidden="true" className="h-3.5 w-3.5 text-inkSoft" />
           <span className="font-mono text-xs font-bold text-ink">{rate}</span>
         </div>

@@ -161,7 +161,7 @@ export default function Profile() {
   const totalCompletions = habits.reduce((sum, h) => sum + (h.completions?.length || 0), 0)
   const longestOverall = habits.reduce((max, h) => Math.max(max, longestStreakEver(h.completions, h.frequency)), 0)
   const avgRate30 = totalHabits
-    ? Math.round(habits.reduce((sum, h) => sum + completionRate30(h.completions), 0) / totalHabits)
+    ? Math.round(habits.reduce((sum, h) => sum + completionRate30(h.completions, h.createdAt), 0) / totalHabits)
     : 0
   const memberSince = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })

@@ -48,11 +48,22 @@ function toISOWeekKey(date) {
 // Walks backwards day-by-day. Treats the streak as still "alive" if yesterday
 // was done even when today hasn't been ticked yet (so it doesn't flicker to 0
 // the moment midnight passes). Any real gap resets it to 0.
+//
+// Anchor point: normally "today" per this machine's own clock. But the streak
+// is often computed on the server while the completion date was stamped by
+// the browser — if they're in different timezones, the server's "today" can
+// be a calendar day behind the browser's (e.g. server in UTC, user ahead of
+// UTC). If the most recent logged date is AHEAD of this machine's "today",
+// trust the data and anchor there instead — otherwise a same-day, same-streak
+// completion could undercount because the walk-back never reaches it.
 function computeDailyStreak(dateKeys) {
   const set = new Set(dateKeys)
-  let cursor = new Date()
+  const localToday = todayKey()
+  const latestLogged = [...set].sort().at(-1)
+  const anchorKey = latestLogged && latestLogged > localToday ? latestLogged : localToday
+  let cursor = new Date(`${anchorKey}T00:00:00`)
 
-  // Allow grace: if today is not yet done, start checking from yesterday
+  // Allow grace: if the anchor day is not yet done, start checking from the day before
   if (!set.has(toDateKey(cursor))) {
     cursor = addDays(cursor, -1)
   }
@@ -65,12 +76,22 @@ function computeDailyStreak(dateKeys) {
   return streak
 }
 
-// Weekly streak 
+// Weekly streak — same anchor-drift protection as computeDailyStreak above.
 function computeWeeklyStreak(dateKeys) {
-  const weekSet = new Set(
-    dateKeys.map((key) => toISOWeekKey(new Date(`${key}T00:00:00`)))
-  )
+  const weekKeys = dateKeys.map((key) => toISOWeekKey(new Date(`${key}T00:00:00`)))
+  const weekSet = new Set(weekKeys)
+  const localWeek = toISOWeekKey(new Date())
+  const latestLoggedWeek = [...weekSet].sort().at(-1)
+  const anchorWeek = latestLoggedWeek && latestLoggedWeek > localWeek ? latestLoggedWeek : localWeek
+
   let cursor = new Date()
+  // Walk `cursor` to land on the anchor week by nudging in 7-day steps.
+  while (toISOWeekKey(cursor) !== anchorWeek && toISOWeekKey(cursor) < anchorWeek) {
+    cursor = addDays(cursor, 7)
+  }
+  while (toISOWeekKey(cursor) !== anchorWeek && toISOWeekKey(cursor) > anchorWeek) {
+    cursor = addDays(cursor, -7)
+  }
 
   if (!weekSet.has(toISOWeekKey(cursor))) {
     cursor = addDays(cursor, -7)
@@ -114,23 +135,38 @@ export function getLast7DateKeys() {
 /**
  * Percentage of the trailing `days` days that were completed.
  * completionRate30 (below) is just this with days=30.
+ *
+ * If `createdAt` is given, the window is capped to how long the habit has
+ * actually existed — a 3-day-old habit completed every day should read
+ * 100%, not 10% (3/30), which is what a flat 30-day denominator would show.
  */
-export function completionRateN(completions, days) {
+export function completionRateN(completions, days, createdAt) {
   if (!Array.isArray(completions)) return 0
+
+  let windowDays = days
+  if (createdAt) {
+    const createdKey = toDateKey(new Date(createdAt))
+    const msPerDay = 86_400_000
+    const daysSinceCreated = Math.floor(
+      (new Date(`${todayKey()}T00:00:00`) - new Date(`${createdKey}T00:00:00`)) / msPerDay
+    ) + 1 // inclusive of the creation day itself
+    windowDays = Math.min(days, Math.max(daysSinceCreated, 1))
+  }
+
   const set = new Set(completions)
   let count = 0
-  for (let i = 0; i < days; i++) {
+  for (let i = 0; i < windowDays; i++) {
     if (set.has(toDateKey(addDays(new Date(), -i)))) count++
   }
-  return Math.round((count / days) * 100)
+  return Math.round((count / windowDays) * 100)
 }
 
 /**
- * Percentage of the last 30 days that were completed.
- * Used on the Stats page.
+ * Percentage of the last 30 days (or the habit's full age, if younger) that
+ * were completed. Used on the Stats page and habit cards.
  */
-export function completionRate30(completions) {
-  return completionRateN(completions, 30)
+export function completionRate30(completions, createdAt) {
+  return completionRateN(completions, 30, createdAt)
 }
 
 // Longest streak ever achieved (not just the current one) — scans the full

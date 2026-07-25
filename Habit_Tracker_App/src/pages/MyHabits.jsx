@@ -79,7 +79,7 @@ export default function MyHabits() {
     const withDerived = list.map((h) => ({
       ...h,
       _longest: longestStreakEver(h.completions, h.frequency),
-      _rate:    completionRate30(h.completions),
+      _rate:    completionRate30(h.completions, h.createdAt),
     }))
 
     switch (sort) {

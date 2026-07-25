@@ -1,22 +1,36 @@
-// Dashboard — overview page (Week 6)
-// Pure stats + quick actions. Full habit CRUD (search/filter/sort, per-habit
-// cards) now lives on the "My Habits" page — this page's job is to answer
-// "how am I doing right now" at a glance, then hand off to the right tool.
+// Dashboard — overview page.
+// Everything here is derived live from `habits` (never stored as a separate
+// aggregate), so it can never drift out of sync with My Habits.
 
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Plus, ListChecks, CalendarDays, BarChart2, Bot,
-  Flame, Trophy, CheckCircle2, ListTodo,
+  Sun, CloudSun, Sunset, Moon, Bot, Trophy, Grid3x3, History,
+  ListChecks, CalendarDays, BarChart2, PartyPopper,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useHabits } from '../context/HabitsContext.jsx'
-import AddHabitForm from '../components/AddHabitForm.jsx'
+import AIInsight from '../components/AIInsight.jsx'
+import AchievementBadges from '../components/AchievementBadges.jsx'
+import RecentActivity from '../components/RecentActivity.jsx'
+import ContributionHeatmap from '../components/ContributionHeatmap.jsx'
 import { completionRateN, isCompletedToday, longestStreakEver } from '../utils/streak.js'
+import { quoteOfTheDay } from '../utils/motivationalQuotes.js'
 
 const TODAY_LABEL = new Date().toLocaleDateString(undefined, {
   weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
 })
+
+function getGreeting(date = new Date()) {
+  const hour = date.getHours()
+  if (hour < 12) return { text: 'Good Morning', Icon: Sun }
+  if (hour < 17) return { text: 'Good Afternoon', Icon: CloudSun }
+  if (hour < 21) return { text: 'Good Evening', Icon: Sunset }
+  return { text: 'Good Night', Icon: Moon }
+}
+
+function Divider() {
+  return <hr className="my-6 border-paperLine" />
+}
 
 function ProgressBar({ label, percent, color }) {
   return (
@@ -35,27 +49,36 @@ function ProgressBar({ label, percent, color }) {
   )
 }
 
-function StatCard({ label, value, Icon, accent }) {
+function StatCard({ label, value, accent }) {
   return (
     <div className="rounded-2xl border border-paperLine bg-white/70 p-4">
-      <div className="flex items-center justify-between">
-        <p className="font-mono text-xs uppercase tracking-wide text-inkSoft">{label}</p>
-        {Icon && <Icon className={`h-4 w-4 ${accent || 'text-inkSoft'}`} aria-hidden="true" />}
-      </div>
-      <p className="mt-1 font-display text-2xl font-bold text-ink">{value}</p>
+      <p className="font-mono text-xs uppercase tracking-wide text-inkSoft">{label}</p>
+      <p className={`mt-1 font-display text-2xl font-bold ${accent || 'text-ink'}`}>{value}</p>
     </div>
+  )
+}
+
+function Card({ title, Icon, children }) {
+  return (
+    <section className="rounded-2xl border border-paperLine bg-white/70 p-5">
+      <h2 className="mb-4 flex items-center gap-2 font-display text-base font-semibold text-ink">
+        {Icon && <Icon className="h-4 w-4 text-pine" aria-hidden="true" />}
+        {title}
+      </h2>
+      {children}
+    </section>
   )
 }
 
 export default function Dashboard() {
   const { user } = useAuth()
-  const { habits, loading, addHabit } = useHabits()
+  const { habits, loading } = useHabits()
 
-  const [formOpen, setFormOpen] = useState(false)
-  const [formError, setFormError] = useState('')
+  const greeting = getGreeting()
 
   const totalHabits = habits.length
   const completedToday = habits.filter((h) => isCompletedToday(h.completions)).length
+  const remainingToday = Math.max(totalHabits - completedToday, 0)
   const currentStreak = habits.reduce((max, h) => Math.max(max, h.streak), 0)
   const longestStreak = habits.reduce(
     (max, h) => Math.max(max, longestStreakEver(h.completions, h.frequency)),
@@ -63,67 +86,106 @@ export default function Dashboard() {
   )
 
   const weeklyProgress = totalHabits
-    ? Math.round(habits.reduce((sum, h) => sum + completionRateN(h.completions, 7), 0) / totalHabits)
+    ? Math.round(habits.reduce((sum, h) => sum + completionRateN(h.completions, 7, h.createdAt), 0) / totalHabits)
     : 0
   const monthlyProgress = totalHabits
-    ? Math.round(habits.reduce((sum, h) => sum + completionRateN(h.completions, 30), 0) / totalHabits)
+    ? Math.round(habits.reduce((sum, h) => sum + completionRateN(h.completions, 30, h.createdAt), 0) / totalHabits)
     : 0
 
-  async function handleAddHabit({ name, frequency }) {
-    try {
-      await addHabit({ name, frequency })
-      setFormOpen(false)
-      setFormError('')
-    } catch (err) {
-      setFormError(err.message)
-    }
+  let goalText
+  let goalDone = false
+  if (totalHabits === 0) {
+    goalText = 'Add a habit to set today\u2019s goal.'
+  } else if (remainingToday === 0) {
+    goalText = 'All habits complete for today!'
+    goalDone = true
+  } else {
+    goalText = `Complete ${remainingToday} more habit${remainingToday !== 1 ? 's' : ''} today`
   }
 
   const quickActions = [
-    { to: '/habits', label: 'My Habits', desc: 'View, edit & complete', Icon: ListChecks, color: 'bg-pineSoft text-pine' },
-    { to: '/calendar', label: 'Calendar', desc: 'Week & month view', Icon: CalendarDays, color: 'bg-emberSoft text-ember' },
-    { to: '/analytics', label: 'Analytics', desc: 'Charts & comparisons', Icon: BarChart2, color: 'bg-pineSoft text-pine' },
-    { to: '/ai-coach', label: 'AI Coach', desc: 'Get personalised tips', Icon: Bot, color: 'bg-emberSoft text-ember' },
+    { to: '/habits',    label: 'My Habits', desc: 'View, edit & complete', Icon: ListChecks,  color: 'bg-pineSoft text-pine'   },
+    { to: '/calendar',  label: 'Calendar',  desc: 'Week & month view',     Icon: CalendarDays, color: 'bg-emberSoft text-ember' },
+    { to: '/analytics', label: 'Analytics', desc: 'Charts & comparisons',  Icon: BarChart2,    color: 'bg-pineSoft text-pine'   },
+    { to: '/ai-coach',  label: 'AI Coach',  desc: 'Get personalised tips', Icon: Bot,          color: 'bg-emberSoft text-ember' },
   ]
 
   return (
     <div>
-      {/* Welcome header */}
-      <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+      {/* ── Greeting header ──────────────────────────────────────────── */}
+      <h1 className="flex items-center gap-2 font-display text-3xl font-bold text-ink">
+        <greeting.Icon className="h-7 w-7 text-ember" aria-hidden="true" />
+        {greeting.text}, {user?.name || 'there'}
+      </h1>
+      <p className="mt-1 font-mono text-xs uppercase tracking-widest text-pine">{TODAY_LABEL}</p>
+
+      {/* ── Motivational quote ───────────────────────────────────────── */}
+      <p className="mt-3 text-sm italic text-inkSoft">"{quoteOfTheDay()}"</p>
+
+      {/* ── Today's Goal ─────────────────────────────────────────────── */}
+      <div className="mt-4 flex items-center gap-2.5 rounded-2xl border border-paperLine bg-pineSoft/50 px-4 py-3">
+        {goalDone && <PartyPopper className="h-4 w-4 shrink-0 text-pine" aria-hidden="true" />}
         <div>
-          <p className="font-mono text-xs uppercase tracking-widest text-pine">{TODAY_LABEL}</p>
-          <h1 className="font-display text-3xl font-bold text-ink">
-            Welcome back, {user?.name || 'there'}
-          </h1>
-          <p className="mt-1 text-sm text-inkSoft">
-            {loading
-              ? 'Loading your habits…'
-              : totalHabits === 0
-                ? "You haven't added any habits yet — start with your first one below."
-                : `${completedToday}/${totalHabits} habits done today.`}
+          <p className="font-display text-sm font-semibold text-ink">Today's Goal</p>
+          <p className="mt-0.5 text-sm text-inkSoft">
+            {loading ? 'Loading your habits…' : goalText}
           </p>
         </div>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-6">
-        <StatCard label="Total habits" value={totalHabits} Icon={ListTodo} />
-        <StatCard label="Completed today" value={`${completedToday}/${totalHabits}`} Icon={CheckCircle2} accent="text-pine" />
-        <StatCard label="Current streak" value={currentStreak} Icon={Flame} accent="text-ember" />
-        <StatCard label="Longest streak" value={longestStreak} Icon={Trophy} accent="text-ember" />
+      <Divider />
+
+      {/* ── Statistics cards ─────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard label="Total Habits"      value={totalHabits} />
+        <StatCard label="Completed Today"   value={`${completedToday}/${totalHabits}`} accent="text-pine" />
+        <StatCard label="Current Streak"    value={currentStreak} accent="text-ember" />
+        <StatCard label="Longest Streak"    value={longestStreak} accent="text-ember" />
       </div>
 
-      {/* Weekly / monthly progress */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-8">
+      <Divider />
+
+      {/* ── Weekly & Monthly Progress ────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="rounded-2xl border border-paperLine bg-white/70 p-5">
-          <ProgressBar label="Weekly progress (last 7 days)" percent={weeklyProgress} color="#2F6F62" />
+          <ProgressBar label="Weekly Progress" percent={weeklyProgress} color="#2F6F62" />
         </div>
         <div className="rounded-2xl border border-paperLine bg-white/70 p-5">
-          <ProgressBar label="Monthly progress (last 30 days)" percent={monthlyProgress} color="#E2672F" />
+          <ProgressBar label="Monthly Progress" percent={monthlyProgress} color="#E2672F" />
         </div>
       </div>
 
-      {/* Quick actions */}
+      <Divider />
+
+      {/* ── AI Insight ───────────────────────────────────────────────── */}
+      <Card title="AI Insight" Icon={Bot}>
+        <AIInsight habits={habits} />
+      </Card>
+
+      <Divider />
+
+      {/* ── Achievement Badges ───────────────────────────────────────── */}
+      <Card title="Achievement Badges" Icon={Trophy}>
+        <AchievementBadges habits={habits} />
+      </Card>
+
+      <Divider />
+
+      {/* ── Heatmap ──────────────────────────────────────────────────── */}
+      <Card title="Heatmap" Icon={Grid3x3}>
+        <ContributionHeatmap habits={habits} />
+      </Card>
+
+      <Divider />
+
+      {/* ── Recent Activity ──────────────────────────────────────────── */}
+      <Card title="Recent Activity" Icon={History}>
+        <RecentActivity habits={habits} />
+      </Card>
+
+      <Divider />
+
+      {/* ── Quick actions ────────────────────────────────────────────── */}
       <section>
         <h2 className="mb-3 font-display text-lg font-semibold text-ink">Quick actions</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -142,14 +204,6 @@ export default function Dashboard() {
           ))}
         </div>
       </section>
-
-      <AddHabitForm
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        onSubmit={handleAddHabit}
-        existingNames={habits.map((h) => h.name)}
-        serverError={formError}
-      />
     </div>
   )
 }
