@@ -7,13 +7,11 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Camera, User, Mail, KeyRound, Trash2, Eye, EyeOff,
-  CheckCircle2, ListTodo, Flame, Trophy, CalendarClock,
+  Camera, User, Mail, KeyRound, Trash2, Eye, EyeOff, CalendarClock,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useHabits } from '../context/HabitsContext.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
-import { longestStreakEver, completionRate30 } from '../utils/streak.js'
 
 // Resize/compress an uploaded image client-side before turning it into a
 // data URL — keeps the document small since it's stored directly on the
@@ -38,18 +36,6 @@ function resizeImageToDataUrl(file, maxSize = 256, quality = 0.82) {
     }
     reader.readAsDataURL(file)
   })
-}
-
-function StatPill({ label, value, Icon }) {
-  return (
-    <div className="rounded-2xl border border-paperLine bg-white/70 p-4">
-      <div className="flex items-center justify-between">
-        <p className="font-mono text-xs uppercase tracking-wide text-inkSoft">{label}</p>
-        {Icon && <Icon className="h-4 w-4 text-ember" aria-hidden="true" />}
-      </div>
-      <p className="mt-1 font-display text-2xl font-bold text-ink">{value}</p>
-    </div>
-  )
 }
 
 export default function Profile() {
@@ -156,13 +142,8 @@ export default function Profile() {
     }
   }
 
-  // ── Account statistics (derived, never stored separately) ───────────────
+  // totalHabits is still used below in the delete-account confirmation message.
   const totalHabits = habits.length
-  const totalCompletions = habits.reduce((sum, h) => sum + (h.completions?.length || 0), 0)
-  const longestOverall = habits.reduce((max, h) => Math.max(max, longestStreakEver(h.completions, h.frequency)), 0)
-  const avgRate30 = totalHabits
-    ? Math.round(habits.reduce((sum, h) => sum + completionRate30(h.completions, h.createdAt), 0) / totalHabits)
-    : 0
   const memberSince = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
     : '—'
@@ -246,19 +227,10 @@ export default function Profile() {
         </form>
       </section>
 
-      {/* ── Account statistics ───────────────────────────────────────────── */}
-      <section className="mb-6">
-        <h2 className="mb-3 font-display text-lg font-semibold text-ink">Account statistics</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatPill label="Habits" value={totalHabits} Icon={ListTodo} />
-          <StatPill label="Completions" value={totalCompletions} Icon={CheckCircle2} />
-          <StatPill label="Best streak" value={longestOverall} Icon={Trophy} />
-          <StatPill label="30-day avg" value={`${avgRate30}%`} Icon={Flame} />
-        </div>
-        <p className="mt-3 flex items-center gap-1.5 text-xs text-inkSoft">
-          <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" /> Member since {memberSince}
-        </p>
-      </section>
+      {/* ── Member since ─────────────────────────────────────────────────── */}
+      <p className="mb-6 flex items-center gap-1.5 text-xs text-inkSoft">
+        <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" /> Member since {memberSince}
+      </p>
 
       {/* ── Change password ─────────────────────────────────────────────── */}
       <section className="rounded-2xl border border-paperLine bg-white/70 p-6 mb-6">
