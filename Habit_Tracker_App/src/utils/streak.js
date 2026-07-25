@@ -34,7 +34,7 @@ export function addDays(date, days) {
 }
 
 /** ISO week key ("2026-W26") for weekly-habit streak counting. */
-function toISOWeekKey(date) {
+export function toISOWeekKey(date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
   const dayNum = (d.getUTCDay() + 6) % 7 // Mon = 0 … Sun = 6
   d.setUTCDate(d.getUTCDate() - dayNum + 3)
@@ -215,4 +215,82 @@ export function longestStreakEver(completions, frequency = 'daily') {
   return frequency === 'weekly'
     ? longestConsecutiveWeeklyRun(valid)
     : longestConsecutiveDailyRun(valid)
+}
+
+// ─── Occurrence-based period progress (Weekly/Monthly Progress cards) ───────
+// Unlike completionRateN (which averages each habit's OWN percentage),
+// this counts every *scheduled occurrence* across ALL habits and every
+// *completed occurrence* across all habits, then divides once:
+//   percent = (total completed occurrences) / (total scheduled occurrences) × 100
+// This is what makes "3 daily habits this week" a flat 21-occurrence
+// denominator (3 × 7) rather than an average of three separate percentages.
+
+/** Monday–Sunday range containing `date` (defaults to today), as Date objects at midnight. */
+export function getWeekRange(date = new Date()) {
+  const d = new Date(date)
+  d.setHours(0, 0, 0, 0)
+  const dayIndex = (d.getDay() + 6) % 7 // Mon=0 … Sun=6
+  const start = addDays(d, -dayIndex)
+  const end   = addDays(start, 6)
+  return { start, end }
+}
+
+/** First–last day of the calendar month containing `date` (defaults to today). */
+export function getMonthRange(date = new Date()) {
+  const start = new Date(date.getFullYear(), date.getMonth(), 1)
+  const end   = new Date(date.getFullYear(), date.getMonth() + 1, 0) // day 0 = last day of prior month arg → last day of this month
+  end.setHours(0, 0, 0, 0)
+  return { start, end }
+}
+
+/**
+ * Total scheduled vs. completed occurrences across every habit within
+ * [periodStart, periodEnd] (inclusive, both at midnight).
+ *
+ * - Daily habits: one scheduled occurrence per calendar day in the period —
+ *   including days later in the period that haven't happened yet, so a
+ *   3-daily-habit week is always a 21-occurrence denominator, not a shrinking
+ *   "days elapsed so far" count. Days before the habit was created don't count.
+ * - Weekly habits: one scheduled occurrence per ISO week that overlaps the
+ *   period (again, skipped if the habit didn't exist yet that week); "completed"
+ *   means at least one completion date fell in that week.
+ */
+export function getPeriodProgress(habits, periodStart, periodEnd) {
+  let totalScheduled = 0
+  let totalCompleted = 0
+
+  for (const h of habits || []) {
+    const completions = Array.isArray(h.completions) ? h.completions : []
+    const completionSet = new Set(completions)
+    const createdKey = h.createdAt ? toDateKey(new Date(h.createdAt)) : null
+
+    if (h.frequency === 'weekly') {
+      const weekKeys = new Set()
+      for (let d = new Date(periodStart); d <= periodEnd; d = addDays(d, 1)) {
+        weekKeys.add(toISOWeekKey(d))
+      }
+      const createdWeekKey = createdKey ? toISOWeekKey(new Date(`${createdKey}T00:00:00`)) : null
+      for (const wk of weekKeys) {
+        if (createdWeekKey && createdWeekKey > wk) continue // habit didn't exist yet that week
+        totalScheduled += 1
+        const completedThisWeek = completions.some(
+          (key) => toISOWeekKey(new Date(`${key}T00:00:00`)) === wk
+        )
+        if (completedThisWeek) totalCompleted += 1
+      }
+    } else {
+      for (let d = new Date(periodStart); d <= periodEnd; d = addDays(d, 1)) {
+        const key = toDateKey(d)
+        if (createdKey && key < createdKey) continue // habit didn't exist yet that day
+        totalScheduled += 1
+        if (completionSet.has(key)) totalCompleted += 1
+      }
+    }
+  }
+
+  return {
+    completed: totalCompleted,
+    scheduled: totalScheduled,
+    percent: totalScheduled > 0 ? Math.round((totalCompleted / totalScheduled) * 100) : 0,
+  }
 }

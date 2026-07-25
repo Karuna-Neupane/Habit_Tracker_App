@@ -9,11 +9,13 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useHabits } from '../context/HabitsContext.jsx'
-import AIInsight from '../components/AIInsight.jsx'
 import AchievementBadges from '../components/AchievementBadges.jsx'
 import RecentActivity from '../components/RecentActivity.jsx'
 import ContributionHeatmap from '../components/ContributionHeatmap.jsx'
-import { completionRateN, isCompletedToday, longestStreakEver } from '../utils/streak.js'
+import {
+  isCompletedToday, longestStreakEver,
+  getWeekRange, getMonthRange, getPeriodProgress,
+} from '../utils/streak.js'
 import { quoteOfTheDay } from '../utils/motivationalQuotes.js'
 
 const TODAY_LABEL = new Date().toLocaleDateString(undefined, {
@@ -32,7 +34,7 @@ function Divider() {
   return <hr className="my-6 border-paperLine" />
 }
 
-function ProgressBar({ label, percent, color }) {
+function ProgressBar({ label, percent, color, subtitle }) {
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between text-sm">
@@ -45,6 +47,7 @@ function ProgressBar({ label, percent, color }) {
           style={{ width: `${percent}%`, backgroundColor: color }}
         />
       </div>
+      {subtitle && <p className="mt-1.5 text-xs text-inkSoft">{subtitle}</p>}
     </div>
   )
 }
@@ -85,12 +88,14 @@ export default function Dashboard() {
     0
   )
 
-  const weeklyProgress = totalHabits
-    ? Math.round(habits.reduce((sum, h) => sum + completionRateN(h.completions, 7, h.createdAt), 0) / totalHabits)
-    : 0
-  const monthlyProgress = totalHabits
-    ? Math.round(habits.reduce((sum, h) => sum + completionRateN(h.completions, 30, h.createdAt), 0) / totalHabits)
-    : 0
+  // Weekly/Monthly Progress: total completed occurrences ÷ total scheduled
+  // occurrences across ALL habits — never an average of individual habit
+  // percentages. See utils/streak.js getPeriodProgress for the full rules
+  // (daily habits: 1 occurrence/day; weekly habits: 1 occurrence/week).
+  const { start: weekStart, end: weekEnd }   = getWeekRange()
+  const { start: monthStart, end: monthEnd } = getMonthRange()
+  const weeklyStats  = getPeriodProgress(habits, weekStart, weekEnd)
+  const monthlyStats = getPeriodProgress(habits, monthStart, monthEnd)
 
   let goalText
   let goalDone = false
@@ -148,19 +153,22 @@ export default function Dashboard() {
       {/* ── Weekly & Monthly Progress ────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="rounded-2xl border border-paperLine bg-white/70 p-5">
-          <ProgressBar label="Weekly Progress" percent={weeklyProgress} color="#2F6F62" />
+          <ProgressBar
+            label="Weekly Progress"
+            percent={weeklyStats.percent}
+            color="#2F6F62"
+            subtitle="Overall completion rate for this week"
+          />
         </div>
         <div className="rounded-2xl border border-paperLine bg-white/70 p-5">
-          <ProgressBar label="Monthly Progress" percent={monthlyProgress} color="#E2672F" />
+          <ProgressBar
+            label="Monthly Progress"
+            percent={monthlyStats.percent}
+            color="#E2672F"
+            subtitle="Overall completion rate for this month"
+          />
         </div>
       </div>
-
-      <Divider />
-
-      {/* ── AI Insight ───────────────────────────────────────────────── */}
-      <Card title="AI Insight" Icon={Bot}>
-        <AIInsight habits={habits} />
-      </Card>
 
       <Divider />
 

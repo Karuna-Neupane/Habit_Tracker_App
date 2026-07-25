@@ -155,7 +155,7 @@ export default function Analytics() {
               <Tooltip {...tooltipStyle()} formatter={(v) => [`${v}%`, 'Completion rate']} />
               <Bar dataKey="rate" radius={[0, 6, 6, 0]}>
                 {comparisonData.map((entry, i) => (
-                  <Cell key={i} fill={entry.rate >= 80 ? PINE : entry.rate >= 50 ? EMBER : GRID} />
+                  <Cell key={i} fill={entry.rate > 0 ? EMBER : GRID} />
                 ))}
               </Bar>
             </BarChart>
@@ -193,7 +193,7 @@ export default function Analytics() {
                   className="h-full rounded-full transition-all duration-500"
                   style={{
                     width: `${h.rate}%`,
-                    backgroundColor: h.rate >= 80 ? PINE : h.rate >= 50 ? EMBER : GRID,
+                    backgroundColor: h.rate > 0 ? EMBER : 'transparent',
                   }}
                 />
               </div>

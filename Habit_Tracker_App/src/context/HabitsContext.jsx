@@ -9,12 +9,13 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import api from '../utils/api.js'
 import { useAuth } from './AuthContext.jsx'
 import { todayKey } from '../utils/streak.js'
+import { logHabitDeleted } from '../utils/activityLog.js'
 
 const HabitsContext = createContext(null)
 
 // ── Provide the Context ────────────────────────────────────────────────────
 export function HabitsProvider({ children }) {
-  const { isAuthenticated, initializing } = useAuth()
+  const { isAuthenticated, initializing, user } = useAuth()
   const [habits,  setHabits]  = useState([])
   const [loading, setLoading] = useState(true)   // drives loading skeleton
   const [error,   setError]   = useState(null)
@@ -89,9 +90,13 @@ export function HabitsProvider({ children }) {
 
   // ── Delete habit — DELETE from MongoDB ──────────────────────────────────
   async function deleteHabit(habitId) {
+    const habit = habits.find((h) => h.id === habitId)
     try {
       await api.delete(`/habits/${habitId}`)
       setHabits((prev) => prev.filter((h) => h.id !== habitId))
+      // Once deleted, this habit's data is gone for good — this is the one
+      // event type Recent Activity can't derive live, so log it separately.
+      if (habit) logHabitDeleted(user?.id, habit.name)
     } catch (err) {
       setError(err.response?.data?.message || err.message)
     }
