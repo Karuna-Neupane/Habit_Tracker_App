@@ -1,17 +1,22 @@
-// AI Coach — Week 7
-// Calls POST /api/ai/coach, which sends the user's real habit names and
-// streaks to Gemini (server-side — the API key never touches the browser)
-// with a habit-coach prompt, and returns structured motivational feedback.
-// Falls back to a rule-based analysis if Gemini isn't configured, so this
-// always works.
+// AI Coach — Week 7, now with a premium AI Chatbot alongside it
+// Calls POST /api/ai/coach, which sends the user's real habit names,
+// streaks, and completion rates to Gemini (server-side — the API key never
+// touches the browser) with a habit-coach prompt, and returns structured
+// coaching feedback. Falls back to a rule-based analysis if Gemini isn't
+// configured, so this always works.
+//
+// Below the coaching card sits the AI Chatbot (AIChatBot.jsx) — a separate,
+// additive premium feature for natural-language follow-up questions. It
+// does not replace this section.
 
 import { useState } from 'react'
 import {
-  Bot, Sparkles, AlertTriangle, RefreshCw, Heart,
-  TrendingDown, Lightbulb, Target, PartyPopper,
+  Bot, Sparkles, AlertTriangle, RefreshCw, Gauge,
+  Trophy, TrendingDown, Lightbulb, Target, Heart,
 } from 'lucide-react'
 import api from '../utils/api.js'
 import { useHabits } from '../context/HabitsContext.jsx'
+import AIChatBot from '../components/AIChatBot.jsx'
 
 export default function AICoach() {
   const { habits } = useHabits()
@@ -34,16 +39,18 @@ export default function AICoach() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
+      {/* ── AI Coach section ──────────────────────────────────────────── */}
       <div className="mb-8 text-center">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-pineSoft text-pine">
           <Bot className="h-7 w-7" aria-hidden="true" />
         </div>
-        <p className="font-mono text-xs uppercase tracking-widest text-pine">AI Habit Coach</p>
+        <p className="font-mono text-xs uppercase tracking-widest text-pine">AI Coach</p>
         <h1 className="mt-1 font-display text-3xl font-bold text-ink">Get AI Coaching</h1>
         <p className="mt-3 text-sm text-inkSoft leading-relaxed">
           Your coach reviews {habits.length > 0 ? `all ${habits.length} of your habits` : 'your habits'} —
-          streaks, completion rates, and what's slipping — and gives you motivation, weak spots,
-          concrete suggestions, and a goal for next week.
+          streaks, weekly and monthly completion rates, and what's slipping — and gives you an honest read on
+          your overall performance, your strongest and weakest habits, concrete suggestions, and a goal for
+          tomorrow.
         </p>
       </div>
 
@@ -96,47 +103,56 @@ export default function AICoach() {
         </div>
       )}
 
-      {/* ── Result: styled motivational card ─────────────────────────────── */}
+      {/* ── Result: styled coaching card ─────────────────────────────────── */}
       {result && (
         <div className="space-y-4">
+          {/* Overall Performance */}
           <div className="rounded-2xl border border-pine/20 bg-gradient-to-br from-pineSoft/60 to-emberSoft/30 p-6">
             <div className="flex items-start gap-3">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-pine text-white">
-                <Heart className="h-4.5 w-4.5" aria-hidden="true" />
+                <Gauge className="h-4.5 w-4.5" aria-hidden="true" />
               </div>
               <div>
-                <p className="font-mono text-[11px] uppercase tracking-widest text-pine">Motivation</p>
+                <p className="font-mono text-[11px] uppercase tracking-widest text-pine">Overall Performance</p>
                 <p className="mt-1 font-display text-base font-semibold text-ink leading-relaxed">
-                  {result.motivation}
+                  {result.overallPerformance}
                 </p>
               </div>
             </div>
           </div>
 
-          {result.weakHabits?.length > 0 && (
-            <div className="rounded-2xl border border-paperLine bg-white/70 p-5">
-              <div className="mb-2 flex items-center gap-2">
-                <TrendingDown className="h-4 w-4 text-ember" aria-hidden="true" />
-                <p className="font-display text-sm font-semibold text-ink">Habits that need attention</p>
+          {/* Strongest / Weakest habit */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {result.strongestHabit && (
+              <div className="rounded-2xl border border-paperLine bg-white/70 p-5">
+                <div className="mb-2 flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-pine" aria-hidden="true" />
+                  <p className="font-display text-sm font-semibold text-ink">Strongest Habit</p>
+                </div>
+                <p className="text-sm text-inkSoft leading-relaxed">{result.strongestHabit}</p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {result.weakHabits.map((name) => (
-                  <span key={name} className="rounded-full bg-emberSoft px-3 py-1 text-xs font-semibold text-ember">
-                    {name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+            )}
 
-          {result.suggestions?.length > 0 && (
+            {result.weakestHabit && (
+              <div className="rounded-2xl border border-paperLine bg-white/70 p-5">
+                <div className="mb-2 flex items-center gap-2">
+                  <TrendingDown className="h-4 w-4 text-ember" aria-hidden="true" />
+                  <p className="font-display text-sm font-semibold text-ink">Weakest Habit</p>
+                </div>
+                <p className="text-sm text-inkSoft leading-relaxed">{result.weakestHabit}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Improvement Suggestions */}
+          {result.improvementSuggestions?.length > 0 && (
             <div className="rounded-2xl border border-paperLine bg-white/70 p-5">
               <div className="mb-2 flex items-center gap-2">
                 <Lightbulb className="h-4 w-4 text-pine" aria-hidden="true" />
-                <p className="font-display text-sm font-semibold text-ink">Suggestions</p>
+                <p className="font-display text-sm font-semibold text-ink">Improvement Suggestions</p>
               </div>
               <ul className="space-y-2">
-                {result.suggestions.map((s, i) => (
+                {result.improvementSuggestions.map((s, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-inkSoft leading-relaxed">
                     <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-pine" />
                     {s}
@@ -146,20 +162,22 @@ export default function AICoach() {
             </div>
           )}
 
-          {result.weeklyGoal && (
+          {/* Tomorrow's Goal */}
+          {result.tomorrowGoal && (
             <div className="rounded-2xl border border-paperLine bg-white/70 p-5">
               <div className="mb-1.5 flex items-center gap-2">
                 <Target className="h-4 w-4 text-ember" aria-hidden="true" />
-                <p className="font-display text-sm font-semibold text-ink">This week's goal</p>
+                <p className="font-display text-sm font-semibold text-ink">Tomorrow's Goal</p>
               </div>
-              <p className="text-sm text-inkSoft leading-relaxed">{result.weeklyGoal}</p>
+              <p className="text-sm text-inkSoft leading-relaxed">{result.tomorrowGoal}</p>
             </div>
           )}
 
-          {result.encouragement && (
+          {/* Motivational Message */}
+          {result.motivationalMessage && (
             <div className="flex items-center gap-2 rounded-2xl bg-ink px-5 py-4 text-paper">
-              <PartyPopper className="h-4 w-4 shrink-0 text-ember" aria-hidden="true" />
-              <p className="text-sm font-medium">{result.encouragement}</p>
+              <Heart className="h-4 w-4 shrink-0 text-ember" aria-hidden="true" />
+              <p className="text-sm font-medium">{result.motivationalMessage}</p>
             </div>
           )}
 
@@ -179,6 +197,9 @@ export default function AICoach() {
           </div>
         </div>
       )}
+
+      {/* ── AI Chatbot section (premium, additive) ─────────────────────── */}
+      <AIChatBot />
     </div>
   )
 }
