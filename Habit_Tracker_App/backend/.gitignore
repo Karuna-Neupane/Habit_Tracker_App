@@ -2,4 +2,10 @@ node_modules
 .env
 *.local
 data/
- 
+dist/
+build/
+.DS_Store
+*.log
+coverage/
+.vscode/
+.idea/
