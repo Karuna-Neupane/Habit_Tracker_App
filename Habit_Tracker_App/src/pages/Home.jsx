@@ -66,7 +66,7 @@ function HeroSection() {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 rounded-full border border-pine/20 bg-pineSoft/60 px-4 py-1.5 text-xs font-mono uppercase tracking-widest text-pine mb-8">
           <span className="h-1.5 w-1.5 rounded-full bg-pine animate-pulse" />
-          Streaks, Calendar &amp; Analytics — AI Coach Coming Soon
+          Streaks, Calendar, Analytics &amp; AI Coaching
           <Sparkles className="h-3 w-3" />
         </div>
 
@@ -85,7 +85,7 @@ function HeroSection() {
         <p className="mt-6 mx-auto max-w-2xl text-lg sm:text-xl text-inkSoft leading-relaxed">
           Habit Tracker helps you build and maintain positive daily routines by tracking habits,
           monitoring streaks, and visualising your progress across a full calendar and analytics
-          dashboard — with an AI coach in active development to keep you going when motivation dips.
+          dashboard — with a real AI coach, powered by Gemini, to keep you going when motivation dips.
         </p>
 
         {/* CTAs */}
@@ -186,7 +186,7 @@ const FEATURES = [
   { icon: Zap,          title: 'Instant updates',        desc: 'Tick a habit and streak, calendar, and stats all update live — no page reloads, no waiting.',                           color: 'bg-emberSoft text-ember' },
   { icon: Target,       title: 'Search, filter & sort',  desc: 'Find any habit fast on the My Habits page — search by name, filter daily/weekly, and sort six different ways.',           color: 'bg-pineSoft text-pine'  },
   { icon: TrendingUp,   title: 'Achievements & heatmap', desc: 'Earn streak and consistency badges automatically, and see months of activity at a glance in a GitHub-style heatmap.',      color: 'bg-emberSoft text-ember' },
-  { icon: Bot,          title: 'AI coaching',            desc: 'An AI coach that analyses your streaks and completion patterns is on the way — currently in active development.',         color: 'bg-pineSoft text-pine'  },
+  { icon: Bot,          title: 'AI coaching',            desc: 'A Gemini-powered coach reviews your streaks and completion rates to give you motivation, weak spots, and a weekly goal — one click away.', color: 'bg-pineSoft text-pine'  },
 ]
 
 function FeaturesSection() {
@@ -239,16 +239,16 @@ function AICoachSection() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-pine/40 bg-pine/20 px-4 py-1.5 text-xs font-mono uppercase tracking-widest text-pineSoft mb-6">
               <Brain className="h-3 w-3" />
-              AI Habit Coach · Coming Soon
+              AI Habit Coach
             </div>
             <h2 className="font-display text-4xl font-bold text-paper leading-tight">
-              A personal coach, on the way.
+              Your personal coach, one click away.
             </h2>
             <p className="mt-4 text-inkSoft leading-relaxed">
-              We're building an AI coach into Habit Tracker that will understand your specific
-              habits, streak history, and patterns — and give you motivation, flag weak habits,
-              and suggest concrete improvements, all based on your real data. It has its own
-              page in the app already; the AI analysis itself is actively in development.
+              Habit Tracker's AI coach reviews your actual habit names, streaks, and completion
+              rates — then, powered by Gemini, gives you motivation, flags the habits slipping,
+              and suggests concrete next steps. Hit "Get AI Coaching" on the AI Coach page any
+              time you want a read on how you're doing.
             </p>
             <ul className="mt-8 space-y-3">
               {[
@@ -266,12 +266,13 @@ function AICoachSection() {
               ))}
             </ul>
             <Link to="/register" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-ember px-6 py-3 text-sm font-semibold text-white hover:bg-ember/90 transition-colors">
-              Create your account — habit tracking is ready now
+              Try the AI coach free
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
-          {/* Mock chat — a concept preview of what's coming, not a live feature yet */}
+          {/* Mock chat — illustrates the kind of insight the coach gives.
+              The real feature (AI Coach page) is one click, not a live chat. */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
             <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
               <div className="flex items-center gap-3">
@@ -281,14 +282,11 @@ function AICoachSection() {
                 <div>
                   <p className="text-sm font-semibold text-paper">Habit AI Coach</p>
                   <div className="flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-ember" />
-                    <span className="text-xs text-inkSoft">Concept preview</span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-xs text-inkSoft">The kind of insight you'll get</span>
                   </div>
                 </div>
               </div>
-              <span className="shrink-0 rounded-full border border-ember/30 bg-ember/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide text-ember">
-                Coming soon
-              </span>
             </div>
 
             <div className="space-y-3 min-h-[260px]">
@@ -318,9 +316,9 @@ function AICoachSection() {
             ) : (
               <div className="mt-4 flex gap-2">
                 <div className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-inkSoft">
-                  Ask your coach anything… (coming soon)
+                  Get AI Coaching — one click, real analysis
                 </div>
-                <div className="rounded-xl bg-pine/50 px-3 py-2 text-white flex items-center cursor-not-allowed">
+                <div className="rounded-xl bg-pine px-3 py-2 text-white flex items-center">
                   <ArrowRight className="h-4 w-4" />
                 </div>
               </div>
@@ -379,7 +377,7 @@ function AboutSection() {
               genuinely useful — without the noise.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
-              {['React', 'Node.js', 'Express', 'MongoDB', 'JWT Auth', 'REST API'].map(tag => (
+              {['React', 'Node.js', 'Express', 'MongoDB', 'JWT Auth', 'REST API', 'Gemini AI'].map(tag => (
                 <span key={tag} className="rounded-full border border-paperLine bg-paper px-3 py-1 text-xs font-mono text-inkSoft">{tag}</span>
               ))}
             </div>
@@ -395,7 +393,7 @@ const STEPS = [
   { num: '01', icon: Shield,       title: 'Create your account',  desc: 'Sign up in seconds with your name, email, and password. Your data is private and secure from day one.'                                                },
   { num: '02', icon: Target,       title: 'Add your habits',      desc: "Give each habit a clear name and choose daily or weekly. Start with 2–3 habits for best results."                                                    },
   { num: '03', icon: CheckCircle2, title: 'Check in every day',   desc: 'Tap the tick button each day you complete a habit. Watch your streak counter grow and your 7-day strip fill up.'                                    },
-  { num: '04', icon: Bot,          title: 'AI coaching (soon)',   desc: "An AI coach that analyses your habits and streaks is in active development — for now, your Dashboard and Analytics page give you the same insight."   },
+  { num: '04', icon: Bot,          title: 'Get coached by AI',    desc: "Head to the AI Coach page and hit \"Get AI Coaching\" any time — it reviews your real streaks and gives you motivation and a weekly goal."   },
   { num: '05', icon: BarChart2,    title: 'Review your progress', desc: 'Visit the Analytics page to see 30-day completion rates, your longest streaks, and an overall picture of consistency.'                                },
 ]
 

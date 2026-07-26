@@ -7,6 +7,7 @@ const express     = require('express');
 const cors        = require('cors');
 const habitRoutes = require('./routes/habitRoutes');
 const authRoutes  = require('./routes/authRoutes');
+const aiRoutes    = require('./routes/aiRoutes');
 const verifyToken = require('./middleware/verifyToken');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -50,6 +51,8 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 // Week 5, item 2: every /api/habits route requires a valid JWT.
 app.use('/api/habits', verifyToken, habitRoutes);
+// Week 7: AI Coach also requires a valid JWT — it reads the caller's own habits.
+app.use('/api/ai', verifyToken, aiRoutes);
 
 // 404
 app.use((req, res) => {
