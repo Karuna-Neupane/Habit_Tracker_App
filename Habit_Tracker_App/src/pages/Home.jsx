@@ -3,6 +3,7 @@ import {
   CheckCircle2, Flame, BarChart2, Bot, Shield, Zap,
   Calendar, Target, TrendingUp, Star, ArrowRight,
   MessageSquare, Brain, Sparkles, Check, Smartphone, Lock, ChevronDown, Frown,
+  Gauge, Trophy, TrendingDown, Lightbulb, Heart,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -66,7 +67,7 @@ function HeroSection() {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 rounded-full border border-pine/20 bg-pineSoft/60 px-4 py-1.5 text-xs font-mono uppercase tracking-widest text-pine mb-8">
           <span className="h-1.5 w-1.5 rounded-full bg-pine animate-pulse" />
-          Streaks, Calendar, Analytics &amp; AI Coaching
+          Streaks, Calendar, Analytics, AI Coaching &amp; Chat
           <Sparkles className="h-3 w-3" />
         </div>
 
@@ -85,7 +86,8 @@ function HeroSection() {
         <p className="mt-6 mx-auto max-w-2xl text-lg sm:text-xl text-inkSoft leading-relaxed">
           Habit Tracker helps you build and maintain positive daily routines by tracking habits,
           monitoring streaks, and visualising your progress across a full calendar and analytics
-          dashboard — with a real AI coach, powered by Gemini, to keep you going when motivation dips.
+          dashboard — with a real AI coach, powered by Gemini, that gives you a one-click coaching
+          card and a follow-up chat you can keep coming back to.
         </p>
 
         {/* CTAs */}
@@ -186,7 +188,7 @@ const FEATURES = [
   { icon: Zap,          title: 'Instant updates',        desc: 'Tick a habit and streak, calendar, and stats all update live — no page reloads, no waiting.',                           color: 'bg-emberSoft text-ember' },
   { icon: Target,       title: 'Search, filter & sort',  desc: 'Find any habit fast on the My Habits page — search by name, filter daily/weekly, and sort six different ways.',           color: 'bg-pineSoft text-pine'  },
   { icon: TrendingUp,   title: 'Achievements & heatmap', desc: 'Earn streak and consistency badges automatically, and see months of activity at a glance in a GitHub-style heatmap.',      color: 'bg-emberSoft text-ember' },
-  { icon: Bot,          title: 'AI coaching',            desc: 'A Gemini-powered coach reviews your streaks and completion rates to give you motivation, weak spots, and a weekly goal — one click away.', color: 'bg-pineSoft text-pine'  },
+  { icon: Bot,          title: 'AI coaching & chat',      desc: 'Get a one-click Gemini coaching card — overall performance, strongest/weakest habit, suggestions, and a goal for tomorrow — then keep asking follow-up questions in a persistent chat that remembers past conversations.', color: 'bg-pineSoft text-pine'  },
 ]
 
 function FeaturesSection() {
@@ -218,8 +220,8 @@ function FeaturesSection() {
 
 // ─── AI Coach ─────────────────────────────────────────────────────────────────
 const CHAT = [
-  { role: 'user', text: "I keep missing my morning run when it's cold. Any tips?" },
-  { role: 'ai',   text: "Cold weather is one of the top habit killers! Try the '2-minute rule' — just put your running shoes on. Once they're on, you'll almost always go." },
+  { role: 'user', text: "Which habit needs the most attention?" },
+  { role: 'ai',   text: "Your weekly meal prep is at 40% completion over the last 30 days — well behind Morning run and Read 20 mins. Want a way to make it stick?" },
   { role: 'user', text: "I've broken my streak 3 days in a row now", icon: Frown },
   { role: 'ai',   text: "A broken streak isn't failure — it's data. You went 11 days before this gap. Let's talk about what changed and build a buffer strategy." },
   { role: 'user', text: "What's a good habit to pair with reading?" },
@@ -242,20 +244,22 @@ function AICoachSection() {
               AI Habit Coach
             </div>
             <h2 className="font-display text-4xl font-bold text-paper leading-tight">
-              Your personal coach, one click away.
+              Your personal coach — and now, a real conversation.
             </h2>
             <p className="mt-4 text-inkSoft leading-relaxed">
-              Habit Tracker's AI coach reviews your actual habit names, streaks, and completion
-              rates — then, powered by Gemini, gives you motivation, flags the habits slipping,
-              and suggests concrete next steps. Hit "Get AI Coaching" on the AI Coach page any
-              time you want a read on how you're doing.
+              Hit "Get AI Coaching" on the AI Coach page and Gemini reviews your actual habit
+              names, streaks, and completion rates to hand you a coaching card: overall
+              performance, your strongest and weakest habit, concrete suggestions, and a goal for
+              tomorrow. Then keep going — a built-in chatbot lets you ask follow-up questions in
+              plain language, and every conversation is saved, so it's still there the next time
+              you log in.
             </p>
             <ul className="mt-8 space-y-3">
               {[
-                { icon: MessageSquare, text: 'Personalised motivation based on your actual streak data'        },
-                { icon: Brain,         text: 'Evidence-based habit-building strategies tailored to you'        },
-                { icon: TrendingUp,    text: 'Pattern analysis to identify weak spots before you miss'         },
-                { icon: Sparkles,      text: 'On-demand coaching tips, any time, for any habit'               },
+                { icon: MessageSquare, text: 'A one-click coaching card built from your real streaks and completion rates'  },
+                { icon: Brain,         text: 'A follow-up chatbot for natural-language questions about your habits'         },
+                { icon: TrendingUp,    text: 'Grounded only in your real data — it never invents a stat or a streak'         },
+                { icon: Sparkles,      text: 'Conversation history is saved, so it survives a refresh or logging back in'    },
               ].map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-start gap-3">
                   <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-pine/30">
@@ -271,9 +275,72 @@ function AICoachSection() {
             </Link>
           </div>
 
-          {/* Mock chat — illustrates the kind of insight the coach gives.
-              The real feature (AI Coach page) is one click, not a live chat. */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+          {/* Illustrative preview of the AI Coach page — the real coaching card
+              (six sections, generated by Gemini) plus the follow-up chatbot below it. */}
+          <div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 mb-4">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-mono uppercase tracking-widest text-pineSoft">Your coaching card</span>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-inkSoft/70">Generated by Gemini</span>
+              </div>
+
+              <div className="flex items-start gap-2.5 mb-4">
+                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-pine/30">
+                  <Gauge className="h-3.5 w-3.5 text-pineSoft" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-pineSoft">Overall Performance</p>
+                  <p className="mt-0.5 text-sm text-paper/90 leading-relaxed">
+                    You're completing habits at an 82% average rate over the last 30 days, with three
+                    habits holding double-digit streaks right now.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="rounded-xl bg-white/5 p-3">
+                  <div className="mb-1 flex items-center gap-1.5">
+                    <Trophy className="h-3.5 w-3.5 text-pineSoft" />
+                    <span className="text-[11px] font-semibold text-pineSoft">Strongest</span>
+                  </div>
+                  <p className="text-xs text-paper/80 leading-relaxed">"Morning run" — 14-day streak</p>
+                </div>
+                <div className="rounded-xl bg-white/5 p-3">
+                  <div className="mb-1 flex items-center gap-1.5">
+                    <TrendingDown className="h-3.5 w-3.5 text-ember" />
+                    <span className="text-[11px] font-semibold text-ember">Weakest</span>
+                  </div>
+                  <p className="text-xs text-paper/80 leading-relaxed">"Weekly meal prep" — 40% completion</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 mb-4">
+                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-pine/30">
+                  <Lightbulb className="h-3.5 w-3.5 text-pineSoft" />
+                </div>
+                <p className="text-xs text-paper/80 leading-relaxed">
+                  Anchor "Weekly meal prep" to an existing routine, like right after your Sunday grocery run.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5 mb-3 rounded-xl bg-ember/15 px-3 py-2.5">
+                <Target className="h-3.5 w-3.5 shrink-0 text-ember" />
+                <p className="text-xs text-paper/90 leading-relaxed">
+                  <span className="font-semibold">Tomorrow's goal:</span> complete "Weekly meal prep" to start pulling its rate up.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5 rounded-xl bg-white/10 px-3 py-2.5">
+                <Heart className="h-3.5 w-3.5 shrink-0 text-ember" />
+                <p className="text-xs font-medium text-paper/90 leading-relaxed">
+                  Small, consistent steps compound — keep showing up.
+                </p>
+              </div>
+            </div>
+
+            <p className="mb-2 text-center text-xs font-mono uppercase tracking-widest text-inkSoft/70">then keep chatting ↓</p>
+
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
             <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-pine text-white">
@@ -283,7 +350,7 @@ function AICoachSection() {
                   <p className="text-sm font-semibold text-paper">Habit AI Coach</p>
                   <div className="flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
-                    <span className="text-xs text-inkSoft">The kind of insight you'll get</span>
+                    <span className="text-xs text-inkSoft">A preview of the real chatbot</span>
                   </div>
                 </div>
               </div>
@@ -316,13 +383,14 @@ function AICoachSection() {
             ) : (
               <div className="mt-4 flex gap-2">
                 <div className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-inkSoft">
-                  Get AI Coaching — one click, real analysis
+                  Saved automatically — pick up this chat any time
                 </div>
                 <div className="rounded-xl bg-pine px-3 py-2 text-white flex items-center">
                   <ArrowRight className="h-4 w-4" />
                 </div>
               </div>
             )}
+            </div>
           </div>
         </div>
       </div>
@@ -393,7 +461,7 @@ const STEPS = [
   { num: '01', icon: Shield,       title: 'Create your account',  desc: 'Sign up in seconds with your name, email, and password. Your data is private and secure from day one.'                                                },
   { num: '02', icon: Target,       title: 'Add your habits',      desc: "Give each habit a clear name and choose daily or weekly. Start with 2–3 habits for best results."                                                    },
   { num: '03', icon: CheckCircle2, title: 'Check in every day',   desc: 'Tap the tick button each day you complete a habit. Watch your streak counter grow and your 7-day strip fill up.'                                    },
-  { num: '04', icon: Bot,          title: 'Get coached by AI',    desc: "Head to the AI Coach page and hit \"Get AI Coaching\" any time — it reviews your real streaks and gives you motivation and a weekly goal."   },
+  { num: '04', icon: Bot,          title: 'Get coached by AI',    desc: "Head to the AI Coach page and hit \"Get AI Coaching\" any time — then ask the chatbot follow-up questions and pick up right where you left off next time."   },
   { num: '05', icon: BarChart2,    title: 'Review your progress', desc: 'Visit the Analytics page to see 30-day completion rates, your longest streaks, and an overall picture of consistency.'                                },
 ]
 
