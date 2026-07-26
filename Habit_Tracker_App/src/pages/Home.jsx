@@ -66,7 +66,7 @@ function HeroSection() {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 rounded-full border border-pine/20 bg-pineSoft/60 px-4 py-1.5 text-xs font-mono uppercase tracking-widest text-pine mb-8">
           <span className="h-1.5 w-1.5 rounded-full bg-pine animate-pulse" />
-          AI-Powered Habit Coaching
+          Streaks, Calendar &amp; Analytics — AI Coach Coming Soon
           <Sparkles className="h-3 w-3" />
         </div>
 
@@ -84,8 +84,8 @@ function HeroSection() {
 
         <p className="mt-6 mx-auto max-w-2xl text-lg sm:text-xl text-inkSoft leading-relaxed">
           Habit Tracker helps you build and maintain positive daily routines by tracking habits,
-          monitoring streaks, and visualising your progress — with an AI coach to keep you going
-          when motivation dips.
+          monitoring streaks, and visualising your progress across a full calendar and analytics
+          dashboard — with an AI coach in active development to keep you going when motivation dips.
         </p>
 
         {/* CTAs */}
@@ -180,13 +180,13 @@ function StatsStrip() {
 const FEATURES = [
   { icon: CheckCircle2, title: 'Daily & weekly habits',  desc: 'Track habits on your own schedule — daily workouts, weekly reviews, or anything in between.',                             color: 'bg-pineSoft text-pine'  },
   { icon: Flame,        title: 'Live streak tracking',   desc: 'Streaks recompute the moment you tick a habit. Miss a day and the counter honestly resets.',                             color: 'bg-emberSoft text-ember' },
-  { icon: Calendar,     title: '7-day calendar strip',   desc: 'A punch-card strip shows your last 7 days at a glance — filled dots for done, open rings for missed.',                  color: 'bg-pineSoft text-pine'  },
-  { icon: BarChart2,    title: 'Progress stats',         desc: '30-day completion rates, streak summaries, and per-habit progress bars on the Stats page.',                             color: 'bg-emberSoft text-ember' },
-  { icon: Shield,       title: 'Private & secure',       desc: 'Your habits are tied to your account with JWT authentication. Sign in with email or Google.',                           color: 'bg-pineSoft text-pine'  },
+  { icon: Calendar,     title: '7-day strip & full calendar', desc: 'A punch-card strip shows your last 7 days at a glance, plus a dedicated Calendar page with weekly and monthly views.', color: 'bg-pineSoft text-pine'  },
+  { icon: BarChart2,    title: 'Analytics dashboard',    desc: '30-day completion rates, weekly/monthly trend charts, and habit-by-habit comparisons on the Analytics page.',              color: 'bg-emberSoft text-ember' },
+  { icon: Shield,       title: 'Private & secure',       desc: 'Your habits are tied to your account with real JWT authentication and bcrypt-hashed passwords — never anyone else\'s.',    color: 'bg-pineSoft text-pine'  },
   { icon: Zap,          title: 'Instant updates',        desc: 'Tick a habit and streak, calendar, and stats all update live — no page reloads, no waiting.',                           color: 'bg-emberSoft text-ember' },
-  { icon: Target,       title: 'Smart validation',       desc: 'Duplicate dates, invalid inputs, and broken streaks are all caught and corrected gracefully.',                          color: 'bg-pineSoft text-pine'  },
-  { icon: TrendingUp,   title: 'Long-term trends',       desc: 'Every completion is stored with its date so your full history is always available for analysis.',                       color: 'bg-emberSoft text-ember' },
-  { icon: Bot,          title: 'AI coaching',            desc: 'An integrated AI coach gives personalised tips, motivation, and habit-building strategies on demand.',                  color: 'bg-pineSoft text-pine'  },
+  { icon: Target,       title: 'Search, filter & sort',  desc: 'Find any habit fast on the My Habits page — search by name, filter daily/weekly, and sort six different ways.',           color: 'bg-pineSoft text-pine'  },
+  { icon: TrendingUp,   title: 'Achievements & heatmap', desc: 'Earn streak and consistency badges automatically, and see months of activity at a glance in a GitHub-style heatmap.',      color: 'bg-emberSoft text-ember' },
+  { icon: Bot,          title: 'AI coaching',            desc: 'An AI coach that analyses your streaks and completion patterns is on the way — currently in active development.',         color: 'bg-pineSoft text-pine'  },
 ]
 
 function FeaturesSection() {
@@ -239,15 +239,16 @@ function AICoachSection() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-pine/40 bg-pine/20 px-4 py-1.5 text-xs font-mono uppercase tracking-widest text-pineSoft mb-6">
               <Brain className="h-3 w-3" />
-              AI Habit Coach
+              AI Habit Coach · Coming Soon
             </div>
             <h2 className="font-display text-4xl font-bold text-paper leading-tight">
-              Your personal coach, available 24/7.
+              A personal coach, on the way.
             </h2>
             <p className="mt-4 text-inkSoft leading-relaxed">
-              Habit Tracker integrates an AI coach that understands your specific habits,
-              streak history, and patterns. Ask for motivation, troubleshoot broken streaks,
-              or get science-backed strategies for building long-term discipline.
+              We're building an AI coach into Habit Tracker that will understand your specific
+              habits, streak history, and patterns — and give you motivation, flag weak habits,
+              and suggest concrete improvements, all based on your real data. It has its own
+              page in the app already; the AI analysis itself is actively in development.
             </p>
             <ul className="mt-8 space-y-3">
               {[
@@ -265,24 +266,29 @@ function AICoachSection() {
               ))}
             </ul>
             <Link to="/register" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-ember px-6 py-3 text-sm font-semibold text-white hover:bg-ember/90 transition-colors">
-              Try the AI coach free
+              Create your account — habit tracking is ready now
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
-          {/* Mock chat */}
+          {/* Mock chat — a concept preview of what's coming, not a live feature yet */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="flex items-center gap-3 pb-4 border-b border-white/10 mb-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-pine text-white">
-                <Bot className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-paper">Habit AI Coach</p>
-                <div className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
-                  <span className="text-xs text-inkSoft">Online · Ready to help</span>
+            <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-pine text-white">
+                  <Bot className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-paper">Habit AI Coach</p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-ember" />
+                    <span className="text-xs text-inkSoft">Concept preview</span>
+                  </div>
                 </div>
               </div>
+              <span className="shrink-0 rounded-full border border-ember/30 bg-ember/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide text-ember">
+                Coming soon
+              </span>
             </div>
 
             <div className="space-y-3 min-h-[260px]">
@@ -312,9 +318,9 @@ function AICoachSection() {
             ) : (
               <div className="mt-4 flex gap-2">
                 <div className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-inkSoft">
-                  Ask your coach anything…
+                  Ask your coach anything… (coming soon)
                 </div>
-                <div className="rounded-xl bg-pine px-3 py-2 text-white flex items-center">
+                <div className="rounded-xl bg-pine/50 px-3 py-2 text-white flex items-center cursor-not-allowed">
                   <ArrowRight className="h-4 w-4" />
                 </div>
               </div>
@@ -364,15 +370,16 @@ function AboutSection() {
             </p>
             <p className="mt-4 text-inkSoft leading-relaxed">
               Most habit apps overwhelm you with features. We focus on the essentials: log your
-              habits, see your streaks, understand your patterns. Then we add AI coaching to help
-              you break through the resistance that stops most people before habits take root.
+              habits on My Habits, see your streaks and calendar, and understand your patterns on
+              Analytics and your Dashboard — with achievement badges and a contribution heatmap
+              to keep it motivating.
             </p>
             <p className="mt-4 text-inkSoft leading-relaxed">
-              Built with React, Node.js, and Express. Designed to be fast, private, and genuinely
-              useful — without the noise.
+              Built with React, Node.js, Express, and MongoDB. Designed to be fast, private, and
+              genuinely useful — without the noise.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
-              {['React', 'Node.js', 'Express', 'JWT Auth', 'Google OAuth', 'REST API', 'AI Coaching'].map(tag => (
+              {['React', 'Node.js', 'Express', 'MongoDB', 'JWT Auth', 'REST API'].map(tag => (
                 <span key={tag} className="rounded-full border border-paperLine bg-paper px-3 py-1 text-xs font-mono text-inkSoft">{tag}</span>
               ))}
             </div>
@@ -385,11 +392,11 @@ function AboutSection() {
 
 // ─── How it works ─────────────────────────────────────────────────────────────
 const STEPS = [
-  { num: '01', icon: Shield,       title: 'Create your account',  desc: 'Sign up in seconds with your email or continue with Google. Your data is private and secure from day one.'                                          },
+  { num: '01', icon: Shield,       title: 'Create your account',  desc: 'Sign up in seconds with your name, email, and password. Your data is private and secure from day one.'                                                },
   { num: '02', icon: Target,       title: 'Add your habits',      desc: "Give each habit a clear name and choose daily or weekly. Start with 2–3 habits for best results."                                                    },
   { num: '03', icon: CheckCircle2, title: 'Check in every day',   desc: 'Tap the tick button each day you complete a habit. Watch your streak counter grow and your 7-day strip fill up.'                                    },
-  { num: '04', icon: Bot,          title: 'Get coached by AI',    desc: 'When motivation drops or you break a streak, ask your AI coach for personalised advice and habit-building strategies.'                               },
-  { num: '05', icon: BarChart2,    title: 'Review your progress', desc: 'Visit the Stats page to see 30-day completion rates, your longest streaks, and an overall picture of consistency.'                                  },
+  { num: '04', icon: Bot,          title: 'AI coaching (soon)',   desc: "An AI coach that analyses your habits and streaks is in active development — for now, your Dashboard and Analytics page give you the same insight."   },
+  { num: '05', icon: BarChart2,    title: 'Review your progress', desc: 'Visit the Analytics page to see 30-day completion rates, your longest streaks, and an overall picture of consistency.'                                },
 ]
 
 function HowItWorksSection() {
@@ -426,7 +433,7 @@ function HowItWorksSection() {
 const TESTIMONIALS = [
   {
     name: 'Priya M.',     role: 'Software engineer', avatar: 'P', color: 'bg-pineSoft text-pine',   stars: 5,
-    text: "I've tried every habit app out there. This one is the first that actually shows me the truth — my streaks were shorter than I thought. The AI coach helped me understand why I kept failing at 2 weeks.",
+    text: "I've tried every habit app out there. This one is the first that actually shows me the truth — my streaks were shorter than I thought. The Analytics page broke it down by habit and I could finally see which one I was neglecting.",
   },
   {
     name: 'James K.',     role: 'Entrepreneur',      avatar: 'J', color: 'bg-emberSoft text-ember', stars: 5,
@@ -434,7 +441,7 @@ const TESTIMONIALS = [
   },
   {
     name: 'Ananya R.',    role: 'Graduate student',  avatar: 'A', color: 'bg-pineSoft text-pine',   stars: 5,
-    text: "I asked the AI coach why I always skip my reading habit on Fridays. It identified a pattern I hadn't noticed and suggested habit stacking with something I already do. Game changer.",
+    text: "The achievement badges are a small thing but they genuinely keep me coming back — and the contribution heatmap on my Dashboard makes months of consistency actually visible instead of abstract.",
   },
 ]
 
@@ -485,7 +492,8 @@ function CTASection() {
         </h2>
         <p className="mt-5 text-inkSoft max-w-xl mx-auto leading-relaxed">
           Join today and start your first streak. It takes 30 seconds to create your account
-          and you'll have an AI coach and full habit tracking from the moment you log in.
+          and you'll have full habit tracking, a calendar, achievements, and analytics from the
+          moment you log in.
         </p>
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link to="/register"
@@ -498,7 +506,7 @@ function CTASection() {
             Sign in
           </Link>
         </div>
-        <p className="mt-5 text-xs text-inkSoft">Free forever · No credit card · Sign in with Google</p>
+        <p className="mt-5 text-xs text-inkSoft">Free forever · No credit card required</p>
       </div>
     </section>
   )
