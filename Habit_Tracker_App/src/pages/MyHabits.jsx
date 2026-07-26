@@ -1,46 +1,46 @@
-// My Habits — Week 6
+// My Habits
 // Full CRUD (add / edit / delete / complete today), plus search, a
 // daily/weekly filter, and sorting. HabitList/HabitCard render the actual
 // cards; this page owns the controls and the derived, filtered list.
 
 import { useMemo, useState } from 'react'
 import { Plus, Search } from 'lucide-react'
-import HabitList     from '../components/HabitList.jsx'
-import AddHabitForm  from '../components/AddHabitForm.jsx'
+import HabitList from '../components/HabitList.jsx'
+import AddHabitForm from '../components/AddHabitForm.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import { useHabits } from '../context/HabitsContext.jsx'
 import { completionRate30, longestStreakEver } from '../utils/streak.js'
 
 const FILTERS = [
-  { key: 'all',    label: 'All'    },
-  { key: 'daily',  label: 'Daily'  },
+  { key: 'all', label: 'All' },
+  { key: 'daily', label: 'Daily' },
   { key: 'weekly', label: 'Weekly' },
 ]
 
 const SORTS = [
-  { key: 'newest',     label: 'Newest first'        },
-  { key: 'oldest',     label: 'Oldest first'        },
-  { key: 'name',       label: 'Name (A–Z)'          },
-  { key: 'streak',     label: 'Current streak'      },
-  { key: 'longest',    label: 'Longest streak'      },
-  { key: 'completion', label: 'Completion %'        },
+  { key: 'newest', label: 'Newest first' },
+  { key: 'oldest', label: 'Oldest first' },
+  { key: 'name', label: 'Name (A–Z)' },
+  { key: 'streak', label: 'Current streak' },
+  { key: 'longest', label: 'Longest streak' },
+  { key: 'completion', label: 'Completion %' },
 ]
 
 export default function MyHabits() {
   const { habits, loading, error, toggleToday, addHabit, editHabit, deleteHabit } = useHabits()
 
-  const [formOpen,      setFormOpen]      = useState(false)
-  const [editingHabit,  setEditingHabit]  = useState(null)
+  const [formOpen, setFormOpen] = useState(false)
+  const [editingHabit, setEditingHabit] = useState(null)
   const [deletingHabit, setDeletingHabit] = useState(null)
-  const [formError,     setFormError]     = useState('')
+  const [formError, setFormError] = useState('')
 
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
-  const [sort,   setSort]   = useState('newest')
+  const [sort, setSort] = useState('newest')
 
-  function openAddForm()        { setEditingHabit(null);   setFormError(''); setFormOpen(true) }
-  function openEditForm(habit)  { setEditingHabit(habit);  setFormError(''); setFormOpen(true) }
-  function closeForm()          { setFormOpen(false); setEditingHabit(null); setFormError('') }
+  function openAddForm() { setEditingHabit(null); setFormError(''); setFormOpen(true) }
+  function openEditForm(habit) { setEditingHabit(habit); setFormError(''); setFormOpen(true) }
+  function closeForm() { setFormOpen(false); setEditingHabit(null); setFormError('') }
 
   async function handleSubmit({ name, frequency }) {
     try {
@@ -55,8 +55,8 @@ export default function MyHabits() {
     }
   }
 
-  function requestDelete(habit)  { setDeletingHabit(habit) }
-  function cancelDelete()        { setDeletingHabit(null)  }
+  function requestDelete(habit) { setDeletingHabit(habit) }
+  function cancelDelete() { setDeletingHabit(null) }
   async function confirmDelete() { await deleteHabit(deletingHabit.id); setDeletingHabit(null) }
 
   const existingNames = habits
@@ -79,17 +79,17 @@ export default function MyHabits() {
     const withDerived = list.map((h) => ({
       ...h,
       _longest: longestStreakEver(h.completions, h.frequency),
-      _rate:    completionRate30(h.completions, h.createdAt),
+      _rate: completionRate30(h.completions, h.createdAt),
     }))
 
     switch (sort) {
-      case 'oldest':     return [...withDerived].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-      case 'name':       return [...withDerived].sort((a, b) => a.name.localeCompare(b.name))
-      case 'streak':     return [...withDerived].sort((a, b) => b.streak - a.streak)
-      case 'longest':    return [...withDerived].sort((a, b) => b._longest - a._longest)
+      case 'oldest': return [...withDerived].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      case 'name': return [...withDerived].sort((a, b) => a.name.localeCompare(b.name))
+      case 'streak': return [...withDerived].sort((a, b) => b.streak - a.streak)
+      case 'longest': return [...withDerived].sort((a, b) => b._longest - a._longest)
       case 'completion': return [...withDerived].sort((a, b) => b._rate - a._rate)
       case 'newest':
-      default:           return [...withDerived].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      default: return [...withDerived].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     }
   }, [habits, search, filter, sort])
 

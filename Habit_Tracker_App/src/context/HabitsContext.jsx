@@ -1,5 +1,5 @@
-// HabitsContext — Week 5
-// Habits are now private per user (item 3): the backend scopes every query
+// HabitsContext 
+// Habits are now private per user: the backend scopes every query
 // to req.user.id, decoded from the JWT that the shared `api` client
 // (utils/api.js) automatically attaches to every request. This context only
 // needs to know *when* to fetch — on login — and *when to stop* — on logout,
@@ -13,12 +13,12 @@ import { logHabitDeleted } from '../utils/activityLog.js'
 
 const HabitsContext = createContext(null)
 
-// ── Provide the Context ────────────────────────────────────────────────────
+// Provide the Context 
 export function HabitsProvider({ children }) {
   const { isAuthenticated, initializing, user } = useAuth()
-  const [habits,  setHabits]  = useState([])
+  const [habits, setHabits] = useState([])
   const [loading, setLoading] = useState(true)   // drives loading skeleton
-  const [error,   setError]   = useState(null)
+  const [error, setError] = useState(null)
 
   // Fetch habits from MongoDB — only ever the current user's own habits,
   // enforced server-side by the verifyToken + userId scoping.
@@ -26,7 +26,7 @@ export function HabitsProvider({ children }) {
     try {
       setLoading(true)
       setError(null)
-      const { data } = await api.get('/habits')          // GET /api/habits
+      const { data } = await api.get('/habits') // GET /api/habits
       setHabits(data.habits)
     } catch (err) {
       setError(err.response?.data?.message || err.message)
@@ -47,10 +47,10 @@ export function HabitsProvider({ children }) {
     }
   }, [isAuthenticated, initializing, fetchHabits])
 
-  // ── Toggle today — POST or DELETE /complete in MongoDB ──────────────────
+  // Toggle today — POST or DELETE /complete in MongoDB 
   async function toggleToday(habitId) {
-    const habit    = habits.find((h) => h.id === habitId)
-    const today    = todayKey()
+    const habit = habits.find((h) => h.id === habitId)
+    const today = todayKey()
     const doneTday = habit?.completions.includes(today)
 
     try {
@@ -64,7 +64,7 @@ export function HabitsProvider({ children }) {
     }
   }
 
-  // ── Add habit — POST to MongoDB ─────────────────────────────────────────
+  // Add habit — POST to MongoDB
   async function addHabit({ name, frequency }) {
     try {
       const { data: newHabit } = await api.post('/habits', { name, frequency })
@@ -76,7 +76,7 @@ export function HabitsProvider({ children }) {
     }
   }
 
-  // ── Edit habit — PUT to MongoDB ─────────────────────────────────────────
+  // Edit habit — PUT to MongoDB 
   async function editHabit(habitId, { name, frequency }) {
     try {
       const { data: updated } = await api.put(`/habits/${habitId}`, { name, frequency })
@@ -88,7 +88,7 @@ export function HabitsProvider({ children }) {
     }
   }
 
-  // ── Delete habit — DELETE from MongoDB ──────────────────────────────────
+  // Delete habit — DELETE from MongoDB 
   async function deleteHabit(habitId) {
     const habit = habits.find((h) => h.id === habitId)
     try {

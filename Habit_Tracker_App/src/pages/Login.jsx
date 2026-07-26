@@ -10,10 +10,10 @@ export default function Login() {
   const location = useLocation()
   const redirectTo = location.state?.from || '/'
 
-  const [email, setEmail]       = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError]       = useState('')
+  const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   async function handleSubmit(e) {
@@ -40,7 +40,7 @@ export default function Login() {
     <div className="min-h-[calc(100vh-73px)]">
       <div className="mx-auto grid max-w-6xl grid-cols-1 lg:grid-cols-2 lg:gap-16 px-4 py-12 lg:py-20 items-center">
 
-        {/* ── Left: branding / content panel (hidden on mobile) ─────────── */}
+        {/* Left: branding / content panel (hidden on mobile) */}
         <div className="hidden lg:block">
           <div className="inline-flex items-center gap-2 rounded-full border border-pine/20 bg-pineSoft/60 px-4 py-1.5 text-xs font-mono uppercase tracking-widest text-pine mb-8">
             <span className="h-1.5 w-1.5 rounded-full bg-pine animate-pulse" />
@@ -52,7 +52,7 @@ export default function Login() {
             Your streaks missed you.
           </h2>
           <p className="mt-4 max-w-md text-inkSoft leading-relaxed">
-            Log back in to pick up exactly where you left off — your habits, streaks,
+            Log back in to pick up exactly where you left off - your habits, streaks,
             calendar, and AI coach are all right where you saved them.
           </p>
 
@@ -80,11 +80,11 @@ export default function Login() {
             <p className="text-sm text-inkSoft leading-relaxed italic">
               "The 7-day calendar strip is genius. One glance and I know exactly where I stand."
             </p>
-            <p className="mt-3 text-xs font-semibold text-ink">— James K., an early user</p>
+            <p className="mt-3 text-xs font-semibold text-ink">— Karuna N., an early user</p>
           </div>
         </div>
 
-        {/* ── Right: the form (unchanged), just wider ───────────────────── */}
+        {/* Right: the form (unchanged), just wider */}
         <div className="w-full max-w-lg mx-auto">
           <div className="mb-6 text-center lg:text-left">
             <p className="font-mono text-xs uppercase tracking-widest text-pine">Welcome back</p>

@@ -3,10 +3,10 @@
 //  1. Validation middleware (express-validator rules + validate error checker)
 //  2. Controller function (does the actual work)
 // This file intentionally contains no business logic — it is purely a map
-// of "URL + method" -> "what runs". (Tutorial PDF, taskRoutes.js pattern)
+// of "URL + method" -> "what runs". (taskRoutes.js pattern)
 
-const express    = require('express');
-const router     = express.Router();
+const express = require('express');
+const router = express.Router();
 const controller = require('../controllers/habitController');
 const {
   validate,

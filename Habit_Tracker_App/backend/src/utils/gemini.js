@@ -1,9 +1,7 @@
 // Gemini client — shared by AI Coach + AI Chatbot
-//
 // Both controllers need to call the same Gemini text-generation endpoint,
 // with JSON-mode for the coach and free-text for the chatbot. Centralizing
-// the fetch call means the API key and model name are configured in exactly
-// one place.
+// the fetch call means the API key and model name are configured in exactly one place.
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';

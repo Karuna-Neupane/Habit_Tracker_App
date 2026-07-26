@@ -1,6 +1,6 @@
-// Server Entry Point — Week 4
+// Server Entry Point
 // Loads environment variables, connects to MongoDB, then starts HTTP server.
-// Following Tutorial PDF pattern: server.js starts the app, src/app.js configures it.
+// server.js starts the app, src/app.js configures it.
 
 require('dotenv').config(); // Must be first — loads MONGO_URI, PORT, etc.
 

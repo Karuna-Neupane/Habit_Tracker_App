@@ -1,4 +1,4 @@
-// HabitList — Week 4 update
+// HabitList
 // Shows loading skeletons while habits are being fetched from MongoDB.
 // When loaded, shows the real HabitCards with live data from DB.
 
@@ -7,7 +7,7 @@ import HabitCardSkeleton from './HabitCardSkeleton.jsx'
 
 export default function HabitList({ habits, loading, error, onToggleToday, onEdit, onDelete }) {
 
-  // Week 4, item 6: loading skeleton while habits fetch from MongoDB
+  // Loading skeleton while habits fetch from MongoDB
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">

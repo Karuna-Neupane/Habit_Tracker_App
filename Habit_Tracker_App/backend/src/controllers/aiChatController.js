@@ -1,4 +1,4 @@
-// AI Chatbot Controller — premium feature alongside the Week 7 AI Coach
+// AI Chatbot Controller — premium feature alongside the AI Coach
 //
 // POST   /api/ai/chat          — send a message, get a contextual reply
 // GET    /api/ai/chat/history  — load the user's full saved conversation
@@ -11,7 +11,7 @@
 // assistant's reply are persisted, so refreshing the page or logging back
 // in restores the full conversation.
 
-const Habit       = require('../models/Habit');
+const Habit = require('../models/Habit');
 const ChatMessage = require('../models/ChatMessage');
 const { getUserHabitStats } = require('../utils/habitStats');
 const gemini = require('../utils/gemini');
@@ -36,7 +36,7 @@ Overall stats: ${JSON.stringify(overall)}
 Per-habit stats: ${JSON.stringify(summaries)}`;
 }
 
-// ── POST /api/ai/chat ────────────────────────────────────────────────────
+// POST /api/ai/chat
 exports.sendMessage = async (req, res) => {
   try {
     const { message } = req.body;
@@ -53,15 +53,15 @@ exports.sendMessage = async (req, res) => {
     // Save the user's message immediately so it's never lost even if the
     // Gemini call below fails.
     const userDoc = await ChatMessage.create({
-      userId:  req.user.id,
-      role:    'user',
+      userId: req.user.id,
+      role: 'user',
       content: trimmed,
     });
 
     const recentHistory = priorMessages.slice(-HISTORY_WINDOW);
     const contents = [
       ...recentHistory.map((m) => ({
-        role:  m.role === 'assistant' ? 'model' : 'user',
+        role: m.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: m.content }],
       })),
       { role: 'user', parts: [{ text: trimmed }] },
@@ -86,22 +86,22 @@ exports.sendMessage = async (req, res) => {
     }
 
     const assistantDoc = await ChatMessage.create({
-      userId:  req.user.id,
-      role:    'assistant',
+      userId: req.user.id,
+      role: 'assistant',
       content: replyText,
     });
 
     return res.status(200).json({
       userMessage: {
-        id:        String(userDoc._id),
-        role:      'user',
-        content:   userDoc.content,
+        id: String(userDoc._id),
+        role: 'user',
+        content: userDoc.content,
         createdAt: userDoc.createdAt,
       },
       reply: {
-        id:        String(assistantDoc._id),
-        role:      'assistant',
-        content:   assistantDoc.content,
+        id: String(assistantDoc._id),
+        role: 'assistant',
+        content: assistantDoc.content,
         createdAt: assistantDoc.createdAt,
       },
       source,
@@ -123,15 +123,15 @@ function buildFallbackReply(userText, summaries, overall) {
   return `Right now you're averaging ${avgMonthlyRate}% completion over the last 30 days (${avgWeeklyRate}% this week), with ${totalCurrentStreakDays} combined current streak days. "${strongest?.name}" is your strongest habit, and "${weakest?.name}" could use a bit more attention. (The AI coach is running in offline mode right now, so this reply is generated from your real stats rather than Gemini.)`;
 }
 
-// ── GET /api/ai/chat/history ─────────────────────────────────────────────
+// GET /api/ai/chat/history 
 exports.getHistory = async (req, res) => {
   try {
     const messages = await ChatMessage.find({ userId: req.user.id }).sort({ createdAt: 1 });
     return res.status(200).json({
       messages: messages.map((m) => ({
-        id:        String(m._id),
-        role:      m.role,
-        content:   m.content,
+        id: String(m._id),
+        role: m.role,
+        content: m.content,
         createdAt: m.createdAt,
       })),
     });
@@ -140,7 +140,7 @@ exports.getHistory = async (req, res) => {
   }
 };
 
-// ── DELETE /api/ai/chat/history ──────────────────────────────────────────
+// DELETE /api/ai/chat/history
 exports.clearHistory = async (req, res) => {
   try {
     await ChatMessage.deleteMany({ userId: req.user.id });

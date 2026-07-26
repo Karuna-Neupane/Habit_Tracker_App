@@ -3,14 +3,14 @@ import { getLast7DateKeys } from '../utils/streak.js'
 const DAY_LABEL = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export default function WeekCalendarStrip({ completions = [] }) {
-  const dateKeys     = getLast7DateKeys()
+  const dateKeys = getLast7DateKeys()
   const completedSet = new Set(completions)
 
   return (
     <div className="flex items-center justify-between gap-1">
       {dateKeys.map((dateKey, i) => {
-        const isToday  = i === dateKeys.length - 1
-        const done     = completedSet.has(dateKey)
+        const isToday = i === dateKeys.length - 1
+        const done = completedSet.has(dateKey)
         const dayLabel = DAY_LABEL[new Date(`${dateKey}T00:00:00`).getDay()]
 
         return (

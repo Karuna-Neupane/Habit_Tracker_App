@@ -231,14 +231,14 @@ export function getWeekRange(date = new Date()) {
   d.setHours(0, 0, 0, 0)
   const dayIndex = (d.getDay() + 6) % 7 // Mon=0 … Sun=6
   const start = addDays(d, -dayIndex)
-  const end   = addDays(start, 6)
+  const end = addDays(start, 6)
   return { start, end }
 }
 
 /** First–last day of the calendar month containing `date` (defaults to today). */
 export function getMonthRange(date = new Date()) {
   const start = new Date(date.getFullYear(), date.getMonth(), 1)
-  const end   = new Date(date.getFullYear(), date.getMonth() + 1, 0) // day 0 = last day of prior month arg → last day of this month
+  const end = new Date(date.getFullYear(), date.getMonth() + 1, 0) // day 0 = last day of prior month arg → last day of this month
   end.setHours(0, 0, 0, 0)
   return { start, end }
 }

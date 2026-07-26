@@ -4,10 +4,10 @@ import { isCompletedToday, longestStreakEver, completionRateN } from '../utils/s
 
 export default function HabitCard({ habit, onToggleToday, onEdit, onDelete }) {
   const todayDone = isCompletedToday(habit.completions)
-  const longest   = longestStreakEver(habit.completions, habit.frequency)
+  const longest = longestStreakEver(habit.completions, habit.frequency)
   // Matches the 7-day strip shown right below it — no other window would
   // agree with what the person can visually count on the card.
-  const rate      = completionRateN(habit.completions, 7)
+  const rate = completionRateN(habit.completions, 7)
 
   return (
     <article className="rounded-2xl border border-paperLine bg-white/70 backdrop-blur-sm p-5 shadow-sm flex flex-col gap-4">
@@ -65,7 +65,7 @@ export default function HabitCard({ habit, onToggleToday, onEdit, onDelete }) {
       {/* 7-day calendar strip */}
       <WeekCalendarStrip completions={habit.completions} />
 
-      {/* Tick button — GREEN when done today (Week 2, item 6) */}
+      {/* Tick button — GREEN when done today */}
       <button
         onClick={() => onToggleToday(habit.id)}
         className={[

@@ -1,5 +1,4 @@
 // Habit Stats — shared by AI Coach + AI Chatbot
-//
 // Both /api/ai/coach and /api/ai/chat need the exact same real numbers about
 // the logged-in user's habits (names, frequencies, streaks, completion
 // rates, overall progress) so Gemini is always grounded in the same facts
@@ -9,7 +8,7 @@
 
 const { computeStreak } = require('./streak');
 
-// ── Longest streak ever (not just current) ─────────────────────────────────
+// Longest streak ever (not just current) 
 function longestStreakEver(completions, frequency) {
   const valid = [...new Set((completions || []).filter(Boolean))].sort();
   if (valid.length === 0) return 0;
@@ -47,7 +46,7 @@ function longestStreakEver(completions, frequency) {
   return longest;
 }
 
-// ── Trailing-N-day completion rate ──────────────────────────────────────────
+// Trailing-N-day completion rate 
 function completionRateN(completions, days) {
   const set = new Set(completions || []);
   let count = 0;
@@ -60,20 +59,20 @@ function completionRateN(completions, days) {
   return Math.round((count / days) * 100);
 }
 
-// ── Per-habit summary (name, frequency, streaks, weekly/monthly rates) ─────
+// Per-habit summary (name, frequency, streaks, weekly/monthly rates) 
 function buildHabitSummaries(habitDocs) {
   return habitDocs.map((h) => ({
-    name:              h.name,
-    frequency:         h.frequency,
-    currentStreak:     computeStreak(h.completions, h.frequency),
-    longestStreak:     longestStreakEver(h.completions, h.frequency),
-    weeklyRate:        completionRateN(h.completions, 7),
-    monthlyRate:       completionRateN(h.completions, 30),
-    totalCompletions:  (h.completions || []).length,
+    name: h.name,
+    frequency: h.frequency,
+    currentStreak: computeStreak(h.completions, h.frequency),
+    longestStreak: longestStreakEver(h.completions, h.frequency),
+    weeklyRate: completionRateN(h.completions, 7),
+    monthlyRate: completionRateN(h.completions, 30),
+    totalCompletions: (h.completions || []).length,
   }));
 }
 
-// ── Overall (across-all-habits) progress numbers ────────────────────────────
+// Overall (across-all-habits) progress numbers 
 function buildOverallStats(summaries) {
   if (summaries.length === 0) {
     return {
@@ -85,7 +84,7 @@ function buildOverallStats(summaries) {
       weakest: null,
     };
   }
-  const avgWeeklyRate  = Math.round(summaries.reduce((s, h) => s + h.weeklyRate, 0) / summaries.length);
+  const avgWeeklyRate = Math.round(summaries.reduce((s, h) => s + h.weeklyRate, 0) / summaries.length);
   const avgMonthlyRate = Math.round(summaries.reduce((s, h) => s + h.monthlyRate, 0) / summaries.length);
   const totalCurrentStreakDays = summaries.reduce((s, h) => s + h.currentStreak, 0);
   const byRate = [...summaries].sort((a, b) => b.monthlyRate - a.monthlyRate);
@@ -106,7 +105,7 @@ function buildOverallStats(summaries) {
 async function getUserHabitStats(Habit, userId) {
   const habitDocs = await Habit.find({ userId });
   const summaries = buildHabitSummaries(habitDocs);
-  const overall   = buildOverallStats(summaries);
+  const overall = buildOverallStats(summaries);
   return { summaries, overall };
 }
 

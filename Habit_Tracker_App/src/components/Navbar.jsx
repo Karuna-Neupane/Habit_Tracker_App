@@ -47,7 +47,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 border-b border-paperLine bg-paper/90 backdrop-blur-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 gap-4">
 
-        {/* ── Brand ──────────────────────────────────────────────────────── */}
+        {/* Brand */}
         <Link
           to="/"
           onClick={() => { setActive('#home'); setMenuOpen(false) }}
@@ -58,7 +58,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* ── Centre nav — only on public home page when logged out ───────── */}
+        {/* Centre nav — only on public home page when logged out */}
         {isHome && !isAuthenticated && (
           <nav className="hidden lg:flex items-center gap-0.5">
             {NAV_LINKS.map(({ label, href }) => {
@@ -82,7 +82,7 @@ export default function Navbar() {
           </nav>
         )}
 
-        {/* ── Right side ─────────────────────────────────────────────────── */}
+        {/* Right side */}
         {isAuthenticated ? (
           /* Logged-in: today progress pill + avatar */
           <div className="flex items-center gap-3">
@@ -135,7 +135,7 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* ── Mobile dropdown menu ───────────────────────────────────────────── */}
+      {/* Mobile dropdown menu */}
       {menuOpen && !isAuthenticated && (
         <div className="sm:hidden border-t border-paperLine bg-paper/95 px-4 pt-3 pb-4">
 

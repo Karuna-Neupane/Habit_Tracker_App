@@ -1,4 +1,4 @@
-// AIChatBot — Premium feature alongside the Week 7 AI Coach
+// AIChatBot — Premium feature alongside AI Coach
 //
 // A fully functional chat interface for natural-language follow-up questions
 // about the user's habits. Conversation history is persisted server-side
@@ -51,11 +51,10 @@ function MessageBubble({ message, user }) {
       )}
       <div className={`flex max-w-[78%] flex-col ${isUser ? 'items-end' : 'items-start'}`}>
         <div
-          className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${
-            isUser
+          className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${isUser
               ? 'rounded-br-sm bg-ember text-white'
               : 'rounded-bl-sm border border-paperLine bg-white text-ink'
-          }`}
+            }`}
         >
           <p className="whitespace-pre-wrap">{message.content}</p>
         </div>
@@ -86,15 +85,15 @@ function TypingIndicator() {
 
 export default function AIChatBot() {
   const { user } = useAuth()
-  const [messages, setMessages]         = useState([])
+  const [messages, setMessages] = useState([])
   const [loadingHistory, setLoadingHistory] = useState(true)
-  const [input, setInput]               = useState('')
-  const [sending, setSending]           = useState(false)
-  const [error, setError]               = useState('')
+  const [input, setInput] = useState('')
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState('')
   const [confirmClearOpen, setConfirmClearOpen] = useState(false)
 
   const scrollRef = useRef(null)
-  const inputRef  = useRef(null)
+  const inputRef = useRef(null)
 
   // Load previous conversation once on mount so chats survive refresh/login.
   useEffect(() => {
@@ -196,7 +195,7 @@ export default function AIChatBot() {
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-paperLine bg-white/60 shadow-sm">
-        {/* ── Message list ────────────────────────────────────────────── */}
+        {/* Message list */}
         <div ref={scrollRef} className="h-[26rem] space-y-4 overflow-y-auto px-4 py-5 sm:h-[30rem]">
           {loadingHistory && (
             <div className="space-y-3">
@@ -213,7 +212,7 @@ export default function AIChatBot() {
               </div>
               <p className="font-display text-sm font-semibold text-ink">Ask me anything about your habits</p>
               <p className="mt-1 max-w-xs text-xs leading-relaxed text-inkSoft">
-                I can see your real streaks and completion rates — ask a follow-up question or try a suggestion below.
+                I can see your real streaks and completion rates - ask a follow-up question or try a suggestion below.
               </p>
             </div>
           )}
@@ -222,7 +221,7 @@ export default function AIChatBot() {
           {sending && <TypingIndicator />}
         </div>
 
-        {/* ── Suggested questions ─────────────────────────────────────── */}
+        {/* Suggested questions */}
         {!loadingHistory && (
           <div className="flex flex-wrap gap-2 border-t border-paperLine bg-paper/60 px-4 py-3">
             {SUGGESTED_QUESTIONS.map((q) => (
@@ -239,19 +238,19 @@ export default function AIChatBot() {
           </div>
         )}
 
-        {/* ── Error state ─────────────────────────────────────────────── */}
+        {/* Error state */}
         {error && (
           <div className="border-t border-ember/20 bg-emberSoft px-4 py-2 text-xs text-ember">{error}</div>
         )}
 
-        {/* ── Composer ─────────────────────────────────────────────────── */}
+        {/* Composer */}
         <div className="flex items-end gap-2 border-t border-paperLine bg-white p-3">
           <textarea
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask about your habits… (Enter to send, Shift+Enter for a new line)"
+            placeholder="Ask about your habits (Enter to send, Shift+Enter for a new line)"
             rows={1}
             disabled={sending || loadingHistory}
             className="max-h-28 flex-1 resize-none rounded-xl border border-paperLine bg-paper/50 px-3 py-2.5 text-sm text-ink placeholder:text-inkSoft/70 focus:border-pine focus:outline-none disabled:opacity-60"

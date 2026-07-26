@@ -1,4 +1,4 @@
-// AI Coach — Week 7, now with a premium AI Chatbot alongside it
+// AI Coach — now with a premium AI Chatbot alongside it
 // Calls POST /api/ai/coach, which sends the user's real habit names,
 // streaks, and completion rates to Gemini (server-side — the API key never
 // touches the browser) with a habit-coach prompt, and returns structured
@@ -20,9 +20,9 @@ import AIChatBot from '../components/AIChatBot.jsx'
 
 export default function AICoach() {
   const { habits } = useHabits()
-  const [result, setResult]   = useState(null)
+  const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
+  const [error, setError] = useState('')
 
   async function handleGetCoaching() {
     setLoading(true)
@@ -39,7 +39,7 @@ export default function AICoach() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
-      {/* ── AI Coach section ──────────────────────────────────────────── */}
+      {/* AI Coach section */}
       <div className="mb-8 text-center">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-pineSoft text-pine">
           <Bot className="h-7 w-7" aria-hidden="true" />
@@ -47,14 +47,14 @@ export default function AICoach() {
         <p className="font-mono text-xs uppercase tracking-widest text-pine">AI Coach</p>
         <h1 className="mt-1 font-display text-3xl font-bold text-ink">Get AI Coaching</h1>
         <p className="mt-3 text-sm text-inkSoft leading-relaxed">
-          Your coach reviews {habits.length > 0 ? `all ${habits.length} of your habits` : 'your habits'} —
-          streaks, weekly and monthly completion rates, and what's slipping — and gives you an honest read on
+          Your coach reviews {habits.length > 0 ? `all ${habits.length} of your habits` : 'your habits'} -
+          streaks, weekly and monthly completion rates, and what's slipping - and gives you an honest read on
           your overall performance, your strongest and weakest habits, concrete suggestions, and a goal for
           tomorrow.
         </p>
       </div>
 
-      {/* ── Button / loading state ─────────────────────────────────────── */}
+      {/* Button / loading state */}
       {!result && (
         <div className="flex flex-col items-center">
           <button
@@ -86,7 +86,7 @@ export default function AICoach() {
         </div>
       )}
 
-      {/* ── Error state ──────────────────────────────────────────────────── */}
+      {/* Error state */}
       {error && (
         <div className="mt-6 flex items-start gap-3 rounded-2xl border border-ember/30 bg-emberSoft px-4 py-3 text-sm text-ember">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
@@ -103,7 +103,7 @@ export default function AICoach() {
         </div>
       )}
 
-      {/* ── Result: styled coaching card ─────────────────────────────────── */}
+      {/* Result: styled coaching card */}
       {result && (
         <div className="space-y-4">
           {/* Overall Performance */}
@@ -198,7 +198,7 @@ export default function AICoach() {
         </div>
       )}
 
-      {/* ── AI Chatbot section (premium, additive) ─────────────────────── */}
+      {/* AI Chatbot section (premium, additive) */}
       <AIChatBot />
     </div>
   )

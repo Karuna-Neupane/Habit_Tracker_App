@@ -1,6 +1,5 @@
 // Loading skeleton shown while habits are being fetched from MongoDB.
 // Matches the exact layout of HabitCard so there's no layout shift on load.
-// Week 4, item 6.
 
 export default function HabitCardSkeleton() {
   return (

@@ -1,5 +1,5 @@
-// AuthController — Week 5
-// Handles registration and login. Follows the Week 5 tutorial pattern:
+// AuthController 
+// Handles registration and login. Follows:
 //   register -> hash password with bcrypt, save user
 //   login    -> compare password with bcrypt, sign a JWT on success
 //
@@ -7,14 +7,14 @@
 // requests (id, email, name). verifyToken middleware decodes this and
 // attaches it to req.user so every route can scope data to the right user.
 
-const jwt    = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-const User   = require('../models/User');
-const Habit  = require('../models/Habit');
+const User = require('../models/User');
+const Habit = require('../models/Habit');
 const { sendResetCodeEmail } = require('../utils/mailer');
 
-const TOKEN_EXPIRES_IN       = '7d';
+const TOKEN_EXPIRES_IN = '7d';
 const RESET_CODE_TTL_MINUTES = 10;
 const RESET_TOKEN_EXPIRES_IN = '10m';
 
@@ -28,15 +28,15 @@ function signToken(user) {
 
 function publicUser(user) {
   return {
-    id:        String(user._id),
-    name:      user.name,
-    email:     user.email,
+    id: String(user._id),
+    name: user.name,
+    email: user.email,
     avatarUrl: user.avatarUrl || '',
     createdAt: user.createdAt,
   };
 }
 
-// ── POST /api/auth/register ─────────────────────────────────────────────────
+// POST /api/auth/register 
 exports.registerUser = async (req, res) => {
   try {
     const { name, email, password, confirmPassword } = req.body;
@@ -56,11 +56,11 @@ exports.registerUser = async (req, res) => {
       return res.status(409).json({ message: 'An account with that email already exists.' });
     }
 
-    // Hash the password before it ever touches the database (item 1).
+    // Hash the password before it ever touches the database.
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
-      name:  name.trim(),
+      name: name.trim(),
       email: email.trim().toLowerCase(),
       password: hashedPassword,
     });
@@ -75,7 +75,7 @@ exports.registerUser = async (req, res) => {
   }
 };
 
-// ── POST /api/auth/login ────────────────────────────────────────────────────
+// POST /api/auth/login 
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -102,7 +102,7 @@ exports.loginUser = async (req, res) => {
   }
 };
 
-// ── GET /api/auth/me ─────────────────────────────────────────────────────────
+// GET /api/auth/me 
 // Lets the frontend restore a session on page load: send the stored token,
 // get back the current user (or 401 if the token is missing/expired/invalid).
 // verifyToken middleware has already run and attached req.user by this point.
@@ -116,7 +116,6 @@ exports.getCurrentUser = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Forgot password — 3-step flow:
 //   1. POST /forgot-password    { email }               -> emails a 6-digit code
 //   2. POST /verify-reset-code  { email, code }          -> returns a short-lived resetToken
@@ -126,7 +125,6 @@ exports.getCurrentUser = async (req, res) => {
 // (a JWT scoped to purpose: 'password-reset', 10-minute expiry) which is what
 // step 3 actually requires — so even if someone captured the code in transit,
 // it's useless once step 2 has already consumed it into a token.
-// ─────────────────────────────────────────────────────────────────────────────
 
 function signResetToken(user) {
   return jwt.sign(
@@ -136,7 +134,7 @@ function signResetToken(user) {
   );
 }
 
-// ── POST /api/auth/forgot-password ──────────────────────────────────────────
+// POST /api/auth/forgot-password 
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -159,7 +157,7 @@ exports.forgotPassword = async (req, res) => {
     // 6-digit numeric code, e.g. "042917". Stored only as a bcrypt hash —
     // same treatment as the account password.
     const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
-    user.resetCodeHash    = await bcrypt.hash(code, 10);
+    user.resetCodeHash = await bcrypt.hash(code, 10);
     user.resetCodeExpires = new Date(Date.now() + RESET_CODE_TTL_MINUTES * 60 * 1000);
     await user.save();
 
@@ -171,7 +169,7 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-// ── POST /api/auth/verify-reset-code ────────────────────────────────────────
+// POST /api/auth/verify-reset-code 
 exports.verifyResetCode = async (req, res) => {
   try {
     const { email, code } = req.body;
@@ -186,7 +184,7 @@ exports.verifyResetCode = async (req, res) => {
     const invalid = () => res.status(400).json({ message: 'Invalid or expired code.' });
 
     if (!user || !user.resetCodeHash || !user.resetCodeExpires) return invalid();
-    if (user.resetCodeExpires.getTime() < Date.now())            return invalid();
+    if (user.resetCodeExpires.getTime() < Date.now()) return invalid();
 
     const isMatch = await bcrypt.compare(code, user.resetCodeHash);
     if (!isMatch) return invalid();
@@ -197,7 +195,7 @@ exports.verifyResetCode = async (req, res) => {
   }
 };
 
-// ── POST /api/auth/reset-password ───────────────────────────────────────────
+// POST /api/auth/reset-password 
 exports.resetPassword = async (req, res) => {
   try {
     const { resetToken, password, confirmPassword } = req.body;
@@ -234,8 +232,8 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ message: 'New password must be different from your old password.' });
     }
 
-    user.password         = await bcrypt.hash(password, 10);
-    user.resetCodeHash    = null;
+    user.password = await bcrypt.hash(password, 10);
+    user.resetCodeHash = null;
     user.resetCodeExpires = null;
     await user.save();
 
@@ -248,12 +246,10 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Profile — Week 6: update profile, change password, delete account.
+// Profile: update profile, change password, delete account.
 // All three require verifyToken, so req.user.id is always the caller's own id.
-// ─────────────────────────────────────────────────────────────────────────────
 
-// ── PUT /api/auth/profile ───────────────────────────────────────────────────
+// PUT /api/auth/profile 
 exports.updateProfile = async (req, res) => {
   try {
     const { name, avatarUrl } = req.body;
@@ -281,7 +277,7 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-// ── PUT /api/auth/password ──────────────────────────────────────────────────
+// PUT /api/auth/password 
 exports.changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword, confirmNewPassword } = req.body;
@@ -319,7 +315,7 @@ exports.changePassword = async (req, res) => {
   }
 };
 
-// ── DELETE /api/auth/account ────────────────────────────────────────────────
+// DELETE /api/auth/account 
 exports.deleteAccount = async (req, res) => {
   try {
     const { password } = req.body;

@@ -1,4 +1,4 @@
-// Calendar — Week 6
+// Calendar
 // Weekly and monthly views of completion history, aggregated across every
 // habit. A day's status is derived purely from `completions` on each habit
 // (never stored separately), same principle as streak.js.
@@ -14,12 +14,12 @@ import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react'
 import { useHabits } from '../context/HabitsContext.jsx'
 import { toDateKey, addDays, todayKey } from '../utils/streak.js'
 
-const VIEW_WEEK  = 'week'
+const VIEW_WEEK = 'week'
 const VIEW_MONTH = 'month'
 
-const WEEKDAY_LABELS      = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const WEEKDAY_LABELS_FULL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-const MONTH_LABEL_FMT     = (d) => d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+const MONTH_LABEL_FMT = (d) => d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
 
 function startOfWeek(date) {
   const d = new Date(date)
@@ -34,16 +34,16 @@ function daysInMonth(date) {
 }
 
 const STATUS_STYLES = {
-  full:    'bg-pine text-white',
+  full: 'bg-pine text-white',
   partial: 'bg-ember text-white',
-  missed:  'bg-emberSoft text-ember',
-  future:  'bg-paperLine/40 text-inkSoft',
-  empty:   'bg-paperLine/40 text-inkSoft',
+  missed: 'bg-emberSoft text-ember',
+  future: 'bg-paperLine/40 text-inkSoft',
+  empty: 'bg-paperLine/40 text-inkSoft',
 }
 
 export default function CalendarPage() {
   const { habits } = useHabits()
-  const [view, setView]     = useState(VIEW_WEEK)
+  const [view, setView] = useState(VIEW_WEEK)
   const [anchor, setAnchor] = useState(new Date())
 
   const today = todayKey()
@@ -51,7 +51,7 @@ export default function CalendarPage() {
   const dayStats = useMemo(() => {
     return (dateKey) => {
       const total = habits.length
-      const done  = habits.filter((h) => h.completions?.includes(dateKey)).length
+      const done = habits.filter((h) => h.completions?.includes(dateKey)).length
       return { done, total }
     }
   }, [habits])
@@ -75,14 +75,14 @@ export default function CalendarPage() {
     setAnchor(new Date())
   }
 
-  // ── Week data ──────────────────────────────────────────────────────────
+  // Week data 
   const weekStart = startOfWeek(anchor)
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
 
-  // ── Month data ─────────────────────────────────────────────────────────
-  const monthStart   = new Date(anchor.getFullYear(), anchor.getMonth(), 1)
+  // Month data
+  const monthStart = new Date(anchor.getFullYear(), anchor.getMonth(), 1)
   const leadingBlanks = (monthStart.getDay() + 6) % 7 // Monday-first offset
-  const totalDays      = daysInMonth(anchor)
+  const totalDays = daysInMonth(anchor)
   const monthCells = [
     ...Array.from({ length: leadingBlanks }, () => null),
     ...Array.from({ length: totalDays }, (_, i) => new Date(anchor.getFullYear(), anchor.getMonth(), i + 1)),
@@ -143,12 +143,12 @@ export default function CalendarPage() {
         </div>
       )}
 
-      {/* ── Week view ────────────────────────────────────────────────────── */}
+      {/* Week view */}
       {view === VIEW_WEEK && (
         <div className="grid grid-cols-7 gap-2">
           {weekDays.map((date, i) => {
             const dateKey = toDateKey(date)
-            const status  = dayStatus(dateKey)
+            const status = dayStatus(dateKey)
             const { done, total } = dayStats(dateKey)
             const isToday = dateKey === today
 
@@ -175,7 +175,7 @@ export default function CalendarPage() {
         </div>
       )}
 
-      {/* ── Month view ───────────────────────────────────────────────────── */}
+      {/* Month view */}
       {view === VIEW_MONTH && (
         <div>
           <div className="mb-2 grid grid-cols-7 gap-2 text-center">
@@ -189,7 +189,7 @@ export default function CalendarPage() {
             {monthCells.map((date, i) => {
               if (!date) return <div key={`blank-${i}`} />
               const dateKey = toDateKey(date)
-              const status  = dayStatus(dateKey)
+              const status = dayStatus(dateKey)
               const isToday = dateKey === today
 
               return (

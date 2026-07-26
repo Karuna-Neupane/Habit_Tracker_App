@@ -1,4 +1,4 @@
-// MongoDB connection using Mongoose (Tutorial PDF - Week 4)
+// MongoDB connection using Mongoose 
 // Connects once on app startup. All models share this connection.
 
 const mongoose = require('mongoose');

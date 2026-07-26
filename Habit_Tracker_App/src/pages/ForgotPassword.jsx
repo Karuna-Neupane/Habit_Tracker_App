@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Mail, KeyRound, Lock, Eye, EyeOff, ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 
-// ─── Forgot Password — Week 5 ──────────────────────────────────────────────
+// Forgot Password 
 // Real 3-step flow backed by the Express API:
 //   1. STEP_EMAIL    -> POST /api/auth/forgot-password    (emails a 6-digit code)
 //   2. STEP_CODE     -> POST /api/auth/verify-reset-code   (returns a resetToken)
@@ -14,15 +14,15 @@ import { useAuth } from '../context/AuthContext.jsx'
 // session exactly like a login — we just navigate to "/", which renders the
 // Dashboard for an authenticated user.
 
-const STEP_EMAIL    = 'email'
-const STEP_CODE     = 'code'
+const STEP_EMAIL = 'email'
+const STEP_CODE = 'code'
 const STEP_PASSWORD = 'password'
 
 const RESEND_COOLDOWN_SECONDS = 30
 
 const STEPS = [
-  { key: STEP_EMAIL,    label: 'Email' },
-  { key: STEP_CODE,     label: 'Code' },
+  { key: STEP_EMAIL, label: 'Email' },
+  { key: STEP_CODE, label: 'Code' },
   { key: STEP_PASSWORD, label: 'New password' },
 ]
 
@@ -33,17 +33,17 @@ export default function ForgotPassword() {
 
   const [step, setStep] = useState(STEP_EMAIL)
 
-  const [email, setEmail]   = useState(location.state?.email || '')
-  const [code, setCode]     = useState('')
+  const [email, setEmail] = useState(location.state?.email || '')
+  const [code, setCode] = useState('')
   const [resetToken, setResetToken] = useState('')
 
-  const [password, setPassword]         = useState('')
-  const [confirm, setConfirm]           = useState('')
+  const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [showConfirm, setShowConfirm]   = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
 
-  const [error, setError]         = useState('')
-  const [info, setInfo]           = useState('')
+  const [error, setError] = useState('')
+  const [info, setInfo] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [resendCooldown, setResendCooldown] = useState(0)
 
@@ -64,7 +64,7 @@ export default function ForgotPassword() {
     }, 1000)
   }
 
-  // ── Step 1: request the code ────────────────────────────────────────────
+  // Step 1: request the code 
   async function handleRequestCode(e) {
     e.preventDefault()
     setError('')
@@ -86,7 +86,7 @@ export default function ForgotPassword() {
     }
   }
 
-  // ── Resend the code without leaving step 2 ──────────────────────────────
+  // Resend the code without leaving step 2
   async function handleResend() {
     if (resendCooldown > 0 || submitting) return
     setError('')
@@ -102,7 +102,7 @@ export default function ForgotPassword() {
     }
   }
 
-  // ── Step 2: verify the code ─────────────────────────────────────────────
+  // Step 2: verify the code 
   async function handleVerifyCode(e) {
     e.preventDefault()
     setError('')
@@ -124,7 +124,7 @@ export default function ForgotPassword() {
     }
   }
 
-  // ── Step 3: set the new password, then land on the dashboard ───────────
+  // Step 3: set the new password, then land on the dashboard 
   async function handleResetPassword(e) {
     e.preventDefault()
     setError('')
@@ -163,13 +163,12 @@ export default function ForgotPassword() {
           {STEPS.map((s, i) => (
             <div key={s.key} className="flex items-center gap-2">
               <div
-                className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
-                  i < stepIndex
+                className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${i < stepIndex
                     ? 'bg-pine text-white'
                     : i === stepIndex
                       ? 'bg-ember text-white'
                       : 'bg-paperLine text-inkSoft'
-                }`}
+                  }`}
               >
                 {i < stepIndex ? <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> : i + 1}
               </div>
@@ -190,7 +189,7 @@ export default function ForgotPassword() {
             </div>
           )}
 
-          {/* ── Step 1: email ──────────────────────────────────────────── */}
+          {/* Step 1: email */}
           {step === STEP_EMAIL && (
             <form onSubmit={handleRequestCode} className="space-y-4">
               <div className="mb-1 flex items-center gap-2 text-ink">
@@ -222,7 +221,7 @@ export default function ForgotPassword() {
             </form>
           )}
 
-          {/* ── Step 2: code ───────────────────────────────────────────── */}
+          {/* Step 2: code */}
           {step === STEP_CODE && (
             <form onSubmit={handleVerifyCode} className="space-y-4">
               <div className="mb-1 flex items-center gap-2 text-ink">
@@ -273,7 +272,7 @@ export default function ForgotPassword() {
             </form>
           )}
 
-          {/* ── Step 3: new password ──────────────────────────────────── */}
+          {/* Step 3: new password */}
           {step === STEP_PASSWORD && (
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div className="mb-1 flex items-center gap-2 text-ink">

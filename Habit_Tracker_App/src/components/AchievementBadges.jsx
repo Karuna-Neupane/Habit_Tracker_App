@@ -19,14 +19,14 @@ export default function AchievementBadges({ habits }) {
     : 0
 
   const badges = [
-    { key: 'first',       Icon: Award,     label: 'First Habit',        earned: totalHabits >= 1 },
-    { key: 'week',        Icon: Flame,     label: '7 Day Streak',       earned: bestCurrentStreak >= 7 },
-    { key: 'month',       Icon: Trophy,    label: '30 Day Streak',      earned: bestEverStreak >= 30 },
-    { key: 'century',     Icon: Star,      label: '100 Completions',    earned: totalCompletions >= 100 },
-    { key: 'collector',   Icon: BookOpen,  label: 'Habit Collector',    earned: totalHabits >= 5 },
-    { key: 'perfectweek', Icon: Target,    label: 'Perfect Week',       earned: totalHabits > 0 && weeklyProgress === 100 },
-    { key: 'consistent',  Icon: Dumbbell,  label: 'Consistency Champ',  earned: totalHabits > 0 && monthlyProgress >= 80 },
-    { key: 'onfire',      Icon: Zap,       label: 'On Fire',            earned: bestEverStreak >= 14 },
+    { key: 'first', Icon: Award, label: 'First Habit', earned: totalHabits >= 1 },
+    { key: 'week', Icon: Flame, label: '7 Day Streak', earned: bestCurrentStreak >= 7 },
+    { key: 'month', Icon: Trophy, label: '30 Day Streak', earned: bestEverStreak >= 30 },
+    { key: 'century', Icon: Star, label: '100 Completions', earned: totalCompletions >= 100 },
+    { key: 'collector', Icon: BookOpen, label: 'Habit Collector', earned: totalHabits >= 5 },
+    { key: 'perfectweek', Icon: Target, label: 'Perfect Week', earned: totalHabits > 0 && weeklyProgress === 100 },
+    { key: 'consistent', Icon: Dumbbell, label: 'Consistency Champ', earned: totalHabits > 0 && monthlyProgress >= 80 },
+    { key: 'onfire', Icon: Zap, label: 'On Fire', earned: bestEverStreak >= 14 },
   ]
 
   const earned = badges.filter((b) => b.earned)

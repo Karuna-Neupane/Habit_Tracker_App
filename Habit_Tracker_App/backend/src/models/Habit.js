@@ -1,4 +1,4 @@
-// Mongoose Habit Schema — Week 4/5
+// Mongoose Habit Schema 
 // Real MongoDB document schema.
 //
 // Schema shape:
@@ -6,7 +6,7 @@
 //
 // completions are stored as "YYYY-MM-DD" strings (not Date objects) so they
 // round-trip cleanly to the frontend without timezone conversion issues.
-// userId (Week 5) ties every habit to exactly one User — this is what makes
+// userId ties every habit to exactly one User — this is what makes
 // habit lists private per account.
 
 const mongoose = require('mongoose');
@@ -14,17 +14,17 @@ const mongoose = require('mongoose');
 const HabitSchema = new mongoose.Schema(
   {
     name: {
-      type:      String,
-      required:  [true, 'Habit name is required'],
-      trim:      true,
-      minlength: [2,  'Name must be at least 2 characters'],
+      type: String,
+      required: [true, 'Habit name is required'],
+      trim: true,
+      minlength: [2, 'Name must be at least 2 characters'],
       maxlength: [60, 'Name must be 60 characters or fewer'],
     },
 
     frequency: {
-      type:    String,
-      enum:    {
-        values:  ['daily', 'weekly'],
+      type: String,
+      enum: {
+        values: ['daily', 'weekly'],
         message: 'Frequency must be daily or weekly',
       },
       default: 'daily',
@@ -33,21 +33,21 @@ const HabitSchema = new mongoose.Schema(
     // Array of "YYYY-MM-DD" date strings — one per completed day.
     // Stored as strings so no timezone drift between server and client.
     completions: {
-      type:    [String],
+      type: [String],
       default: [],
       validate: {
         validator: (arr) => arr.every((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)),
-        message:   'Each completion must be a valid YYYY-MM-DD date string',
+        message: 'Each completion must be a valid YYYY-MM-DD date string',
       },
     },
 
-    // Week 5, item 3: every habit belongs to exactly one user. Set from
+    // Every habit belongs to exactly one user. Set from
     // req.user.id (decoded off the JWT by verifyToken) — never from the
     // request body, so a user can never create/see a habit under someone
     // else's id.
     userId: {
-      type:     mongoose.Schema.Types.ObjectId,
-      ref:      'User',
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: [true, 'userId is required'],
     },
   },

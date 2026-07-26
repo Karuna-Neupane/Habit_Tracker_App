@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import api, { getToken, setToken } from '../utils/api.js'
 
-// ─── Auth Context — Week 5 ────────────────────────────────────────────────────
+// Auth Context 
 // Real backend auth: the server hashes passwords with bcrypt and issues a
 // JWT on register/login (see backend/src/controllers/authController.js).
 // The token is kept in localStorage and attached to every API request by
@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
       .finally(() => setInitializing(false))
   }, [])
 
-  // ── Register with name + email + password ────────────────────────────────
+  // Register with name + email + password 
   async function register({ name, email, password, confirmPassword }) {
     try {
       const { data } = await api.post('/auth/register', { name, email, password, confirmPassword })
@@ -44,7 +44,7 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // ── Login with email + password ───────────────────────────────────────────
+  // Login with email + password
   async function login({ email, password }) {
     try {
       const { data } = await api.post('/auth/login', { email, password })
@@ -56,13 +56,13 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // ── Logout: clear the token so every subsequent request is unauthenticated ─
+  // Logout: clear the token so every subsequent request is unauthenticated
   function logout() {
     setToken(null)
     setUser(null)
   }
 
-  // ── Forgot password, step 1: email a 6-digit code ────────────────────────
+  // Forgot password, step 1: email a 6-digit code 
   async function requestPasswordReset(email) {
     try {
       const { data } = await api.post('/auth/forgot-password', { email })
@@ -72,7 +72,7 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // ── Forgot password, step 2: verify the code, get a short-lived reset token ─
+  // Forgot password, step 2: verify the code, get a short-lived reset token
   async function verifyResetCode(email, code) {
     try {
       const { data } = await api.post('/auth/verify-reset-code', { email, code })
@@ -82,7 +82,7 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // ── Forgot password, step 3: set the new password, auto-login ────────────
+  // Forgot password, step 3: set the new password, auto-login
   async function resetPassword(resetToken, password, confirmPassword) {
     try {
       const { data } = await api.post('/auth/reset-password', { resetToken, password, confirmPassword })
@@ -94,7 +94,7 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // ── Profile: update name / avatar ──────────────────────────────────────
+  // Profile: update name / avatar
   async function updateProfile({ name, avatarUrl }) {
     try {
       const { data } = await api.put('/auth/profile', { name, avatarUrl })
@@ -105,7 +105,7 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // ── Profile: change password (requires current password) ─────────────────
+  // Profile: change password (requires current password)
   async function changePassword({ currentPassword, newPassword, confirmNewPassword }) {
     try {
       const { data } = await api.put('/auth/password', { currentPassword, newPassword, confirmNewPassword })
@@ -115,7 +115,7 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // ── Profile: delete account (requires password confirmation) ──────────────
+  // Profile: delete account (requires password confirmation)
   async function deleteAccount(password) {
     try {
       await api.delete('/auth/account', { data: { password } })

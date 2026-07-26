@@ -1,4 +1,4 @@
-// Mailer — Week 5 forgot-password flow
+// Mailer — forgot-password flow
 // Sends the 6-digit reset code by email using SMTP credentials from .env.
 //
 // If SMTP_* isn't configured (e.g. a fresh clone before anyone has set up

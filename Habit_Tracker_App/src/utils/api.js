@@ -1,4 +1,4 @@
-// Shared Axios client — Week 5
+// Shared Axios client 
 // Every request automatically carries `Authorization: Bearer <token>` if
 // we have one stashed in localStorage. This is what lets the Express
 // verifyToken middleware identify the user on both /api/auth/me and every

@@ -92,9 +92,9 @@ export default function Dashboard() {
   // occurrences across ALL habits — never an average of individual habit
   // percentages. See utils/streak.js getPeriodProgress for the full rules
   // (daily habits: 1 occurrence/day; weekly habits: 1 occurrence/week).
-  const { start: weekStart, end: weekEnd }   = getWeekRange()
+  const { start: weekStart, end: weekEnd } = getWeekRange()
   const { start: monthStart, end: monthEnd } = getMonthRange()
-  const weeklyStats  = getPeriodProgress(habits, weekStart, weekEnd)
+  const weeklyStats = getPeriodProgress(habits, weekStart, weekEnd)
   const monthlyStats = getPeriodProgress(habits, monthStart, monthEnd)
 
   let goalText
@@ -109,25 +109,25 @@ export default function Dashboard() {
   }
 
   const quickActions = [
-    { to: '/habits',    label: 'My Habits', desc: 'View, edit & complete', Icon: ListChecks,  color: 'bg-pineSoft text-pine'   },
-    { to: '/calendar',  label: 'Calendar',  desc: 'Week & month view',     Icon: CalendarDays, color: 'bg-emberSoft text-ember' },
-    { to: '/analytics', label: 'Analytics', desc: 'Charts & comparisons',  Icon: BarChart2,    color: 'bg-pineSoft text-pine'   },
-    { to: '/ai-coach',  label: 'AI Coach',  desc: 'Get personalised tips', Icon: Bot,          color: 'bg-emberSoft text-ember' },
+    { to: '/habits', label: 'My Habits', desc: 'View, edit & complete', Icon: ListChecks, color: 'bg-pineSoft text-pine' },
+    { to: '/calendar', label: 'Calendar', desc: 'Week & month view', Icon: CalendarDays, color: 'bg-emberSoft text-ember' },
+    { to: '/analytics', label: 'Analytics', desc: 'Charts & comparisons', Icon: BarChart2, color: 'bg-pineSoft text-pine' },
+    { to: '/ai-coach', label: 'AI Coach', desc: 'Get personalised tips', Icon: Bot, color: 'bg-emberSoft text-ember' },
   ]
 
   return (
     <div>
-      {/* ── Greeting header ──────────────────────────────────────────── */}
+      {/* Greeting header */}
       <h1 className="flex items-center gap-2 font-display text-3xl font-bold text-ink">
         <greeting.Icon className="h-7 w-7 text-ember" aria-hidden="true" />
         {greeting.text}, {user?.name || 'there'}
       </h1>
       <p className="mt-1 font-mono text-xs uppercase tracking-widest text-pine">{TODAY_LABEL}</p>
 
-      {/* ── Motivational quote ───────────────────────────────────────── */}
+      {/* Motivational quote */}
       <p className="mt-3 text-sm italic text-inkSoft">"{quoteOfTheDay()}"</p>
 
-      {/* ── Today's Goal ─────────────────────────────────────────────── */}
+      {/* Today's Goal */}
       <div className="mt-4 flex items-center gap-2.5 rounded-2xl border border-paperLine bg-pineSoft/50 px-4 py-3">
         {goalDone && <PartyPopper className="h-4 w-4 shrink-0 text-pine" aria-hidden="true" />}
         <div>
@@ -140,17 +140,17 @@ export default function Dashboard() {
 
       <Divider />
 
-      {/* ── Statistics cards ─────────────────────────────────────────── */}
+      {/* Statistics cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Total Habits"      value={totalHabits} />
-        <StatCard label="Completed Today"   value={`${completedToday}/${totalHabits}`} accent="text-pine" />
-        <StatCard label="Current Streak"    value={currentStreak} accent="text-ember" />
-        <StatCard label="Longest Streak"    value={longestStreak} accent="text-ember" />
+        <StatCard label="Total Habits" value={totalHabits} />
+        <StatCard label="Completed Today" value={`${completedToday}/${totalHabits}`} accent="text-pine" />
+        <StatCard label="Current Streak" value={currentStreak} accent="text-ember" />
+        <StatCard label="Longest Streak" value={longestStreak} accent="text-ember" />
       </div>
 
       <Divider />
 
-      {/* ── Weekly & Monthly Progress ────────────────────────────────── */}
+      {/* Weekly & Monthly Progress */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="rounded-2xl border border-paperLine bg-white/70 p-5">
           <ProgressBar
@@ -172,28 +172,28 @@ export default function Dashboard() {
 
       <Divider />
 
-      {/* ── Achievement Badges ───────────────────────────────────────── */}
+      {/* Achievement Badges */}
       <Card title="Achievement Badges" Icon={Trophy}>
         <AchievementBadges habits={habits} />
       </Card>
 
       <Divider />
 
-      {/* ── Heatmap ──────────────────────────────────────────────────── */}
+      {/* Heatmap */}
       <Card title="Heatmap" Icon={Grid3x3}>
         <ContributionHeatmap habits={habits} />
       </Card>
 
       <Divider />
 
-      {/* ── Recent Activity ──────────────────────────────────────────── */}
+      {/* Recent Activity */}
       <Card title="Recent Activity" Icon={History}>
         <RecentActivity habits={habits} />
       </Card>
 
       <Divider />
 
-      {/* ── Quick actions ────────────────────────────────────────────── */}
+      {/* Quick actions */}
       <section>
         <h2 className="mb-3 font-display text-lg font-semibold text-ink">Quick actions</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

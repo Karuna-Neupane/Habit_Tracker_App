@@ -86,7 +86,7 @@ export default function AddHabitForm({
             : 'Small, specific habits are easier to keep.'}
         </p>
 
-        {/* Controlled form (Tutorial PDF, "Handling form submission") */}
+        {/* Controlled form ("Handling form submission") */}
         <form onSubmit={handleSubmit} noValidate className="mt-4 space-y-4">
 
           {/* Name field */}
@@ -108,8 +108,8 @@ export default function AddHabitForm({
               ref={nameInputRef}
               id="hf-name"
               type="text"
-              value={name}                                      // binds state to input value
-              onChange={(e) => {                                // updates state on keystroke
+              value={name} // binds state to input value
+              onChange={(e) => { // updates state on keystroke
                 setName(e.target.value)
                 if (nameError) setNameError('')
               }}

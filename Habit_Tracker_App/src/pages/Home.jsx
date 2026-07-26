@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import Dashboard from './Dashboard.jsx'
 import Footer from '../components/Footer.jsx'
 
-// ── Animated counter (counts up on first render) ──────────────────────────────
+// Animated counter (counts up on first render)
 function useCounter(target, duration = 1500) {
   const [count, setCount] = useState(0)
   const started = useRef(false)
@@ -29,19 +29,18 @@ function useCounter(target, duration = 1500) {
   return count
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 
 export default function Home() {
   const { isAuthenticated, initializing } = useAuth()
 
   if (initializing) return null
 
-  // ── Signed in: keep existing behaviour — show Dashboard ──────────────────
+  // Signed in: keep existing behaviour — show Dashboard
   if (isAuthenticated) {
     return <Dashboard />
   }
 
-  // ── Signed out: rich landing page ─────────────────────────────────────────
+  // Signed out: rich landing page 
   return (
     <div>
       <HeroSection />
@@ -57,7 +56,7 @@ export default function Home() {
   )
 }
 
-// ─── Hero ─────────────────────────────────────────────────────────────────────
+// Hero
 function HeroSection() {
   return (
     <section id="home" className="relative overflow-hidden">
@@ -86,7 +85,7 @@ function HeroSection() {
         <p className="mt-6 mx-auto max-w-2xl text-lg sm:text-xl text-inkSoft leading-relaxed">
           Habit Tracker helps you build and maintain positive daily routines by tracking habits,
           monitoring streaks, and visualising your progress across a full calendar and analytics
-          dashboard — with a real AI coach, powered by Gemini, that gives you a one-click coaching
+          dashboard - with a real AI coach, powered by Gemini, that gives you a one-click coaching
           card and a follow-up chat you can keep coming back to.
         </p>
 
@@ -112,9 +111,9 @@ function HeroSection() {
         {/* Preview habit cards */}
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto text-left">
           {[
-            { name: 'Morning run',      streak: 14, bars: [1,1,1,1,1,1,1], freq: 'daily'  },
-            { name: 'Read 20 mins',     streak: 7,  bars: [1,1,1,0,1,1,1], freq: 'daily'  },
-            { name: 'Weekly meal prep', streak: 5,  bars: [0,0,0,0,0,0,1], freq: 'weekly' },
+            { name: 'Morning run', streak: 14, bars: [1, 1, 1, 1, 1, 1, 1], freq: 'daily' },
+            { name: 'Read 20 mins', streak: 7, bars: [1, 1, 1, 0, 1, 1, 1], freq: 'daily' },
+            { name: 'Weekly meal prep', streak: 5, bars: [0, 0, 0, 0, 0, 0, 1], freq: 'weekly' },
           ].map(({ name, streak, bars, freq }) => (
             <div key={name} className="rounded-2xl border border-paperLine bg-white/80 p-4 shadow-sm">
               <div className="flex items-start justify-between mb-3">
@@ -138,9 +137,9 @@ function HeroSection() {
                   </div>
                 ))}
               </div>
-              <div className={`mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl py-1.5 text-center text-xs font-semibold ${bars[bars.length-1] ? 'bg-pine text-white' : 'bg-ink text-paper'}`}>
-                {bars[bars.length-1] && <Check className="h-3.5 w-3.5" aria-hidden="true" />}
-                {bars[bars.length-1] ? 'Done for today' : 'Mark today done'}
+              <div className={`mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl py-1.5 text-center text-xs font-semibold ${bars[bars.length - 1] ? 'bg-pine text-white' : 'bg-ink text-paper'}`}>
+                {bars[bars.length - 1] && <Check className="h-3.5 w-3.5" aria-hidden="true" />}
+                {bars[bars.length - 1] ? 'Done for today' : 'Mark today done'}
               </div>
             </div>
           ))}
@@ -150,22 +149,22 @@ function HeroSection() {
   )
 }
 
-// ─── Stats strip ──────────────────────────────────────────────────────────────
+// Stats strip 
 function StatsStrip() {
-  const habits  = useCounter(2400)
+  const habits = useCounter(2400)
   const streaks = useCounter(98)
-  const users   = useCounter(1200)
-  const rate    = useCounter(87)
+  const users = useCounter(1200)
+  const rate = useCounter(87)
 
   return (
     <section className="border-y border-paperLine bg-white/50 py-10">
       <div className="mx-auto max-w-6xl px-6">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
           {[
-            { value: `${habits.toLocaleString()}+`, label: 'Habits tracked'    },
-            { value: `${streaks}%`,                 label: 'Streak retention'  },
-            { value: `${users.toLocaleString()}+`,  label: 'Active users'      },
-            { value: `${rate}%`,                    label: '30-day completion' },
+            { value: `${habits.toLocaleString()}+`, label: 'Habits tracked' },
+            { value: `${streaks}%`, label: 'Streak retention' },
+            { value: `${users.toLocaleString()}+`, label: 'Active users' },
+            { value: `${rate}%`, label: '30-day completion' },
           ].map(({ value, label }) => (
             <div key={label}>
               <p className="font-display text-3xl font-bold text-ink">{value}</p>
@@ -178,17 +177,17 @@ function StatsStrip() {
   )
 }
 
-// ─── Features ─────────────────────────────────────────────────────────────────
+// Features
 const FEATURES = [
-  { icon: CheckCircle2, title: 'Daily & weekly habits',  desc: 'Track habits on your own schedule — daily workouts, weekly reviews, or anything in between.',                             color: 'bg-pineSoft text-pine'  },
-  { icon: Flame,        title: 'Live streak tracking',   desc: 'Streaks recompute the moment you tick a habit. Miss a day and the counter honestly resets.',                             color: 'bg-emberSoft text-ember' },
-  { icon: Calendar,     title: '7-day strip & full calendar', desc: 'A punch-card strip shows your last 7 days at a glance, plus a dedicated Calendar page with weekly and monthly views.', color: 'bg-pineSoft text-pine'  },
-  { icon: BarChart2,    title: 'Analytics dashboard',    desc: '30-day completion rates, weekly/monthly trend charts, and habit-by-habit comparisons on the Analytics page.',              color: 'bg-emberSoft text-ember' },
-  { icon: Shield,       title: 'Private & secure',       desc: 'Your habits are tied to your account with real JWT authentication and bcrypt-hashed passwords — never anyone else\'s.',    color: 'bg-pineSoft text-pine'  },
-  { icon: Zap,          title: 'Instant updates',        desc: 'Tick a habit and streak, calendar, and stats all update live — no page reloads, no waiting.',                           color: 'bg-emberSoft text-ember' },
-  { icon: Target,       title: 'Search, filter & sort',  desc: 'Find any habit fast on the My Habits page — search by name, filter daily/weekly, and sort six different ways.',           color: 'bg-pineSoft text-pine'  },
-  { icon: TrendingUp,   title: 'Achievements & heatmap', desc: 'Earn streak and consistency badges automatically, and see months of activity at a glance in a GitHub-style heatmap.',      color: 'bg-emberSoft text-ember' },
-  { icon: Bot,          title: 'AI coaching & chat',      desc: 'Get a one-click Gemini coaching card — overall performance, strongest/weakest habit, suggestions, and a goal for tomorrow — then keep asking follow-up questions in a persistent chat that remembers past conversations.', color: 'bg-pineSoft text-pine'  },
+  { icon: CheckCircle2, title: 'Daily & weekly habits', desc: 'Track habits on your own schedule - daily workouts, weekly reviews, or anything in between.', color: 'bg-pineSoft text-pine' },
+  { icon: Flame, title: 'Live streak tracking', desc: 'Streaks recompute the moment you tick a habit. Miss a day and the counter honestly resets.', color: 'bg-emberSoft text-ember' },
+  { icon: Calendar, title: '7-day strip & full calendar', desc: 'A punch-card strip shows your last 7 days at a glance, plus a dedicated Calendar page with weekly and monthly views.', color: 'bg-pineSoft text-pine' },
+  { icon: BarChart2, title: 'Analytics dashboard', desc: '30-day completion rates, weekly/monthly trend charts, and habit-by-habit comparisons on the Analytics page.', color: 'bg-emberSoft text-ember' },
+  { icon: Shield, title: 'Private & secure', desc: 'Your habits are tied to your account with real JWT authentication and bcrypt-hashed passwords - never anyone else\'s.', color: 'bg-pineSoft text-pine' },
+  { icon: Zap, title: 'Instant updates', desc: 'Tick a habit and streak, calendar, and stats all update live - no page reloads, no waiting.', color: 'bg-emberSoft text-ember' },
+  { icon: Target, title: 'Search, filter & sort', desc: 'Find any habit fast on the My Habits page - search by name, filter daily/weekly, and sort six different ways.', color: 'bg-pineSoft text-pine' },
+  { icon: TrendingUp, title: 'Achievements & heatmap', desc: 'Earn streak and consistency badges automatically, and see months of activity at a glance in a GitHub-style heatmap.', color: 'bg-emberSoft text-ember' },
+  { icon: Bot, title: 'AI coaching & chat', desc: 'Get a one-click Gemini coaching card - overall performance, strongest/weakest habit, suggestions, and a goal for tomorrow - then keep asking follow-up questions in a persistent chat that remembers past conversations.', color: 'bg-pineSoft text-pine' },
 ]
 
 function FeaturesSection() {
@@ -218,14 +217,14 @@ function FeaturesSection() {
   )
 }
 
-// ─── AI Coach ─────────────────────────────────────────────────────────────────
+// AI Coach 
 const CHAT = [
   { role: 'user', text: "Which habit needs the most attention?" },
-  { role: 'ai',   text: "Your weekly meal prep is at 40% completion over the last 30 days — well behind Morning run and Read 20 mins. Want a way to make it stick?" },
+  { role: 'ai', text: "Your weekly meal prep is at 40% completion over the last 30 days - well behind Morning run and Read 20 mins. Want a way to make it stick?" },
   { role: 'user', text: "I've broken my streak 3 days in a row now", icon: Frown },
-  { role: 'ai',   text: "A broken streak isn't failure — it's data. You went 11 days before this gap. Let's talk about what changed and build a buffer strategy." },
+  { role: 'ai', text: "A broken streak isn't failure - it's data. You went 11 days before this gap. Let's talk about what changed and build a buffer strategy." },
   { role: 'user', text: "What's a good habit to pair with reading?" },
-  { role: 'ai',   text: "Habit stacking! Pair reading with something you already do daily — right after morning coffee, or before you put your phone down at night. The existing habit becomes your trigger." },
+  { role: 'ai', text: "Habit stacking! Pair reading with something you already do daily — right after morning coffee, or before you put your phone down at night. The existing habit becomes your trigger." },
 ]
 
 function AICoachSection() {
@@ -244,22 +243,22 @@ function AICoachSection() {
               AI Habit Coach
             </div>
             <h2 className="font-display text-4xl font-bold text-paper leading-tight">
-              Your personal coach — and now, a real conversation.
+              Your personal coach and now, a real conversation.
             </h2>
             <p className="mt-4 text-inkSoft leading-relaxed">
               Hit "Get AI Coaching" on the AI Coach page and Gemini reviews your actual habit
               names, streaks, and completion rates to hand you a coaching card: overall
               performance, your strongest and weakest habit, concrete suggestions, and a goal for
-              tomorrow. Then keep going — a built-in chatbot lets you ask follow-up questions in
+              tomorrow. Then keep going - a built-in chatbot lets you ask follow-up questions in
               plain language, and every conversation is saved, so it's still there the next time
               you log in.
             </p>
             <ul className="mt-8 space-y-3">
               {[
-                { icon: MessageSquare, text: 'A one-click coaching card built from your real streaks and completion rates'  },
-                { icon: Brain,         text: 'A follow-up chatbot for natural-language questions about your habits'         },
-                { icon: TrendingUp,    text: 'Grounded only in your real data — it never invents a stat or a streak'         },
-                { icon: Sparkles,      text: 'Conversation history is saved, so it survives a refresh or logging back in'    },
+                { icon: MessageSquare, text: 'A one-click coaching card built from your real streaks and completion rates' },
+                { icon: Brain, text: 'A follow-up chatbot for natural-language questions about your habits' },
+                { icon: TrendingUp, text: 'Grounded only in your real data - it never invents a stat or a streak' },
+                { icon: Sparkles, text: 'Conversation history is saved, so it survives a refresh or logging back in' },
               ].map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-start gap-3">
                   <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-pine/30">
@@ -303,14 +302,14 @@ function AICoachSection() {
                     <Trophy className="h-3.5 w-3.5 text-pineSoft" />
                     <span className="text-[11px] font-semibold text-pineSoft">Strongest</span>
                   </div>
-                  <p className="text-xs text-paper/80 leading-relaxed">"Morning run" — 14-day streak</p>
+                  <p className="text-xs text-paper/80 leading-relaxed">"Morning run" - 14-day streak</p>
                 </div>
                 <div className="rounded-xl bg-white/5 p-3">
                   <div className="mb-1 flex items-center gap-1.5">
                     <TrendingDown className="h-3.5 w-3.5 text-ember" />
                     <span className="text-[11px] font-semibold text-ember">Weakest</span>
                   </div>
-                  <p className="text-xs text-paper/80 leading-relaxed">"Weekly meal prep" — 40% completion</p>
+                  <p className="text-xs text-paper/80 leading-relaxed">"Weekly meal prep" - 40% completion</p>
                 </div>
               </div>
 
@@ -333,7 +332,7 @@ function AICoachSection() {
               <div className="flex items-center gap-2.5 rounded-xl bg-white/10 px-3 py-2.5">
                 <Heart className="h-3.5 w-3.5 shrink-0 text-ember" />
                 <p className="text-xs font-medium text-paper/90 leading-relaxed">
-                  Small, consistent steps compound — keep showing up.
+                  Small, consistent steps compound - keep showing up.
                 </p>
               </div>
             </div>
@@ -341,55 +340,55 @@ function AICoachSection() {
             <p className="mb-2 text-center text-xs font-mono uppercase tracking-widest text-inkSoft/70">then keep chatting ↓</p>
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-pine text-white">
-                  <Bot className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-paper">Habit AI Coach</p>
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
-                    <span className="text-xs text-inkSoft">A preview of the real chatbot</span>
+              <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-pine text-white">
+                    <Bot className="h-5 w-5" />
                   </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3 min-h-[260px]">
-              {CHAT.slice(0, visible).map((msg, i) => (
-                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  {msg.role === 'ai' && (
-                    <div className="mr-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-pine/30 mt-0.5">
-                      <Bot className="h-3.5 w-3.5 text-pineSoft" />
+                  <div>
+                    <p className="text-sm font-semibold text-paper">Habit AI Coach</p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
+                      <span className="text-xs text-inkSoft">A preview of the real chatbot</span>
                     </div>
-                  )}
-                  <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${msg.role === 'user' ? 'bg-ember/20 text-paper rounded-br-sm' : 'bg-white/10 text-paper/90 rounded-bl-sm'}`}>
-                    <span className="inline-flex items-center gap-1.5">
-                      {msg.text}
-                      {msg.icon && <msg.icon className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden="true" />}
-                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            {visible < CHAT.length ? (
-              <button onClick={() => setVisible(v => Math.min(v + 2, CHAT.length))}
-                className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/10 py-2 text-xs text-inkSoft hover:bg-white/5 transition-colors">
-                See more conversation
-                <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
-              </button>
-            ) : (
-              <div className="mt-4 flex gap-2">
-                <div className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-inkSoft">
-                  Saved automatically — pick up this chat any time
-                </div>
-                <div className="rounded-xl bg-pine px-3 py-2 text-white flex items-center">
-                  <ArrowRight className="h-4 w-4" />
-                </div>
               </div>
-            )}
+
+              <div className="space-y-3 min-h-[260px]">
+                {CHAT.slice(0, visible).map((msg, i) => (
+                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    {msg.role === 'ai' && (
+                      <div className="mr-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-pine/30 mt-0.5">
+                        <Bot className="h-3.5 w-3.5 text-pineSoft" />
+                      </div>
+                    )}
+                    <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${msg.role === 'user' ? 'bg-ember/20 text-paper rounded-br-sm' : 'bg-white/10 text-paper/90 rounded-bl-sm'}`}>
+                      <span className="inline-flex items-center gap-1.5">
+                        {msg.text}
+                        {msg.icon && <msg.icon className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden="true" />}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {visible < CHAT.length ? (
+                <button onClick={() => setVisible(v => Math.min(v + 2, CHAT.length))}
+                  className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/10 py-2 text-xs text-inkSoft hover:bg-white/5 transition-colors">
+                  See more conversation
+                  <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              ) : (
+                <div className="mt-4 flex gap-2">
+                  <div className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-inkSoft">
+                    Saved automatically - pick up this chat any time
+                  </div>
+                  <div className="rounded-xl bg-pine px-3 py-2 text-white flex items-center">
+                    <ArrowRight className="h-4 w-4" />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -398,7 +397,7 @@ function AICoachSection() {
   )
 }
 
-// ─── About ────────────────────────────────────────────────────────────────────
+// About 
 function AboutSection() {
   return (
     <section id="about" className="py-24 bg-white/50 border-y border-paperLine">
@@ -408,10 +407,10 @@ function AboutSection() {
           {/* Grid of value props */}
           <div className="order-2 lg:order-1 grid grid-cols-2 gap-4">
             {[
-              { icon: Target,     title: 'Goal-focused',    desc: 'Every feature exists to help you complete one more day.'            },
-              { icon: Lock,       title: 'Private first',   desc: 'Your data is yours. JWT auth, no third-party sharing.'              },
-              { icon: Smartphone, title: 'Works everywhere',desc: 'Responsive on mobile, tablet, and desktop out of the box.'          },
-              { icon: Zap,        title: 'Real-time',       desc: 'Streaks and stats update the instant you tick a habit.'             },
+              { icon: Target, title: 'Goal-focused', desc: 'Every feature exists to help you complete one more day.' },
+              { icon: Lock, title: 'Private first', desc: 'Your data is yours. JWT auth, no third-party sharing.' },
+              { icon: Smartphone, title: 'Works everywhere', desc: 'Responsive on mobile, tablet, and desktop out of the box.' },
+              { icon: Zap, title: 'Real-time', desc: 'Streaks and stats update the instant you tick a habit.' },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="rounded-2xl border border-paperLine bg-paper/80 p-5">
                 <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-pineSoft text-pine">
@@ -431,18 +430,18 @@ function AboutSection() {
             </h2>
             <p className="mt-5 text-inkSoft leading-relaxed">
               Habit Tracker is a full-stack web application designed to help you build and maintain
-              positive daily routines. We believe consistency compounds — small daily actions,
+              positive daily routines. We believe consistency compounds small daily actions,
               repeated over months, produce extraordinary results.
             </p>
             <p className="mt-4 text-inkSoft leading-relaxed">
               Most habit apps overwhelm you with features. We focus on the essentials: log your
               habits on My Habits, see your streaks and calendar, and understand your patterns on
-              Analytics and your Dashboard — with achievement badges and a contribution heatmap
+              Analytics and your Dashboard with achievement badges and a contribution heatmap
               to keep it motivating.
             </p>
             <p className="mt-4 text-inkSoft leading-relaxed">
               Built with React, Node.js, Express, and MongoDB. Designed to be fast, private, and
-              genuinely useful — without the noise.
+              genuinely useful without the noise.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
               {['React', 'Node.js', 'Express', 'MongoDB', 'JWT Auth', 'REST API', 'Gemini AI'].map(tag => (
@@ -456,13 +455,13 @@ function AboutSection() {
   )
 }
 
-// ─── How it works ─────────────────────────────────────────────────────────────
+// How it works
 const STEPS = [
-  { num: '01', icon: Shield,       title: 'Create your account',  desc: 'Sign up in seconds with your name, email, and password. Your data is private and secure from day one.'                                                },
-  { num: '02', icon: Target,       title: 'Add your habits',      desc: "Give each habit a clear name and choose daily or weekly. Start with 2–3 habits for best results."                                                    },
-  { num: '03', icon: CheckCircle2, title: 'Check in every day',   desc: 'Tap the tick button each day you complete a habit. Watch your streak counter grow and your 7-day strip fill up.'                                    },
-  { num: '04', icon: Bot,          title: 'Get coached by AI',    desc: "Head to the AI Coach page and hit \"Get AI Coaching\" any time — then ask the chatbot follow-up questions and pick up right where you left off next time."   },
-  { num: '05', icon: BarChart2,    title: 'Review your progress', desc: 'Visit the Analytics page to see 30-day completion rates, your longest streaks, and an overall picture of consistency.'                                },
+  { num: '01', icon: Shield, title: 'Create your account', desc: 'Sign up in seconds with your name, email, and password. Your data is private and secure from day one.' },
+  { num: '02', icon: Target, title: 'Add your habits', desc: "Give each habit a clear name and choose daily or weekly. Start with 2-3 habits for best results." },
+  { num: '03', icon: CheckCircle2, title: 'Check in every day', desc: 'Tap the tick button each day you complete a habit. Watch your streak counter grow and your 7-day strip fill up.' },
+  { num: '04', icon: Bot, title: 'Get coached by AI', desc: "Head to the AI Coach page and hit \"Get AI Coaching\" any time then ask the chatbot follow-up questions and pick up right where you left off next time." },
+  { num: '05', icon: BarChart2, title: 'Review your progress', desc: 'Visit the Analytics page to see 30-day completion rates, your longest streaks, and an overall picture of consistency.' },
 ]
 
 function HowItWorksSection() {
@@ -495,19 +494,19 @@ function HowItWorksSection() {
   )
 }
 
-// ─── Testimonials ─────────────────────────────────────────────────────────────
+// Testimonials 
 const TESTIMONIALS = [
   {
-    name: 'Priya M.',     role: 'Software engineer', avatar: 'P', color: 'bg-pineSoft text-pine',   stars: 5,
-    text: "I've tried every habit app out there. This one is the first that actually shows me the truth — my streaks were shorter than I thought. The Analytics page broke it down by habit and I could finally see which one I was neglecting.",
+    name: 'Shikha P.', role: 'AI engineer', avatar: 'S', color: 'bg-pineSoft text-pine', stars: 5,
+    text: "I've tried every habit app out there. This one is the first that actually shows me the truth - my streaks were shorter than I thought. The Analytics page broke it down by habit and I could finally see which one I was neglecting.",
   },
   {
-    name: 'James K.',     role: 'Entrepreneur',      avatar: 'J', color: 'bg-emberSoft text-ember', stars: 5,
+    name: 'Dipika R.', role: 'Entrepreneur', avatar: 'D', color: 'bg-emberSoft text-ember', stars: 5,
     text: "The 7-day calendar strip is genius. One glance and I know exactly where I stand. No numbers to decode, no graphs to interpret. And the streak counter updating live is oddly satisfying.",
   },
   {
-    name: 'Ananya R.',    role: 'Graduate student',  avatar: 'A', color: 'bg-pineSoft text-pine',   stars: 5,
-    text: "The achievement badges are a small thing but they genuinely keep me coming back — and the contribution heatmap on my Dashboard makes months of consistency actually visible instead of abstract.",
+    name: 'Susmita K.', role: 'Fitness Trainer', avatar: 'S', color: 'bg-pineSoft text-pine', stars: 5,
+    text: "The achievement badges are a small thing but they genuinely keep me coming back and the contribution heatmap on my Dashboard makes months of consistency actually visible instead of abstract.",
   },
 ]
 
@@ -545,7 +544,7 @@ function TestimonialsSection() {
   )
 }
 
-// ─── CTA ──────────────────────────────────────────────────────────────────────
+// CTA 
 function CTASection() {
   return (
     <section className="py-24 bg-ink relative overflow-hidden">

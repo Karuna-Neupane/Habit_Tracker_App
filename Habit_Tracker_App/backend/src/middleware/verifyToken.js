@@ -1,4 +1,4 @@
-// Auth Middleware — Week 5
+// Auth Middleware 
 // Verifies the JWT sent in the Authorization header (`Bearer <token>`) on
 // every protected request. On success it attaches the decoded payload to
 // req.user (id, name, email) so downstream controllers can scope data —

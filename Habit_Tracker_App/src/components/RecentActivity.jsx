@@ -21,9 +21,9 @@ function relativeLabel(dateKey, today, yesterday) {
 }
 
 const ICONS = {
-  added:     { Icon: PlusCircle,   color: 'text-pine'  },
-  completed: { Icon: CheckCircle2, color: 'text-pine'  },
-  deleted:   { Icon: Trash2,       color: 'text-ember' },
+  added: { Icon: PlusCircle, color: 'text-pine' },
+  completed: { Icon: CheckCircle2, color: 'text-pine' },
+  deleted: { Icon: Trash2, color: 'text-ember' },
 }
 
 const VERBS = { added: 'added', completed: 'completed', deleted: 'deleted' }

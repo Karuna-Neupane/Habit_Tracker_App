@@ -1,13 +1,13 @@
-// Express App Configuration — Week 5
+// Express App Configuration
 // CORS allows both Vite (5173) and any other local origin.
 // MongoDB is connected in server.js before this app is used.
 // /api/auth is public; /api/habits requires a valid JWT (verifyToken).
 
-const express     = require('express');
-const cors        = require('cors');
+const express = require('express');
+const cors = require('cors');
 const habitRoutes = require('./routes/habitRoutes');
-const authRoutes  = require('./routes/authRoutes');
-const aiRoutes    = require('./routes/aiRoutes');
+const authRoutes = require('./routes/authRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 const verifyToken = require('./middleware/verifyToken');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -20,7 +20,7 @@ app.use(cors({
     'http://127.0.0.1:5173',
     'http://localhost:3000',
   ],
-  methods:      ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
@@ -39,9 +39,9 @@ app.use((req, res, next) => {
 app.get('/api/health', (req, res) => {
   const mongoose = require('mongoose');
   res.status(200).json({
-    status:    'ok',
-    message:   'Habit Tracker API running',
-    db:        mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    status: 'ok',
+    message: 'Habit Tracker API running',
+    db: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString(),
   });
 });
@@ -49,9 +49,9 @@ app.get('/api/health', (req, res) => {
 // Routes
 // Auth routes are public (register/login issue the token in the first place).
 app.use('/api/auth', authRoutes);
-// Week 5, item 2: every /api/habits route requires a valid JWT.
+// Every /api/habits route requires a valid JWT.
 app.use('/api/habits', verifyToken, habitRoutes);
-// Week 7: AI Coach also requires a valid JWT — it reads the caller's own habits.
+// AI Coach also requires a valid JWT — it reads the caller's own habits.
 app.use('/api/ai', verifyToken, aiRoutes);
 
 // 404

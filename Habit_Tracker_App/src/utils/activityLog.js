@@ -1,4 +1,4 @@
-// Activity log — Week 7 (Dashboard polish)
+// Activity log (Dashboard polish)
 //
 // "Added" and "completed" events are already fully and accurately derivable
 // live from each habit's own `createdAt`/`completions` — see RecentActivity.jsx.

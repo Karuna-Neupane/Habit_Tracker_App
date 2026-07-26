@@ -1,4 +1,4 @@
-// AI Coach Controller — Week 7 (+ premium chatbot upgrade)
+// AI Coach Controller (+ premium chatbot upgrade)
 // POST /api/ai/coach
 //
 // 1. Fetches the logged-in user's real habits from MongoDB (never trusts
@@ -38,7 +38,7 @@ Per-habit stats (JSON):
 ${JSON.stringify(summaries, null, 2)}`;
 }
 
-// ── Rule-based fallback (no API key, or Gemini call failed) ────────────────
+// Rule-based fallback (no API key, or Gemini call failed) 
 function buildFallbackCoaching(summaries, overall) {
   if (summaries.length === 0) {
     return {
@@ -82,7 +82,7 @@ function buildFallbackCoaching(summaries, overall) {
   };
 }
 
-// ── POST /api/ai/coach ──────────────────────────────────────────────────────
+// POST /api/ai/coach 
 exports.getCoaching = async (req, res) => {
   try {
     const { summaries, overall } = await getUserHabitStats(Habit, req.user.id);

@@ -8,13 +8,13 @@ export default function Register() {
   const { register } = useAuth()
   const navigate = useNavigate()
 
-  const [name, setName]         = useState('')
-  const [email, setEmail]       = useState('')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [confirm, setConfirm]   = useState('')
+  const [confirm, setConfirm] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [showConfirm, setShowConfirm]   = useState(false)
-  const [error, setError]       = useState('')
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   async function handleSubmit(e) {
@@ -49,7 +49,7 @@ export default function Register() {
     <div className="min-h-[calc(100vh-73px)]">
       <div className="mx-auto grid max-w-6xl grid-cols-1 lg:grid-cols-2 lg:gap-16 px-4 py-12 lg:py-20 items-center">
 
-        {/* ── Left: branding / content panel (hidden on mobile) ─────────── */}
+        {/* Left: branding / content panel (hidden on mobile) */}
         <div className="hidden lg:block">
           <div className="inline-flex items-center gap-2 rounded-full border border-pine/20 bg-pineSoft/60 px-4 py-1.5 text-xs font-mono uppercase tracking-widest text-pine mb-8">
             <span className="h-1.5 w-1.5 rounded-full bg-pine animate-pulse" />
@@ -71,7 +71,7 @@ export default function Register() {
               'Streaks that recompute the instant you tick a habit',
               'A 7-day calendar strip and 30-day completion stats',
               'AI coaching tailored to your actual habit data',
-              'Private by default — your data is tied to your account',
+              'Private by default - your data is tied to your account',
             ].map((text) => (
               <li key={text} className="flex items-start gap-3">
                 <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-pineSoft text-pine">
@@ -86,12 +86,12 @@ export default function Register() {
             <div className="rounded-2xl border border-paperLine bg-white/60 p-5">
               <Shield className="h-5 w-5 text-pine mb-2" aria-hidden="true" />
               <p className="font-display text-sm font-semibold text-ink">Private first</p>
-              <p className="mt-1 text-xs text-inkSoft leading-relaxed">Your habits are yours — no third-party sharing.</p>
+              <p className="mt-1 text-xs text-inkSoft leading-relaxed">Your habits are yours - no third-party sharing.</p>
             </div>
             <div className="rounded-2xl border border-paperLine bg-white/60 p-5">
               <Zap className="h-5 w-5 text-ember mb-2" aria-hidden="true" />
               <p className="font-display text-sm font-semibold text-ink">Instant updates</p>
-              <p className="mt-1 text-xs text-inkSoft leading-relaxed">No reloads — everything updates live.</p>
+              <p className="mt-1 text-xs text-inkSoft leading-relaxed">No reloads - everything updates live.</p>
             </div>
           </div>
 
@@ -103,7 +103,7 @@ export default function Register() {
           </div>
         </div>
 
-        {/* ── Right: the form (unchanged), just wider ───────────────────── */}
+        {/* Right: the form (unchanged), just wider */}
         <div className="w-full max-w-lg mx-auto">
           <div className="mb-6 text-center lg:text-left">
             <p className="font-mono text-xs uppercase tracking-widest text-pine">Get started</p>

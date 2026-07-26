@@ -1,4 +1,5 @@
 // Validators (express-validator) 
+
 //  1. Define validation rule arrays
 //  2. Export a `validate` middleware that collects errors and returns 400
 //  3. Apply both in the route: router.post('/', createRules, validate, handler)
@@ -12,7 +13,7 @@ const DATE_KEY_RE = /^\d{4}-\d{2}-\d{2}$/;
 // Reusable: collect errors and respond 400 if any
 const validate = (req, res, next) => {
   const errors = validationResult(req);
-  if (errors.isEmpty()) return next();          
+  if (errors.isEmpty()) return next();
   return res.status(400).json({
     message: 'Validation failed',
     errors: errors.array().map((e) => ({

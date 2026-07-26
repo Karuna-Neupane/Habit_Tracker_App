@@ -1,4 +1,4 @@
-// Analytics — Week 6
+// Analytics 
 // Charts built with recharts. All data is derived on the fly from each
 // habit's `completions` array (streak.js) — nothing charted here is stored
 // as a separate aggregate, so it's always consistent with the raw history.
@@ -12,9 +12,9 @@ import { BarChart2, Flame } from 'lucide-react'
 import { useHabits } from '../context/HabitsContext.jsx'
 import { toDateKey, addDays, completionRate30, longestStreakEver } from '../utils/streak.js'
 
-const PINE  = '#2F6F62'
+const PINE = '#2F6F62'
 const EMBER = '#E2672F'
-const GRID  = '#DAD3C0'
+const GRID = '#DAD3C0'
 
 function ChartCard({ title, subtitle, children }) {
   return (
@@ -55,14 +55,14 @@ export default function Analytics() {
     )
   }
 
-  const doneToday    = habits.filter((h) => h.completions?.includes(toDateKey(new Date()))).length
+  const doneToday = habits.filter((h) => h.completions?.includes(toDateKey(new Date()))).length
   const longestOverall = habits.reduce((max, h) => Math.max(max, longestStreakEver(h.completions, h.frequency)), 0)
-  const avgRate30    = Math.round(habits.reduce((sum, h) => sum + completionRate30(h.completions, h.createdAt), 0) / totalHabits)
+  const avgRate30 = Math.round(habits.reduce((sum, h) => sum + completionRate30(h.completions, h.createdAt), 0) / totalHabits)
 
-  // ── Weekly completion: last 7 days, % of habits completed each day ──────
+  // Weekly completion: last 7 days, % of habits completed each day
   const weeklyData = Array.from({ length: 7 }, (_, i) => {
     const date = addDays(new Date(), -(6 - i))
-    const key  = toDateKey(date)
+    const key = toDateKey(date)
     const done = habits.filter((h) => h.completions?.includes(key)).length
     return {
       label: date.toLocaleDateString(undefined, { weekday: 'short' }),
@@ -70,10 +70,10 @@ export default function Analytics() {
     }
   })
 
-  // ── Monthly completion: last 30 days trend, % of habits completed each day ─
+  // Monthly completion: last 30 days trend, % of habits completed each day
   const monthlyData = Array.from({ length: 30 }, (_, i) => {
     const date = addDays(new Date(), -(29 - i))
-    const key  = toDateKey(date)
+    const key = toDateKey(date)
     const done = habits.filter((h) => h.completions?.includes(key)).length
     return {
       label: date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }),
@@ -81,12 +81,12 @@ export default function Analytics() {
     }
   })
 
-  // ── Habit comparison: 30-day completion rate per habit ──────────────────
+  // Habit comparison: 30-day completion rate per habit
   const comparisonData = habits
     .map((h) => ({ name: h.name, rate: completionRate30(h.completions, h.createdAt) }))
     .sort((a, b) => b.rate - a.rate)
 
-  // ── Longest streak per habit ─────────────────────────────────────────────
+  // Longest streak per habit
   const streakData = habits
     .map((h) => ({ name: h.name, longest: longestStreakEver(h.completions, h.frequency) }))
     .sort((a, b) => b.longest - a.longest)
@@ -103,10 +103,10 @@ export default function Analytics() {
       {/* Top-line summary cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-8">
         {[
-          { label: 'Habits',        value: totalHabits },
-          { label: 'Done today',    value: `${doneToday}/${totalHabits}` },
-          { label: 'Best streak',   value: longestOverall, Icon: Flame },
-          { label: '30-day avg',    value: `${avgRate30}%` },
+          { label: 'Habits', value: totalHabits },
+          { label: 'Done today', value: `${doneToday}/${totalHabits}` },
+          { label: 'Best streak', value: longestOverall, Icon: Flame },
+          { label: '30-day avg', value: `${avgRate30}%` },
         ].map(({ label, value, Icon }) => (
           <div key={label} className="rounded-2xl border border-paperLine bg-white/70 p-4">
             <p className="font-mono text-xs uppercase tracking-wide text-inkSoft">{label}</p>
@@ -179,7 +179,7 @@ export default function Analytics() {
       {/* Exact per-habit completion % (precise numbers, not just the chart) */}
       <section className="mt-5">
         <h2 className="font-display text-lg font-semibold text-ink mb-3">
-          30-day completion rate — exact figures
+          30-day completion rate - exact figures
         </h2>
         <div className="space-y-3">
           {comparisonData.map((h) => (

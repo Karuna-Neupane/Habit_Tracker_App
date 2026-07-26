@@ -1,4 +1,4 @@
-// Controller — Week 5: every operation is scoped to req.user.id (attached
+// Controller: every operation is scoped to req.user.id (attached
 // by the verifyToken middleware, applied to all /api/habits routes in
 // app.js). This is the enforcement point for private, per-user habit lists:
 //   - list/read only ever query { userId: req.user.id }
@@ -10,7 +10,7 @@
 // The streak is NEVER stored in the database — it is always computed from
 // the live completions array returned from MongoDB, exactly like before.
 
-const Habit      = require('../models/Habit');
+const Habit = require('../models/Habit');
 const { computeStreak, todayKey, isValidDateKey } = require('../utils/streak');
 
 // Attach computed streak to a Mongoose document before sending to client.
@@ -18,7 +18,7 @@ const { computeStreak, todayKey, isValidDateKey } = require('../utils/streak');
 function withStreak(doc) {
   const obj = doc.toObject ? doc.toObject() : { ...doc };
   // Rename _id → id so the frontend doesn't need to change
-  obj.id  = String(obj._id);
+  obj.id = String(obj._id);
   delete obj._id;
   delete obj.__v;
   delete obj.userId; // internal — no need to ship it back to the client
@@ -26,10 +26,10 @@ function withStreak(doc) {
   return obj;
 }
 
-// ── GET /api/habits ─────────────────────────────────────────────────────────
+// GET /api/habits
 exports.getAllHabits = async (req, res) => {
   try {
-    const docs   = await Habit.find({ userId: req.user.id }).sort({ createdAt: 1 });
+    const docs = await Habit.find({ userId: req.user.id }).sort({ createdAt: 1 });
     const habits = docs.map(withStreak);
     res.status(200).json({ count: habits.length, habits });
   } catch (err) {
@@ -37,7 +37,7 @@ exports.getAllHabits = async (req, res) => {
   }
 };
 
-// ── GET /api/habits/:id ─────────────────────────────────────────────────────
+// GET /api/habits/:id 
 exports.getHabitById = async (req, res) => {
   try {
     const doc = await Habit.findOne({ _id: req.params.id, userId: req.user.id });
@@ -48,7 +48,7 @@ exports.getHabitById = async (req, res) => {
   }
 };
 
-// ── POST /api/habits ────────────────────────────────────────────────────────
+// POST /api/habits 
 exports.createHabit = async (req, res) => {
   try {
     const { name, frequency } = req.body;
@@ -70,7 +70,7 @@ exports.createHabit = async (req, res) => {
   }
 };
 
-// ── PUT /api/habits/:id ─────────────────────────────────────────────────────
+// PUT /api/habits/:id 
 exports.updateHabit = async (req, res) => {
   try {
     const { name, frequency } = req.body;
@@ -81,7 +81,7 @@ exports.updateHabit = async (req, res) => {
       const exists = await Habit.findOne({
         userId: req.user.id,
         name: { $regex: new RegExp(`^${name.trim()}$`, 'i') },
-        _id:  { $ne: req.params.id },
+        _id: { $ne: req.params.id },
       });
       if (exists) {
         return res.status(409).json({ message: `A habit named "${name}" already exists.` });
@@ -89,7 +89,7 @@ exports.updateHabit = async (req, res) => {
     }
 
     const updates = {};
-    if (name)      updates.name      = name.trim();
+    if (name) updates.name = name.trim();
     if (frequency) updates.frequency = frequency;
 
     const doc = await Habit.findOneAndUpdate(
@@ -104,7 +104,7 @@ exports.updateHabit = async (req, res) => {
   }
 };
 
-// ── DELETE /api/habits/:id ───────────────────────────────────────────────────
+// DELETE /api/habits/:id 
 exports.deleteHabit = async (req, res) => {
   try {
     const doc = await Habit.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
@@ -115,7 +115,7 @@ exports.deleteHabit = async (req, res) => {
   }
 };
 
-// ── POST /api/habits/:id/complete ───────────────────────────────────────────
+// POST /api/habits/:id/complete 
 exports.completeHabit = async (req, res) => {
   try {
     const date = req.body.date || todayKey();
@@ -142,7 +142,7 @@ exports.completeHabit = async (req, res) => {
   }
 };
 
-// ── DELETE /api/habits/:id/complete ─────────────────────────────────────────
+// DELETE /api/habits/:id/complete 
 exports.uncompleteHabit = async (req, res) => {
   try {
     const date = req.body.date || todayKey();
@@ -162,18 +162,18 @@ exports.uncompleteHabit = async (req, res) => {
   }
 };
 
-// ── GET /api/habits/:id/history ─────────────────────────────────────────────
+// GET /api/habits/:id/history 
 exports.getHabitHistory = async (req, res) => {
   try {
     const doc = await Habit.findOne({ _id: req.params.id, userId: req.user.id });
     if (!doc) return res.status(404).json({ message: 'Habit not found.' });
 
     res.status(200).json({
-      id:               String(doc._id),
-      name:             doc.name,
-      frequency:        doc.frequency,
-      completions:      doc.completions,
-      streak:           computeStreak(doc.completions, doc.frequency),
+      id: String(doc._id),
+      name: doc.name,
+      frequency: doc.frequency,
+      completions: doc.completions,
+      streak: computeStreak(doc.completions, doc.frequency),
       totalCompletions: doc.completions.length,
     });
   } catch (err) {

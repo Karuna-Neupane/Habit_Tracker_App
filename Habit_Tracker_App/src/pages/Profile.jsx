@@ -1,4 +1,4 @@
-// Profile — Week 6
+// Profile
 // Avatar (stored as a small client-resized data URL, no cloud storage
 // needed), an editable name, read-only email, a separate change-
 // password form, computed account statistics, and a danger-zone account
@@ -44,14 +44,14 @@ export default function Profile() {
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
 
-  // ── Profile fields ─────────────────────────────────────────────────────
+  // Profile fields 
   const [name, setName] = useState(user?.name || '')
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '')
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileError, setProfileError] = useState('')
   const [profileSuccess, setProfileSuccess] = useState('')
 
-  // ── Password fields ─────────────────────────────────────────────────────
+  // Password fields 
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
@@ -62,7 +62,7 @@ export default function Profile() {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false)
 
-  // ── Delete account ──────────────────────────────────────────────────────
+  // Delete account 
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deletePassword, setDeletePassword] = useState('')
   const [deleteError, setDeleteError] = useState('')
@@ -155,7 +155,7 @@ export default function Profile() {
         <h1 className="font-display text-3xl font-bold text-ink">Profile</h1>
       </div>
 
-      {/* ── Profile details ──────────────────────────────────────────────── */}
+      {/* Profile details */}
       <section className="rounded-2xl border border-paperLine bg-white/70 p-6 mb-6">
         <div className="flex items-center gap-4 mb-6">
           <div className="relative">
@@ -214,7 +214,7 @@ export default function Profile() {
               disabled
               className="w-full cursor-not-allowed rounded-xl border border-paperLine bg-paperLine/30 px-3 py-2.5 text-sm text-inkSoft outline-none"
             />
-            <p className="mt-1 text-xs text-inkSoft">Email can't be changed here — it's tied to your login.</p>
+            <p className="mt-1 text-xs text-inkSoft">Email can't be changed here - it's tied to your login.</p>
           </div>
 
           <button
@@ -227,12 +227,12 @@ export default function Profile() {
         </form>
       </section>
 
-      {/* ── Member since ─────────────────────────────────────────────────── */}
+      {/* Member since */}
       <p className="mb-6 flex items-center gap-1.5 text-xs text-inkSoft">
         <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" /> Member since {memberSince}
       </p>
 
-      {/* ── Change password ─────────────────────────────────────────────── */}
+      {/* Change password */}
       <section className="rounded-2xl border border-paperLine bg-white/70 p-6 mb-6">
         <h2 className="mb-1 flex items-center gap-1.5 font-display text-base font-semibold text-ink">
           <KeyRound className="h-4 w-4 text-pine" aria-hidden="true" /> Change password
@@ -334,7 +334,7 @@ export default function Profile() {
         </form>
       </section>
 
-      {/* ── Danger zone: delete account ─────────────────────────────────── */}
+      {/* Danger zone: delete account */}
       <section className="rounded-2xl border border-ember/30 bg-emberSoft/30 p-6">
         <h2 className="mb-1 flex items-center gap-1.5 font-display text-base font-semibold text-ember">
           <Trash2 className="h-4 w-4" aria-hidden="true" /> Delete account

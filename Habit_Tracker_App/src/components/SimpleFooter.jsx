@@ -8,7 +8,7 @@ export default function SimpleFooter() {
   return (
     <footer className="border-t border-paperLine bg-paper/90 backdrop-blur-sm">
       <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-2 px-4 py-5 text-xs text-inkSoft md:grid-cols-[1fr_2fr_1fr]">
-        
+
         {/* Left */}
         <p className="text-center md:text-left whitespace-nowrap">
           © {year} Habitra.
