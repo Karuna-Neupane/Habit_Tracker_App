@@ -7,8 +7,9 @@
 // new turns come in.
 
 import { useEffect, useRef, useState } from 'react'
-import { Bot, MessageCircle, Send, Sparkles, Trash2, User } from 'lucide-react'
+import { Bot, MessageCircle, Send, Sparkles, Trash2 } from 'lucide-react'
 import api from '../utils/api.js'
+import { useAuth } from '../context/AuthContext.jsx'
 import ConfirmDialog from './ConfirmDialog.jsx'
 
 const SUGGESTED_QUESTIONS = [
@@ -26,17 +27,28 @@ function formatTime(dateLike) {
   }
 }
 
-function MessageBubble({ message }) {
+function MessageBubble({ message, user }) {
   const isUser = message.role === 'user'
   return (
     <div className={`flex items-end gap-2 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-      <div
-        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
-          isUser ? 'bg-ember text-white' : 'bg-pine text-white'
-        }`}
-      >
-        {isUser ? <User className="h-3.5 w-3.5" aria-hidden="true" /> : <Bot className="h-3.5 w-3.5" aria-hidden="true" />}
-      </div>
+      {isUser ? (
+        user?.avatarUrl ? (
+          <img
+            src={user.avatarUrl}
+            alt={user.name}
+            referrerPolicy="no-referrer"
+            className="h-7 w-7 shrink-0 rounded-full object-cover ring-2 ring-ember/20"
+          />
+        ) : (
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emberSoft text-xs font-semibold text-ember">
+            {user?.name?.[0]?.toUpperCase() || '?'}
+          </div>
+        )
+      ) : (
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-pine text-white">
+          <Bot className="h-3.5 w-3.5" aria-hidden="true" />
+        </div>
+      )}
       <div className={`flex max-w-[78%] flex-col ${isUser ? 'items-end' : 'items-start'}`}>
         <div
           className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${
@@ -73,6 +85,7 @@ function TypingIndicator() {
 }
 
 export default function AIChatBot() {
+  const { user } = useAuth()
   const [messages, setMessages]         = useState([])
   const [loadingHistory, setLoadingHistory] = useState(true)
   const [input, setInput]               = useState('')
@@ -205,7 +218,7 @@ export default function AIChatBot() {
             </div>
           )}
 
-          {!loadingHistory && messages.map((m) => <MessageBubble key={m.id} message={m} />)}
+          {!loadingHistory && messages.map((m) => <MessageBubble key={m.id} message={m} user={user} />)}
           {sending && <TypingIndicator />}
         </div>
 
