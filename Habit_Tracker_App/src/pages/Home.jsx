@@ -10,6 +10,53 @@ import { useAuth } from '../context/AuthContext.jsx'
 import Dashboard from './Dashboard.jsx'
 import Footer from '../components/Footer.jsx'
 
+// Scroll-reveal hook - fades/slides an element in the first time it enters the viewport
+function useInView(options) {
+  const ref = useRef(null)
+  const [inView, setInView] = useState(false)
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setInView(true)
+        observer.unobserve(node)
+      }
+    }, { threshold: 0.15, ...options })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+  return [ref, inView]
+}
+
+// Wraps children in a fade + slide-up reveal that triggers once, on scroll into view
+function Reveal({ children, delay = 0, className = '', as: Tag = 'div' }) {
+  const [ref, inView] = useInView()
+  return (
+    <Tag
+      ref={ref}
+      className={`transition-all duration-700 ease-out will-change-transform ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'} ${className}`}
+      style={{ transitionDelay: inView ? `${delay}ms` : '0ms' }}
+    >
+      {children}
+    </Tag>
+  )
+}
+
+// One-time keyframes powering the home page's animations (float, blobs, fade-in, shimmer)
+function HomeAnimationStyles() {
+  return (
+    <style>{`
+      @keyframes home-fade-up { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes home-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+      @keyframes home-float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+      @keyframes home-blob { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(24px, -18px) scale(1.06); } 66% { transform: translate(-18px, 14px) scale(0.96); } }
+      @keyframes home-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+      @keyframes draw-underline { to { stroke-dashoffset: 0; } }
+    `}</style>
+  )
+}
+
 // Animated counter (counts up on first render)
 function useCounter(target, duration = 1500) {
   const [count, setCount] = useState(0)
@@ -43,6 +90,7 @@ export default function Home() {
   // Signed out: rich landing page 
   return (
     <div>
+      <HomeAnimationStyles />
       <HeroSection />
       <StatsStrip />
       <FeaturesSection />
@@ -61,28 +109,35 @@ function HeroSection() {
   return (
     <section id="home" className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-pineSoft/40 via-transparent to-emberSoft/20 pointer-events-none" />
+      {/* Soft floating blobs for subtle ambient motion behind the hero copy */}
+      <div className="absolute -top-10 -left-16 h-72 w-72 rounded-full bg-pineSoft/50 blur-3xl pointer-events-none [animation:home-blob_14s_ease-in-out_infinite]" />
+      <div className="absolute top-10 -right-10 h-80 w-80 rounded-full bg-emberSoft/50 blur-3xl pointer-events-none [animation:home-blob_18s_ease-in-out_infinite_reverse]" />
       <div className="relative mx-auto max-w-6xl px-6 pt-20 pb-24 text-center">
 
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 rounded-full border border-pine/20 bg-pineSoft/60 px-4 py-1.5 text-xs font-mono uppercase tracking-widest text-pine mb-8">
+        <div
+          className="inline-flex items-center gap-2 rounded-full border border-pine/20 bg-pineSoft/60 px-4 py-1.5 text-xs font-mono uppercase tracking-widest text-pine mb-8 opacity-0 [animation:home-fade-up_0.7s_ease-out_forwards]"
+        >
           <span className="h-1.5 w-1.5 rounded-full bg-pine animate-pulse" />
           Streaks, Calendar, Analytics, AI Coaching &amp; Chat
           <Sparkles className="h-3 w-3" />
         </div>
 
         {/* Headline */}
-        <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-ink leading-[1.08] tracking-tight">
+        <h1
+          className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-ink leading-[1.08] tracking-tight opacity-0 [animation:home-fade-up_0.7s_ease-out_0.12s_forwards]"
+        >
           Build habits that{' '}
           <span className="relative inline-block">
             <span className="text-pine">actually</span>
             <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 8" fill="none">
-              <path d="M2 6 Q50 2 100 5 Q150 8 198 4" stroke="#2F6F62" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+              <path d="M2 6 Q50 2 100 5 Q150 8 198 4" stroke="#2F6F62" strokeWidth="2.5" strokeLinecap="round" fill="none" className="[stroke-dasharray:220] [stroke-dashoffset:220] motion-safe:[animation:draw-underline_1.1s_ease-out_0.5s_forwards]" />
             </svg>
           </span>{' '}
           stick.
         </h1>
 
-        <p className="mt-6 mx-auto max-w-2xl text-lg sm:text-xl text-inkSoft leading-relaxed">
+        <p className="mt-6 mx-auto max-w-2xl text-lg sm:text-xl text-inkSoft leading-relaxed opacity-0 [animation:home-fade-up_0.7s_ease-out_0.24s_forwards]">
           Habit Tracker helps you build and maintain positive daily routines by tracking habits,
           monitoring streaks, and visualising your progress across a full calendar and analytics
           dashboard - with a real AI coach, powered by Gemini, that gives you a one-click coaching
@@ -90,23 +145,23 @@ function HeroSection() {
         </p>
 
         {/* CTAs */}
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 opacity-0 [animation:home-fade-up_0.7s_ease-out_0.36s_forwards]">
           <Link
             to="/register"
-            className="group inline-flex items-center gap-2 rounded-2xl bg-ember px-8 py-4 text-base font-semibold text-white shadow-lg shadow-ember/25 transition-all hover:bg-ember/90 hover:-translate-y-0.5 hover:shadow-xl"
+            className="group inline-flex items-center gap-2 rounded-2xl bg-ember px-8 py-4 text-base font-semibold text-white shadow-lg shadow-ember/25 transition-all hover:bg-ember/90 hover:-translate-y-0.5 hover:shadow-xl hover:scale-[1.03] active:scale-[0.98]"
           >
             Get started — it's free
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
           <Link
             to="/login"
-            className="inline-flex items-center gap-2 rounded-2xl border border-paperLine bg-white/70 px-8 py-4 text-base font-semibold text-ink transition-all hover:bg-white hover:shadow-md"
+            className="inline-flex items-center gap-2 rounded-2xl border border-paperLine bg-white/70 px-8 py-4 text-base font-semibold text-ink transition-all hover:bg-white hover:shadow-md hover:scale-[1.03] active:scale-[0.98]"
           >
             I already have an account
           </Link>
         </div>
 
-        <p className="mt-4 text-xs text-inkSoft">No credit card required · Free forever for personal use</p>
+        <p className="mt-4 text-xs text-inkSoft opacity-0 [animation:home-fade-up_0.7s_ease-out_0.46s_forwards]">No credit card required · Free forever for personal use</p>
 
         {/* Preview habit cards */}
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto text-left">
@@ -114,8 +169,12 @@ function HeroSection() {
             { name: 'Morning run', streak: 14, bars: [1, 1, 1, 1, 1, 1, 1], freq: 'daily' },
             { name: 'Read 20 mins', streak: 7, bars: [1, 1, 1, 0, 1, 1, 1], freq: 'daily' },
             { name: 'Weekly meal prep', streak: 5, bars: [0, 0, 0, 0, 0, 0, 1], freq: 'weekly' },
-          ].map(({ name, streak, bars, freq }) => (
-            <div key={name} className="rounded-2xl border border-paperLine bg-white/80 p-4 shadow-sm">
+          ].map(({ name, streak, bars, freq }, i) => (
+            <div
+              key={name}
+              className="rounded-2xl border border-paperLine bg-white/80 p-4 shadow-sm opacity-0 transition-shadow hover:shadow-lg [animation:home-fade-up_0.6s_ease-out_forwards,home-float_6s_ease-in-out_infinite]"
+              style={{ animationDelay: `${0.55 + i * 0.12}s, ${0.55 + i * 0.12 + 1}s` }}
+            >
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <p className="font-display text-sm font-semibold text-ink">{name}</p>
@@ -165,11 +224,11 @@ function StatsStrip() {
             { value: `${streaks}%`, label: 'Streak retention' },
             { value: `${users.toLocaleString()}+`, label: 'Active users' },
             { value: `${rate}%`, label: '30-day completion' },
-          ].map(({ value, label }) => (
-            <div key={label}>
+          ].map(({ value, label }, i) => (
+            <Reveal key={label} delay={i * 90}>
               <p className="font-display text-3xl font-bold text-ink">{value}</p>
               <p className="mt-1 text-sm text-inkSoft">{label}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -194,22 +253,24 @@ function FeaturesSection() {
   return (
     <section id="features" className="py-24">
       <div className="mx-auto max-w-6xl px-6">
-        <div className="text-center mb-14">
+        <Reveal className="text-center mb-14">
           <p className="font-mono text-xs uppercase tracking-widest text-pine mb-2">Features</p>
           <h2 className="font-display text-4xl font-bold text-ink">Everything you need to stay consistent</h2>
           <p className="mt-3 text-inkSoft max-w-xl mx-auto">
             A focused set of tools designed around one goal: helping you build habits that outlast motivation.
           </p>
-        </div>
+        </Reveal>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {FEATURES.map(({ icon: Icon, title, desc, color }) => (
-            <div key={title} className="rounded-2xl border border-paperLine bg-white/70 p-6 transition-all hover:shadow-md hover:-translate-y-0.5 hover:bg-white">
-              <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${color} mb-4`}>
-                <Icon className="h-5 w-5" aria-hidden="true" />
+          {FEATURES.map(({ icon: Icon, title, desc, color }, i) => (
+            <Reveal key={title} delay={(i % 3) * 100}>
+              <div className="group rounded-2xl border border-paperLine bg-white/70 p-6 transition-all hover:shadow-md hover:-translate-y-0.5 hover:scale-[1.02] hover:bg-white">
+                <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${color} mb-4 transition-transform group-hover:scale-110`}>
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <h3 className="font-display text-base font-semibold text-ink mb-1.5">{title}</h3>
+                <p className="text-sm text-inkSoft leading-relaxed">{desc}</p>
               </div>
-              <h3 className="font-display text-base font-semibold text-ink mb-1.5">{title}</h3>
-              <p className="text-sm text-inkSoft leading-relaxed">{desc}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -237,7 +298,7 @@ function AICoachSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
           {/* Copy */}
-          <div>
+          <Reveal>
             <div className="inline-flex items-center gap-2 rounded-full border border-pine/40 bg-pine/20 px-4 py-1.5 text-xs font-mono uppercase tracking-widest text-pineSoft mb-6">
               <Brain className="h-3 w-3" />
               AI Habit Coach
@@ -259,25 +320,25 @@ function AICoachSection() {
                 { icon: Brain, text: 'A follow-up chatbot for natural-language questions about your habits' },
                 { icon: TrendingUp, text: 'Grounded only in your real data - it never invents a stat or a streak' },
                 { icon: Sparkles, text: 'Conversation history is saved, so it survives a refresh or logging back in' },
-              ].map(({ icon: Icon, text }) => (
-                <li key={text} className="flex items-start gap-3">
+              ].map(({ icon: Icon, text }, i) => (
+                <Reveal key={text} as="li" delay={150 + i * 90} className="flex items-start gap-3">
                   <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-pine/30">
                     <Icon className="h-3.5 w-3.5 text-pineSoft" />
                   </div>
                   <span className="text-sm text-inkSoft">{text}</span>
-                </li>
+                </Reveal>
               ))}
             </ul>
-            <Link to="/register" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-ember px-6 py-3 text-sm font-semibold text-white hover:bg-ember/90 transition-colors">
+            <Link to="/register" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-ember px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-ember/90 hover:scale-[1.03] active:scale-[0.98]">
               Try the AI coach free
               <ArrowRight className="h-4 w-4" />
             </Link>
-          </div>
+          </Reveal>
 
           {/* Illustrative preview of the AI Coach page — the real coaching card
               (six sections, generated by Gemini) plus the follow-up chatbot below it. */}
-          <div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 mb-4">
+          <Reveal delay={150}>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 mb-4 transition-transform hover:-translate-y-1">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-xs font-mono uppercase tracking-widest text-pineSoft">Your coaching card</span>
                 <span className="text-[10px] font-mono uppercase tracking-widest text-inkSoft/70">Generated by Gemini</span>
@@ -357,7 +418,11 @@ function AICoachSection() {
 
               <div className="space-y-3 min-h-[260px]">
                 {CHAT.slice(0, visible).map((msg, i) => (
-                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div
+                    key={i}
+                    className={`flex opacity-0 [animation:home-fade-up_0.5s_ease-out_forwards] ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    style={{ animationDelay: `${(i % 2) * 120}ms` }}
+                  >
                     {msg.role === 'ai' && (
                       <div className="mr-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-pine/30 mt-0.5">
                         <Bot className="h-3.5 w-3.5 text-pineSoft" />
@@ -390,7 +455,7 @@ function AICoachSection() {
                 </div>
               )}
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>
@@ -411,19 +476,19 @@ function AboutSection() {
               { icon: Lock, title: 'Private first', desc: 'Your data is yours. JWT auth, no third-party sharing.' },
               { icon: Smartphone, title: 'Works everywhere', desc: 'Responsive on mobile, tablet, and desktop out of the box.' },
               { icon: Zap, title: 'Real-time', desc: 'Streaks and stats update the instant you tick a habit.' },
-            ].map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="rounded-2xl border border-paperLine bg-paper/80 p-5">
+            ].map(({ icon: Icon, title, desc }, i) => (
+              <Reveal key={title} delay={i * 100} className="rounded-2xl border border-paperLine bg-paper/80 p-5 transition-all hover:shadow-md hover:-translate-y-0.5">
                 <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-pineSoft text-pine">
                   <Icon className="h-4.5 w-4.5" aria-hidden="true" />
                 </div>
                 <p className="font-display text-sm font-semibold text-ink">{title}</p>
                 <p className="mt-1 text-xs text-inkSoft leading-relaxed">{desc}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
 
           {/* Copy */}
-          <div className="order-1 lg:order-2">
+          <Reveal delay={100} className="order-1 lg:order-2">
             <p className="font-mono text-xs uppercase tracking-widest text-pine mb-2">About</p>
             <h2 className="font-display text-4xl font-bold text-ink leading-tight">
               Built for people who want to change their lives, not just track them.
@@ -448,7 +513,7 @@ function AboutSection() {
                 <span key={tag} className="rounded-full border border-paperLine bg-paper px-3 py-1 text-xs font-mono text-inkSoft">{tag}</span>
               ))}
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>
@@ -468,17 +533,17 @@ function HowItWorksSection() {
   return (
     <section id="how-it-works" className="py-24">
       <div className="mx-auto max-w-6xl px-6">
-        <div className="text-center mb-14">
+        <Reveal className="text-center mb-14">
           <p className="font-mono text-xs uppercase tracking-widest text-pine mb-2">How it works</p>
           <h2 className="font-display text-4xl font-bold text-ink">Up and running in 2 minutes</h2>
           <p className="mt-3 text-inkSoft max-w-lg mx-auto">No complex setup. No tutorial videos. Just a clean flow and you're tracking.</p>
-        </div>
+        </Reveal>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 relative">
           {/* Connector line desktop */}
           <div className="absolute top-8 left-16 right-16 h-px bg-paperLine hidden lg:block" />
-          {STEPS.map(({ num, icon: Icon, title, desc }) => (
-            <div key={num} className="relative text-center">
-              <div className="relative mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-paperLine bg-paper shadow-sm z-10">
+          {STEPS.map(({ num, icon: Icon, title, desc }, i) => (
+            <Reveal key={num} delay={i * 120} className="relative text-center group">
+              <div className="relative mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-paperLine bg-paper shadow-sm z-10 transition-transform duration-300 group-hover:-translate-y-1 group-hover:border-pine/40">
                 <Icon className="h-6 w-6 text-pine" />
                 <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-ink font-mono text-[10px] font-bold text-paper">
                   {Number(num)}
@@ -486,7 +551,7 @@ function HowItWorksSection() {
               </div>
               <h3 className="font-display text-sm font-semibold text-ink mb-2">{title}</h3>
               <p className="text-xs text-inkSoft leading-relaxed">{desc}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -514,13 +579,13 @@ function TestimonialsSection() {
   return (
     <section id="testimonials" className="py-24 bg-white/50 border-y border-paperLine">
       <div className="mx-auto max-w-6xl px-6">
-        <div className="text-center mb-14">
+        <Reveal className="text-center mb-14">
           <p className="font-mono text-xs uppercase tracking-widest text-pine mb-2">Testimonials</p>
           <h2 className="font-display text-4xl font-bold text-ink">People who changed their routines</h2>
-        </div>
+        </Reveal>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {TESTIMONIALS.map(({ name, role, avatar, color, stars, text }) => (
-            <div key={name} className="rounded-2xl border border-paperLine bg-paper/80 p-6 flex flex-col">
+          {TESTIMONIALS.map(({ name, role, avatar, color, stars, text }, i) => (
+            <Reveal key={name} delay={i * 110} className="rounded-2xl border border-paperLine bg-paper/80 p-6 flex flex-col transition-all hover:shadow-lg hover:-translate-y-1">
               <div className="flex gap-1 mb-4">
                 {Array.from({ length: stars }).map((_, i) => (
                   <Star key={i} className="h-4 w-4 fill-ember text-ember" />
@@ -536,7 +601,7 @@ function TestimonialsSection() {
                   <p className="text-xs text-inkSoft">{role}</p>
                 </div>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -549,8 +614,8 @@ function CTASection() {
   return (
     <section className="py-24 bg-ink relative overflow-hidden">
       <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle, #F3F1EA 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-      <div className="relative mx-auto max-w-4xl px-6 text-center">
-        <Sparkles className="h-8 w-8 text-pine mx-auto mb-5" />
+      <Reveal className="relative mx-auto max-w-4xl px-6 text-center">
+        <Sparkles className="h-8 w-8 text-pine mx-auto mb-5 [animation:home-float_4s_ease-in-out_infinite]" />
         <h2 className="font-display text-4xl sm:text-5xl font-bold text-paper leading-tight">
           Your best habits are waiting.<br />
           <span className="text-pine">Start today.</span>
@@ -562,17 +627,17 @@ function CTASection() {
         </p>
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link to="/register"
-            className="group inline-flex items-center gap-2 rounded-2xl bg-ember px-10 py-4 text-base font-semibold text-white shadow-lg shadow-ember/20 hover:bg-ember/90 transition-all hover:-translate-y-0.5">
+            className="group inline-flex items-center gap-2 rounded-2xl bg-ember px-10 py-4 text-base font-semibold text-white shadow-lg shadow-ember/20 hover:bg-ember/90 transition-all hover:-translate-y-0.5 hover:scale-[1.03] active:scale-[0.98]">
             Create free account
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
           <Link to="/login"
-            className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-10 py-4 text-base font-semibold text-paper hover:bg-white/10 transition-colors">
+            className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-10 py-4 text-base font-semibold text-paper hover:bg-white/10 transition-colors hover:scale-[1.03] active:scale-[0.98]">
             Sign in
           </Link>
         </div>
         <p className="mt-5 text-xs text-inkSoft">Free forever · No credit card required</p>
-      </div>
+      </Reveal>
     </section>
   )
 }
