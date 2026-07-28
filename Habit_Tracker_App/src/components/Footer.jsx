@@ -65,17 +65,17 @@ export default function Footer() {
           <div className="grid grid-cols-1 items-center gap-2 text-xs text-inkSoft md:grid-cols-[1fr_2fr_1fr]">
 
             {/* Left */}
-            <p className="text-center md:text-left whitespace-nowrap">
+            <p className="text-center md:text-left md:whitespace-nowrap">
               © {year} Habitra.
             </p>
 
             {/* Center */}
-            <p className="text-center whitespace-nowrap">
+            <p className="text-center">
               Built with React, Tailwind CSS, Node.js, Express, MongoDB, JWT and Gemini API.
             </p>
 
             {/* Right */}
-            <p className="text-center font-mono whitespace-nowrap md:text-right">
+            <p className="text-center font-mono md:whitespace-nowrap md:text-right">
               Track · Streak · Improve
             </p>
 

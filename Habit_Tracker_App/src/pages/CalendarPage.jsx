@@ -145,7 +145,7 @@ export default function CalendarPage() {
 
       {/* Week view */}
       {view === VIEW_WEEK && (
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2">
           {weekDays.map((date, i) => {
             const dateKey = toDateKey(date)
             const status = dayStatus(dateKey)
@@ -156,17 +156,17 @@ export default function CalendarPage() {
               <div
                 key={dateKey}
                 className={[
-                  'rounded-2xl border p-3 text-center flex flex-col items-center gap-2',
+                  'rounded-xl sm:rounded-2xl border p-1.5 sm:p-3 text-center flex flex-col items-center gap-1 sm:gap-2',
                   isToday ? 'border-pine ring-2 ring-pine/40' : 'border-paperLine',
                 ].join(' ')}
               >
-                <span className="text-[10px] font-mono uppercase tracking-wider text-inkSoft">
+                <span className="text-[8px] sm:text-[10px] font-mono uppercase tracking-wider text-inkSoft">
                   {WEEKDAY_LABELS[i]}
                 </span>
-                <span className="font-display text-sm font-semibold text-ink">
+                <span className="font-display text-xs sm:text-sm font-semibold text-ink">
                   {date.getDate()}
                 </span>
-                <div className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold ${STATUS_STYLES[status]}`}>
+                <div className={`flex h-6 w-6 sm:h-9 sm:w-9 items-center justify-center rounded-full text-[9px] sm:text-xs font-bold ${STATUS_STYLES[status]}`}>
                   {total > 0 ? `${done}/${total}` : '–'}
                 </div>
               </div>
