@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { CheckCircle2, Shield, Zap, Star, Sparkles, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import SimpleFooter from '../components/SimpleFooter.jsx'
+import GoogleAuthButton from '../components/GoogleAuthButton.jsx'
 
 export default function Register() {
   const { register } = useAuth()
@@ -217,6 +218,11 @@ export default function Register() {
                 {submitting ? 'Creating account…' : 'Register'}
               </button>
             </form>
+
+            <GoogleAuthButton
+              onSuccess={() => navigate('/', { replace: true })}
+              onError={(msg) => setError(msg)}
+            />
           </div>
 
           <p className="mt-6 text-center text-sm text-inkSoft">

@@ -56,6 +56,22 @@ export function AuthProvider({ children }) {
     }
   }
 
+  // Continue with Google: exchange the access token Google issued in the
+  // browser (via the custom button's implicit-flow popup) for our own JWT.
+  // The backend verifies it against Google and finds-or-creates the user, so
+  // this single call covers both "register with Google" and "log in with
+  // Google" — same as login()/register(), it just sets token + user on success.
+  async function loginWithGoogle(accessToken) {
+    try {
+      const { data } = await api.post('/auth/google', { access_token: accessToken })
+      setToken(data.token)
+      setUser(data.user)
+      return data.user
+    } catch (err) {
+      throw new Error(err.response?.data?.message || err.message)
+    }
+  }
+
   // Logout: clear the token so every subsequent request is unauthenticated
   function logout() {
     setToken(null)
@@ -132,6 +148,7 @@ export function AuthProvider({ children }) {
     initializing,
     register,
     login,
+    loginWithGoogle,
     logout,
     requestPasswordReset,
     verifyResetCode,

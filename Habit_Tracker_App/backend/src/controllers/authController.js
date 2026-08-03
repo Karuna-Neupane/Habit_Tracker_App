@@ -102,6 +102,97 @@ exports.loginUser = async (req, res) => {
   }
 };
 
+// POST /api/auth/google 
+// "Continue with Google" for both register and login — one endpoint handles
+// both, since from the server's side they're the same operation: verify the
+// Google access token, then find-or-create the matching user.
+
+const GOOGLE_TOKENINFO_URL = 'https://www.googleapis.com/oauth2/v3/tokeninfo';
+const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo';
+
+exports.googleAuth = async (req, res) => {
+  try {
+    const { access_token } = req.body;
+    if (!access_token) {
+      return res.status(400).json({ message: 'Google access token is required.' });
+    }
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      return res.status(500).json({ message: 'Google Sign-In is not configured on the server.' });
+    }
+
+    let tokenInfo;
+    try {
+      const tokenInfoRes = await fetch(`${GOOGLE_TOKENINFO_URL}?access_token=${encodeURIComponent(access_token)}`);
+      if (!tokenInfoRes.ok) throw new Error('token rejected by Google');
+      tokenInfo = await tokenInfoRes.json();
+    } catch {
+      return res.status(401).json({ message: 'Invalid or expired Google sign-in. Please try again.' });
+    }
+
+    // Make sure this token was actually issued for our app, not lifted from
+    // some other site's Google login.
+    if (tokenInfo.aud !== process.env.GOOGLE_CLIENT_ID) {
+      return res.status(401).json({ message: 'Invalid Google sign-in token.' });
+    }
+
+    let profile;
+    try {
+      const userInfoRes = await fetch(GOOGLE_USERINFO_URL, {
+        headers: { Authorization: `Bearer ${access_token}` },
+      });
+      if (!userInfoRes.ok) throw new Error('userinfo request failed');
+      profile = await userInfoRes.json();
+    } catch {
+      return res.status(401).json({ message: 'Could not verify Google account. Please try again.' });
+    }
+
+    if (!profile?.email) {
+      return res.status(400).json({ message: 'Google did not return an email address for this account.' });
+    }
+    if (profile.email_verified === false) {
+      return res.status(400).json({ message: 'Please use a verified Google email address.' });
+    }
+
+    const email = profile.email.trim().toLowerCase();
+    const googleId = profile.sub;
+
+    // 1) Already linked to this Google account — just log them in.
+    let user = await User.findOne({ googleId });
+
+    // 2) Not linked yet, but an account with this email already exists
+    //    (they originally registered with a password) — link Google to it
+    //    rather than creating a duplicate account.
+    if (!user) {
+      user = await User.findOne({ email });
+      if (user) {
+        user.googleId = googleId;
+        if (!user.avatarUrl && profile.picture) user.avatarUrl = profile.picture;
+        await user.save();
+      }
+    }
+
+    // 3) Brand new user — create the account. No local password is set;
+    //    they can add one later from Profile > change password if they want
+    //    to also be able to log in without Google.
+    if (!user) {
+      user = await User.create({
+        name: (profile.name || email.split('@')[0]).trim(),
+        email,
+        googleId,
+        avatarUrl: profile.picture || '',
+      });
+    }
+
+    const token = signToken(user);
+    res.status(200).json({ message: 'Google sign-in successful', token, user: publicUser(user) });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(409).json({ message: 'An account with that email already exists.' });
+    }
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // GET /api/auth/me 
 // Lets the frontend restore a session on page load: send the stored token,
 // get back the current user (or 401 if the token is missing/expired/invalid).

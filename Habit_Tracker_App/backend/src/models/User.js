@@ -33,11 +33,30 @@ const UserSchema = new mongoose.Schema(
     },
 
     // Stored as a bcrypt hash — see AuthController.registerUser.
+    // Not required for accounts created via Google Sign-In (see googleId below) —
+    // those users never set a local password unless they later use "forgot password".
     password: {
       type: String,
-      required: [true, 'Password is required'],
+      required: [
+        function () {
+          return !this.googleId;
+        },
+        'Password is required',
+      ],
       minlength: 6,
       select: false, // never return the hash unless explicitly requested
+    },
+
+    // Google Sign-In 
+    // Set when the account was created (or linked) via "Continue with Google".
+    // This is Google's stable, unique subject id ("sub" claim) for the user —
+    // used to find the account on subsequent Google logins without relying on
+    // email matching alone.
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // allows many docs with no googleId at all
+      select: false,
     },
 
     // Forgot-password flow 

@@ -9,6 +9,7 @@ const verifyToken = require('../middleware/verifyToken');
 
 router.post('/register', AuthController.registerUser);
 router.post('/login', AuthController.loginUser);
+router.post('/google', AuthController.googleAuth);
 router.get('/me', verifyToken, AuthController.getCurrentUser);
 
 // Profile management — all require a valid JWT.
